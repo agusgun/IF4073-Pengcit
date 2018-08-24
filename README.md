@@ -1,16 +1,22 @@
-# My Own Notebook Template
+# IF4073 Interpretasi dan Pengolahan Citra Task
 ## Goal
-The goal of this template is to create more clean code in experimented using a notebook
-
-## How To
+This repository is collection of task from IF4073 Interpretasi dan Pengolahan Citra Task
+## Prerequirements
 
 1. Install The Package
 - go to the root folder
 - `pip install --editable .`
 
-2. Run jupyter notebook or jupyter lab
+2. Install Requirements Package
 
-3. Dont forget to add  
+`pip install -r requirements.txt`
+
+## How To Add New Notebook
+
+
+1. Run jupyter notebook or jupyter lab
+
+2. Dont forget to add  
 ```
 %load_ext autoreload
 %autoreload 2
