@@ -1,11 +1,11 @@
 from setuptools import setup
 
-setup(name='example',
+setup(name='pengcit',
       version='0.1',
-      description='description here',
-      url='http://url-here',
-      author='author here',
-      author_email='author email here',
+      description='Pengict Packages',
+      url='https://github.com/agusgun/IF4073-Pengcit',
+      author='Jordhy, Felix, Agus',
+      author_email='13515004@std.stei.itb.ac.id, 13515065@std.stei.itb.ac.id, 13515143@std.stei.itb.ac.id',
       license='MIT',
-      packages=['example'],
+      packages=['pengcit'],
       zip_safe=False)
