@@ -51,6 +51,10 @@ class HistogramMaker:
         imshow(pil_im)
 
     def plot_rgb_grayscale(self, value_dict, color_name, histogram_color):
+        '''
+        Input: value_dict = dictionary of quantity for each color value, color_name = Color name for title, histogram_color = color for histogram
+        Return a histogram image
+        '''
         width = 1.0
         plt.bar(value_dict.keys(), value_dict.values(), color=histogram_color)
         plt.title("Histogram of %s Color in Image" % color_name)
