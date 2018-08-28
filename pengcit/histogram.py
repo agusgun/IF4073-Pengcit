@@ -48,16 +48,18 @@ class HistogramMaker:
 
         return ((red_dict, green_dict, blue_dict, grayscale_dict))
 
-    def show_im(self, pil_im):
+    def show_image(self, pil_im, image_filename):
         imshow(pil_im)
+        plt.title(image_filename)
+        plt.axis('off')
 
-    def plot_rgb_grayscale(self, value_dict, color_name, histogram_color):
+    def plot_histogram(self, value_dict, color_name, histogram_color):
         '''
         Input: value_dict = dictionary of quantity for each color value, color_name = Color name for title, histogram_color = color for histogram
         Return a histogram image
         '''
         width = 1.0
-        plt.bar(value_dict.keys(),value_dict.values(), color=histogram_color,width=1)
+        plt.bar(value_dict.keys(), value_dict.values(), color=histogram_color, width=2)
         plt.title("Histogram of %s Color in Image" % color_name)
         plt.xlabel('Color Value')
         plt.ylabel('Quantity')
@@ -67,19 +69,21 @@ class HistogramMaker:
     def histogram_from_image(self, image_filename):
         pil_im = array(Image.open(image_filename))
 
-        red_dict, blue_dict, green_dict, grayscale_dict = self.get_rgb_grayscale_dict(pil_im)
+        red_dict, green_dict, blue_dict, grayscale_dict = self.get_rgb_grayscale_dict(pil_im)
+        plt.figure(figsize=(20,10))
+        plt.subplot(4, 1, 1)
+        self.show_image(pil_im, image_filename)
 
-        x = np.arange(5)
-        y = np.exp(5)
-        plt.figure(1)
-        self.show_im(pil_im)
-        plt.figure(2)
-        self.plot_rgb_grayscale(red_dict, 'Red', 'r')
-        plt.figure(3)
-        self.plot_rgb_grayscale(green_dict, 'Green', 'g')
-        plt.figure(4)
-        self.plot_rgb_grayscale(blue_dict, 'Blue', 'b')
-        plt.figure(5)
-        self.plot_rgb_grayscale(grayscale_dict, 'Grayscale', 'k')
+        plt.subplot(4, 2, 3)
+        self.plot_histogram(red_dict, 'Red', 'r')
+
+        plt.subplot(4, 2, 4)
+        self.plot_histogram(green_dict, 'Green', 'g')
+
+        plt.subplot(4, 2, 7)
+        self.plot_histogram(blue_dict, 'Blue', 'b')
+
+        plt.subplot(4, 2, 8)
+        self.plot_histogram(grayscale_dict, 'Grayscale', 'k')
 
         show()
