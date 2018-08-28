@@ -6,7 +6,7 @@ import numpy as np
 class HistogramMaker:
     def __init__(self):
         return
-    
+
     def get_rgb_grayscale_dict(self, pil_image_array):
         '''
         Input: Pil Image Array
@@ -22,7 +22,7 @@ class HistogramMaker:
                 green = pixel[1]
                 blue = pixel[2]
                 grayscale = (int(red) + int(green) + int(blue)) // 3 # convert to int for overflow handler
-                
+
                 # Check Red
                 if red not in red_dict:
                     red_dict[red] = 1
@@ -34,18 +34,18 @@ class HistogramMaker:
                     green_dict[green] = 1
                 else:
                     green_dict[green] += 1
-                
+
                 # Check Blue
                 if blue not in blue_dict:
                     blue_dict[blue] = 1
                 else:
                     blue_dict[blue] += 1
-                
+
                 if grayscale not in grayscale_dict:
                     grayscale_dict[grayscale] = 1
                 else:
                     grayscale_dict[grayscale] += 1
-        
+
         return ((red_dict, green_dict, blue_dict, grayscale_dict))
 
     def show_im(self, pil_im):
@@ -57,17 +57,18 @@ class HistogramMaker:
         Return a histogram image
         '''
         width = 1.0
-        plt.bar(value_dict.keys(), value_dict.values(), color=histogram_color)
+        plt.bar(value_dict.keys(),value_dict.values(), color=histogram_color,width=1)
         plt.title("Histogram of %s Color in Image" % color_name)
         plt.xlabel('Color Value')
         plt.ylabel('Quantity')
-
+        plt.xlim(-5, 260)
+        plt.grid(True)
 
     def histogram_from_image(self, image_filename):
         pil_im = array(Image.open(image_filename))
-        
+
         red_dict, blue_dict, green_dict, grayscale_dict = self.get_rgb_grayscale_dict(pil_im)
-        
+
         x = np.arange(5)
         y = np.exp(5)
         plt.figure(1)
