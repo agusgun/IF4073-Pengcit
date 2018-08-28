@@ -1,6 +1,7 @@
 from PIL import Image
-from pylab import array, imshow
+from pylab import array, imshow, figure, show
 import matplotlib.pyplot as plt
+import numpy as np
 
 class HistogramMaker:
     def __init__(self):
@@ -60,3 +61,24 @@ class HistogramMaker:
         plt.title("Histogram of %s Color in Image" % color_name)
         plt.xlabel('Color Value')
         plt.ylabel('Quantity')
+
+
+    def histogram_from_image(self, image_filename):
+        pil_im = array(Image.open(image_filename))
+        
+        red_dict, blue_dict, green_dict, grayscale_dict = self.get_rgb_grayscale_dict(pil_im)
+        
+        x = np.arange(5)
+        y = np.exp(5)
+        plt.figure(1)
+        self.show_im(pil_im)
+        plt.figure(2)
+        self.plot_rgb_grayscale(red_dict, 'Red', 'r')
+        plt.figure(3)
+        self.plot_rgb_grayscale(green_dict, 'Green', 'g')
+        plt.figure(4)
+        self.plot_rgb_grayscale(blue_dict, 'Blue', 'b')
+        plt.figure(5)
+        self.plot_rgb_grayscale(grayscale_dict, 'Grayscale', 'k')
+
+        show()
