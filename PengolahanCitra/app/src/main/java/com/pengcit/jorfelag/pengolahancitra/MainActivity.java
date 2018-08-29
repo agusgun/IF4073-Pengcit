@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.Image;
 import android.net.Uri;
@@ -21,6 +22,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -34,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private Uri file;
 
     private static final int REQUEST_IMAGE_CAPTURE = 100;
+    private static final int PICK_IMAGE = 50;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +88,27 @@ public class MainActivity extends AppCompatActivity {
             for (int i = 0; i < 256; i++) {
                 System.out.println(redQuantityArray[i] + " " + greenQunatityArray[i] + " " + blueQuantityArray[i] + " " + grayQuantityArray[i]);
             }
+        } else if (requestCode == PICK_IMAGE && resultCode == RESULT_OK) {
+            try {
+                final Uri imageUri = data.getData();
+                final InputStream imageStream = getContentResolver().openInputStream(imageUri);
+                final Bitmap imageBitmap = BitmapFactory.decodeStream(imageStream);
+                imageView.setImageBitmap(imageBitmap);
+
+                Map<String, Integer[]> rgbgrayHashMap = getRGBGrayHashMap(imageBitmap);
+                Integer[] redQuantityArray = rgbgrayHashMap.get("red");
+                Integer[] greenQunatityArray = rgbgrayHashMap.get("green");
+                Integer[] blueQuantityArray = rgbgrayHashMap.get("blue");
+                Integer[] grayQuantityArray = rgbgrayHashMap.get("gray");
+
+                for (int i = 0; i < 256; i++) {
+                    System.out.println(redQuantityArray[i] + " " + greenQunatityArray[i] + " " + blueQuantityArray[i] + " " + grayQuantityArray[i]);
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+
+            //Todo jordhy: add here also
         }
     }
 
@@ -126,6 +151,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void selectPicture(View view) {
-        //Todo: Select picture
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE);
     }
 }
