@@ -71,7 +71,15 @@ public class HistogramActivity extends AppCompatActivity {
         BarGraphSeries series4 = new BarGraphSeries<>(generateData(hashMap.get("gray")));
         series4.setColor(Color.GRAY);
         grayHistogramView.addSeries(series4);
+
         grayHistogramView.setTitle("Grayscale Histogram");
+        grayHistogramView.getViewport().setXAxisBoundsManual(true);
+        grayHistogramView.getViewport().setMinX(0);
+        grayHistogramView.getViewport().setMaxX(255);
+
+        // enable scaling and scrolling
+        grayHistogramView.getViewport().setScalable(true);
+        grayHistogramView.getViewport().setScalableY(true);
     }
 
     private DataPoint[] generateData(Integer[] colorValuesFrequencies) {
