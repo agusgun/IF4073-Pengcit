@@ -16,8 +16,8 @@
 
     <Button
         android:id="@+id/button_image"
-        android:layout_width="wrap_content"
-        android:layout_height="48dp"
+        android:layout_width="105dp"
+        android:layout_height="60dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
         android:onClick="takePicture"
@@ -25,10 +25,19 @@
 
     <Button
         android:id="@+id/select_image"
-        android:layout_width="wrap_content"
-        android:layout_height="48dp"
+        android:layout_width="107dp"
+        android:layout_height="60dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:onClick="selectPicture"
         android:text="Select a picture!" />
+
+    <Button
+        android:id="@+id/display_histogram"
+        android:layout_width="148dp"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:onClick="displayHistogram"
+        android:text="Display histogram" />
 </RelativeLayout>

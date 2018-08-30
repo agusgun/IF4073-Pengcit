@@ -23,14 +23,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
     private ImageView imageView;
-    private Uri file;
     String mCurrentImagePath;
+    Bitmap imageBitmap;
 
     /**
      * Tag for logging.
@@ -115,6 +113,16 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(Intent.createChooser(intent, "Select Picture"), SELECT_IMAGE);
     }
 
+    /**
+     * Called when the 'display histogram' button is clicked.
+     * Callback is defined in resource layout definition.
+     */
+    public void displayHistogram(View view) {
+        if (imageBitmap != null) {
+            new CreateImageHistogramTask(this).execute(imageBitmap);
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
@@ -133,8 +141,7 @@ public class MainActivity extends AppCompatActivity {
                 imageView.setImageURI(imageUri);
                 try {
                     InputStream imageStream = getContentResolver().openInputStream(imageUri);
-                    Bitmap imageBitmap = BitmapFactory.decodeStream(imageStream);
-                    new CreateImageHistogramTask(this).execute(imageBitmap);
+                    imageBitmap = BitmapFactory.decodeStream(imageStream);
                 } catch (FileNotFoundException e) {
                     Log.e(TAG, "File not found for image uri " + imageUri);
                     e.printStackTrace();
