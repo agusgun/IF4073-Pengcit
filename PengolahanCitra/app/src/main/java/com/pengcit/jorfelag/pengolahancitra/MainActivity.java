@@ -214,5 +214,4 @@ public class MainActivity extends AppCompatActivity {
         mCurrentImagePath = image.getAbsolutePath();
         return image;
     }
-
 }
