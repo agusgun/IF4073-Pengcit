@@ -60,8 +60,13 @@ public class ContrastEnhancementActivity extends AppCompatActivity {
                 } else if (position == 1) {
                     //Todo jordhy: Metode 2
                     new HistogramEqualizationTask(ContrastEnhancementActivity.this, resultImageView).execute(ContrastEnhancementActivity.this.imageBitmapOrigin);
-                } else {
+                } else if (position == 2){
                     //Todo jordhy: Metode 3
+                    new LogTransformationTask(ContrastEnhancementActivity.this, resultImageView).execute(ContrastEnhancementActivity.this.imageBitmapOrigin);
+                } else if (position == 3) {
+                    new PowerLawTask(ContrastEnhancementActivity.this, resultImageView).execute(ContrastEnhancementActivity.this.imageBitmapOrigin);
+                } else if (position == 4) {
+                    new LogTransformationTask(ContrastEnhancementActivity.this, resultImageView).execute(ContrastEnhancementActivity.this.imageBitmapOrigin);
                 }
             }
 
