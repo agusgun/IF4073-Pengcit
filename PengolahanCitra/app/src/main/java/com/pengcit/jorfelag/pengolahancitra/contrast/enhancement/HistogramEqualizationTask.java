@@ -1,13 +1,11 @@
-package com.pengcit.jorfelag.pengolahancitra;
+package com.pengcit.jorfelag.pengolahancitra.contrast.enhancement;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.widget.ImageView;
 
-import java.util.HashMap;
+import com.pengcit.jorfelag.pengolahancitra.contrast.enhancement.ContrastEnhancementActivity;
 
 public class HistogramEqualizationTask extends AsyncTask<Bitmap, Void, Bitmap> {
 

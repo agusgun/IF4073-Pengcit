@@ -1,4 +1,4 @@
-package com.pengcit.jorfelag.pengolahancitra;
+package com.pengcit.jorfelag.pengolahancitra.histogram;
 
 import android.content.Intent;
 import android.graphics.Color;
@@ -11,6 +11,7 @@ import com.jjoe64.graphview.series.BarGraphSeries;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 import com.jjoe64.graphview.series.PointsGraphSeries;
+import com.pengcit.jorfelag.pengolahancitra.R;
 
 import java.util.HashMap;
 

@@ -20,10 +20,9 @@
     <string name="action_show_histogram">Show histogram</string>
     <string name="action_contrast_enhancement">Constrast Enhancement</string>
 
-    <!-- TODO jordhy: chcange here -->
     <string-array name="contrast_enhancement_method">
-        <item>Metode 1</item>
-        <item>Metode 2</item>
+        <item>Linear Stretching</item>
+        <item>Histogram equalization</item>
         <item>Metode 3</item>
     </string-array>
 </resources>

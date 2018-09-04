@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ContrastEnhancementActivity">
+    tools:context=".contrast.enhancement.ContrastEnhancementActivity">
 
     <ImageView
         android:id="@+id/contrast_enhancement_imageview_origin"

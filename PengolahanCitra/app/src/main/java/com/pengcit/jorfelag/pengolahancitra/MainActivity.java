@@ -19,6 +19,8 @@ import android.widget.Toast;
 
 import com.leinardi.android.speeddial.SpeedDialActionItem;
 import com.leinardi.android.speeddial.SpeedDialView;
+import com.pengcit.jorfelag.pengolahancitra.contrast.enhancement.ContrastEnhancementActivity;
+import com.pengcit.jorfelag.pengolahancitra.histogram.CreateImageHistogramTask;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -30,7 +32,7 @@ import java.util.Date;
 public class MainActivity extends AppCompatActivity {
 
     private ImageView imageView;
-    String mCurrentImagePath;
+    String currentImagePath;
     Bitmap imageBitmap;
     Uri imageBitmapURI;
 
@@ -172,8 +174,8 @@ public class MainActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK) {
             imageBitmapURI = null;
             if (requestCode == IMAGE_CAPTURE) {
-                Log.e(TAG, mCurrentImagePath);
-                File imageFile = new File(mCurrentImagePath);
+                Log.e(TAG, currentImagePath);
+                File imageFile = new File(currentImagePath);
                 if (imageFile.exists()) {
                     imageBitmapURI = Uri.fromFile(imageFile);
                     imageView.setRotation(90);
@@ -211,7 +213,7 @@ public class MainActivity extends AppCompatActivity {
                 storageDir
         );
 
-        mCurrentImagePath = image.getAbsolutePath();
+        currentImagePath = image.getAbsolutePath();
         return image;
     }
 }

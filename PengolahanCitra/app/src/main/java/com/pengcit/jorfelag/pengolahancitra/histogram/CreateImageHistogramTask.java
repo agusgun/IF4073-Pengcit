@@ -1,4 +1,4 @@
-package com.pengcit.jorfelag.pengolahancitra;
+package com.pengcit.jorfelag.pengolahancitra.histogram;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -6,8 +6,9 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 
+import com.pengcit.jorfelag.pengolahancitra.MainActivity;
+
 import java.util.HashMap;
-import java.util.Map;
 
 public class CreateImageHistogramTask extends AsyncTask<Bitmap, Void, HashMap<String, Integer[]>> {
 

@@ -1,4 +1,4 @@
-package com.pengcit.jorfelag.pengolahancitra;
+package com.pengcit.jorfelag.pengolahancitra.contrast.enhancement;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -13,9 +13,10 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.pengcit.jorfelag.pengolahancitra.R;
+
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.lang.reflect.Array;
 
 public class ContrastEnhancementActivity extends AppCompatActivity {
 
@@ -53,10 +54,9 @@ public class ContrastEnhancementActivity extends AppCompatActivity {
         methodListSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(getApplicationContext(), Integer.toString(position), Toast.LENGTH_SHORT).show();
                 if (position == 0) {
                     //Todo jordhy: Metode 1
-
+                    new LinearStretchingTask(ContrastEnhancementActivity.this, resultImageView).execute(ContrastEnhancementActivity.this.imageBitmapOrigin);
                 } else if (position == 1) {
                     //Todo jordhy: Metode 2
                     new HistogramEqualizationTask(ContrastEnhancementActivity.this, resultImageView).execute(ContrastEnhancementActivity.this.imageBitmapOrigin);
