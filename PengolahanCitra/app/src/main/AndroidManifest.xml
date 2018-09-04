@@ -27,6 +27,14 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".HistogramActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".ContrastEnhancementActivity"
+            android:screenOrientation="portrait" />
+
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="com.pengcit.jorfelag.pengolahancitra.provider"
@@ -36,13 +44,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
         </provider>
-
-        <activity
-            android:name=".HistogramActivity"
-            android:screenOrientation="portrait"/>
-        <activity
-            android:name=".ContrastEnhancementActivity"
-            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>

@@ -7,45 +7,19 @@
     tools:context=".MainActivity">
 
     <ImageView
-        android:id="@+id/imageview"
-        android:layout_width="200dp"
-        android:layout_height="300dp"
+        android:id="@+id/imageView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true" />
 
-    <Button
-        android:id="@+id/button_image"
+    <com.leinardi.android.speeddial.SpeedDialView
+        android:id="@+id/speedDial"
         android:layout_width="wrap_content"
-        android:layout_height="60dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true"
-        android:onClick="takePicture"
-        android:text="Take a picture!" />
-
-    <Button
-        android:id="@+id/select_image"
-        android:layout_width="wrap_content"
-        android:layout_height="60dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:onClick="selectPicture"
-        android:text="Select a picture!" />
-
-    <Button
-        android:id="@+id/display_histogram"
-        android:layout_width="148dp"
-        android:layout_height="60dp"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentTop="true"
-        android:onClick="displayHistogram"
-        android:text="Display histogram" />
-
-    <Button
-        android:id="@+id/main_button_contrast_enhancement"
-        android:layout_width="146dp"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
-        android:layout_below="@+id/display_histogram"
-        android:text="Constrast Enhancement"
-        android:onClick="launchContrastEnhancement" />
+        android:layout_gravity="bottom|end"
+        app:sdMainFabClosedSrc="@drawable/ic_add_white_24dp" />
+
 </RelativeLayout>

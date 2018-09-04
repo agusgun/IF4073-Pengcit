@@ -19,6 +19,9 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.leinardi.android.speeddial.SpeedDialActionItem;
+import com.leinardi.android.speeddial.SpeedDialView;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -61,7 +64,31 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        imageView = (ImageView) findViewById(R.id.imageview);
+        imageView = (ImageView) findViewById(R.id.imageView);
+
+        SpeedDialView speedDialView = findViewById(R.id.speedDial);
+        speedDialView.inflate(R.menu.menu_speed_dial);
+        speedDialView.setOnActionSelectedListener(new SpeedDialView.OnActionSelectedListener() {
+            @Override
+            public boolean onActionSelected(SpeedDialActionItem speedDialActionItem) {
+                switch (speedDialActionItem.getId()) {
+                    case R.id.action_camera:
+                        takePicture();
+                        return false; // true to keep the Speed Dial open
+                    case R.id.action_select_picture:
+                        selectPicture();
+                        return false;
+                    case R.id.action_show_histogram:
+                        displayHistogram();
+                        return false;
+                    case R.id.action_constrast_enhancement:
+                        launchContrastEnhancement();
+                        return false;
+                    default:
+                        return false;
+                }
+            }
+        });
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) !=
                 PackageManager.PERMISSION_GRANTED) {
@@ -72,10 +99,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Called when the 'take a picture!' button is clicked.
-     * Callback is defined in resource layout definition.
+     * Called when the 'take a picture' button is clicked.
      */
-    public void takePicture(View view) {
+    public void takePicture() {
         Log.i(TAG, getString(R.string.taking_a_picture));
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) !=
                 PackageManager.PERMISSION_GRANTED) {
@@ -107,10 +133,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Called when the 'select a picture!' button is clicked.
-     * Callback is defined in resource layout definition.
+     * Called when the 'select a picture' button is clicked.
      */
-    public void selectPicture(View view) {
+    public void selectPicture() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("image/*");
         startActivityForResult(Intent.createChooser(intent, getString(R.string.select_picture)), SELECT_IMAGE);
@@ -120,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
      * Called when the 'display histogram' button is clicked.
      * Callback is defined in resource layout definition.
      */
-    public void displayHistogram(View view) {
+    public void displayHistogram() {
         if (imageBitmap != null) {
             new CreateImageHistogramTask(this).execute(imageBitmap);
         } else {
@@ -171,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
         return image;
     }
 
-    public void launchContrastEnhancement(View view) {
+    public void launchContrastEnhancement() {
         if (imageBitmap != null) {
             Intent intent = new Intent(this, ContrastEnhancementActivity.class);
             intent.putExtra("BitmapImageURI", imageBitmapURI.toString());
