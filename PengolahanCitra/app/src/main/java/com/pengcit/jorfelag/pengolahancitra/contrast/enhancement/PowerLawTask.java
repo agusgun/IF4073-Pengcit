@@ -10,6 +10,7 @@ public class PowerLawTask extends AsyncTask<Bitmap, Void, Bitmap> {
     private ProgressDialog dialog;
     ContrastEnhancementActivity activity;
     ImageView resultImageView;
+    private static final int GAMMA = 2;
 
     public PowerLawTask(ContrastEnhancementActivity activity, ImageView resultImageView) {
         dialog = new ProgressDialog(activity);
@@ -36,7 +37,13 @@ public class PowerLawTask extends AsyncTask<Bitmap, Void, Bitmap> {
         Integer[] T = new Integer[256];
 
         for (int i = 0; i < 256; i++) {
-            T[i] = (int) (Math.log(1 + i) * 255 / Math.log(256));
+            int pow = i;
+            int maxPow = 255;
+            for (int j = 1; j < GAMMA; j++) {
+                pow *= i;
+                maxPow *= 255;
+            }
+            T[i] = pow * 255 / maxPow;
         }
 
         Bitmap result = Bitmap.createBitmap(imageBitmap.getWidth(), imageBitmap.getHeight(), Bitmap.Config.ARGB_8888);
