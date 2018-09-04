@@ -66,7 +66,7 @@ public class ContrastEnhancementActivity extends AppCompatActivity {
                 } else if (position == 3) {
                     new PowerLawTask(ContrastEnhancementActivity.this, resultImageView).execute(ContrastEnhancementActivity.this.imageBitmapOrigin);
                 } else if (position == 4) {
-                    new LogTransformationTask(ContrastEnhancementActivity.this, resultImageView).execute(ContrastEnhancementActivity.this.imageBitmapOrigin);
+                    new NegativeTask(ContrastEnhancementActivity.this, resultImageView).execute(ContrastEnhancementActivity.this.imageBitmapOrigin);
                 }
             }
 

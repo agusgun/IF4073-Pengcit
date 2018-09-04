@@ -22,7 +22,9 @@
 
     <string-array name="contrast_enhancement_method">
         <item>Linear Stretching</item>
-        <item>Histogram equalization</item>
-        <item>Metode 3</item>
+        <item>Histogram Equalization</item>
+        <item>Logarithmic Transformation</item>
+        <item>Power Law</item>
+        <item>Negative</item>
     </string-array>
 </resources>
