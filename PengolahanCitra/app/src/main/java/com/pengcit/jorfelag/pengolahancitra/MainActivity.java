@@ -1,7 +1,6 @@
 package com.pengcit.jorfelag.pengolahancitra;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -15,7 +14,6 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -79,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
                         selectPicture();
                         return false;
                     case R.id.action_show_histogram:
-                        displayHistogram();
+                        showHistogram();
                         return false;
                     case R.id.action_constrast_enhancement:
                         launchContrastEnhancement();
@@ -100,6 +98,7 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Called when the 'take a picture' button is clicked.
+     * Open the camera app to take the picture to be processed.
      */
     public void takePicture() {
         Log.i(TAG, getString(R.string.taking_a_picture));
@@ -134,6 +133,7 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Called when the 'select a picture' button is clicked.
+     * Open file manager to choose the picture to be processed.
      */
     public void selectPicture() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -142,14 +142,28 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Called when the 'display histogram' button is clicked.
-     * Callback is defined in resource layout definition.
+     * Called when the 'show histogram' button is clicked.
+     * Launch a new activity that show the image histogram for RGB and grayscale values.
      */
-    public void displayHistogram() {
+    public void showHistogram() {
         if (imageBitmap != null) {
             new CreateImageHistogramTask(this).execute(imageBitmap);
         } else {
             Toast.makeText(getApplicationContext(), R.string.select_or_capture_image, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Called when the 'contrast enhancement' button is clicked.
+     * Launch contrast enhancement activity.
+     */
+    public void launchContrastEnhancement() {
+        if (imageBitmap != null) {
+            Intent intent = new Intent(this, ContrastEnhancementActivity.class);
+            intent.putExtra("BitmapImageURI", imageBitmapURI.toString());
+            startActivity(intent);
+        } else {
+            Toast.makeText(getApplicationContext(), R.string.ask_to_select_or_capture_an_image, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -181,6 +195,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Create a new image file.
+     * @return The created image file.
+     * @throws IOException thrown when failed to create file.
+     */
     private File createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
@@ -194,16 +213,6 @@ public class MainActivity extends AppCompatActivity {
 
         mCurrentImagePath = image.getAbsolutePath();
         return image;
-    }
-
-    public void launchContrastEnhancement() {
-        if (imageBitmap != null) {
-            Intent intent = new Intent(this, ContrastEnhancementActivity.class);
-            intent.putExtra("BitmapImageURI", imageBitmapURI.toString());
-            startActivity(intent);
-        } else {
-            Toast.makeText(getApplicationContext(), R.string.ask_to_select_or_capture_an_image, Toast.LENGTH_SHORT).show();
-        }
     }
 
 }
