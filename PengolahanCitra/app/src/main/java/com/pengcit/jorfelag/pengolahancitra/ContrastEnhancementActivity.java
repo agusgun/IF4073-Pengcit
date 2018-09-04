@@ -56,8 +56,10 @@ public class ContrastEnhancementActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), Integer.toString(position), Toast.LENGTH_SHORT).show();
                 if (position == 0) {
                     //Todo jordhy: Metode 1
+
                 } else if (position == 1) {
                     //Todo jordhy: Metode 2
+                    new HistogramEqualizationTask(ContrastEnhancementActivity.this, resultImageView).execute(ContrastEnhancementActivity.this.imageBitmapOrigin);
                 } else {
                     //Todo jordhy: Metode 3
                 }
