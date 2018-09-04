@@ -3,4 +3,23 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="fail_to_create_image">Failed to create image file</string>
+    <string name="camera_permission_not_granted">CAMERA permission has NOT been granted. Requesting permission.</string>
+    <string name="taking_a_picture">Take a picture! button pressed. Checking permission.</string>
+    <string name="no_activity_available_to_resolve_intent">No activity available to resolve intent</string>
+    <string name="select_picture">Select Picture</string>
+    <string name="select_or_capture_image">Please Select or Capture an Image</string>
+    <string name="file_not_found_for_image_uri">File not found for image uri</string>
+    <string name="ask_to_select_or_capture_an_image">Please Select or Capture an Image</string>
+    <string name="grayscale_histogram_title">Grayscale Histogram</string>
+    <string name="blue_histogram_title">Blue Histogram</string>
+    <string name="green_histogram_title">Green Histogram</string>
+    <string name="red_histogram_title">Red Histogram</string>
+
+    <!-- TODO jordhy: chcange here -->
+    <string-array name="contrast_enhancement_method">
+        <item>Metode 1</item>
+        <item>Metode 2</item>
+        <item>Metode 3</item>
+    </string-array>
 </resources>

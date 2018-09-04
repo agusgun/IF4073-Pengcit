@@ -1,6 +1,7 @@
 package com.pengcit.jorfelag.pengolahancitra;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -16,6 +17,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -29,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageView imageView;
     String mCurrentImagePath;
     Bitmap imageBitmap;
+    Uri imageBitmapURI;
 
     /**
      * Tag for logging.
@@ -73,10 +76,10 @@ public class MainActivity extends AppCompatActivity {
      * Callback is defined in resource layout definition.
      */
     public void takePicture(View view) {
-        Log.i(TAG, "Take a picture! button pressed. Checking permission.");
+        Log.i(TAG, getString(R.string.taking_a_picture));
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) !=
                 PackageManager.PERMISSION_GRANTED) {
-            Log.i(TAG, "CAMERA permission has NOT been granted. Requesting permission.");
+            Log.i(TAG, getString(R.string.camera_permission_not_granted));
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.CAMERA},
                     REQUEST_CAMERA);
@@ -87,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     imageFile = createImageFile();
                 } catch (IOException ex) {
-                    Log.e(TAG, "Failed to create image file");
+                    Log.e(TAG, getString(R.string.fail_to_create_image));
                 }
 
                 if (imageFile != null) {
@@ -98,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
                     startActivityForResult(intent, IMAGE_CAPTURE);
                 }
             } else {
-                Log.i(TAG, "No activity available to resolve intent");
+                Log.i(TAG, getString(R.string.no_activity_available_to_resolve_intent));
             }
         }
     }
@@ -110,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
     public void selectPicture(View view) {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("image/*");
-        startActivityForResult(Intent.createChooser(intent, "Select Picture"), SELECT_IMAGE);
+        startActivityForResult(Intent.createChooser(intent, getString(R.string.select_picture)), SELECT_IMAGE);
     }
 
     /**
@@ -120,30 +123,33 @@ public class MainActivity extends AppCompatActivity {
     public void displayHistogram(View view) {
         if (imageBitmap != null) {
             new CreateImageHistogramTask(this).execute(imageBitmap);
+        } else {
+            Toast.makeText(getApplicationContext(), R.string.select_or_capture_image, Toast.LENGTH_SHORT).show();
         }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
-            Uri imageUri = null;
+            imageBitmapURI = null;
             if (requestCode == IMAGE_CAPTURE) {
+                Log.e(TAG, mCurrentImagePath);
                 File imageFile = new File(mCurrentImagePath);
                 if (imageFile.exists()) {
-                    imageUri = Uri.fromFile(imageFile);
+                    imageBitmapURI = Uri.fromFile(imageFile);
                     imageView.setRotation(90);
                 }
             } else if (requestCode == SELECT_IMAGE) {
-                imageUri = data.getData();
+                imageBitmapURI = data.getData();
                 imageView.setRotation(0);
             }
-            if (imageUri != null) {
-                imageView.setImageURI(imageUri);
+            if (imageBitmapURI != null) {
+                imageView.setImageURI(imageBitmapURI);
                 try {
-                    InputStream imageStream = getContentResolver().openInputStream(imageUri);
+                    InputStream imageStream = getContentResolver().openInputStream(imageBitmapURI);
                     imageBitmap = BitmapFactory.decodeStream(imageStream);
                 } catch (FileNotFoundException e) {
-                    Log.e(TAG, "File not found for image uri " + imageUri);
+                    Log.e(TAG, getString(R.string.file_not_found_for_image_uri) + imageBitmapURI);
                     e.printStackTrace();
                 }
             }
@@ -164,4 +170,15 @@ public class MainActivity extends AppCompatActivity {
         mCurrentImagePath = image.getAbsolutePath();
         return image;
     }
+
+    public void launchContrastEnhancement(View view) {
+        if (imageBitmap != null) {
+            Intent intent = new Intent(this, ContrastEnhancementActivity.class);
+            intent.putExtra("BitmapImageURI", imageBitmapURI.toString());
+            startActivity(intent);
+        } else {
+            Toast.makeText(getApplicationContext(), R.string.ask_to_select_or_capture_an_image, Toast.LENGTH_SHORT).show();
+        }
+    }
+
 }

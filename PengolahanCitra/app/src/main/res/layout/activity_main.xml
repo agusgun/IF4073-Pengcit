@@ -8,15 +8,14 @@
 
     <ImageView
         android:id="@+id/imageview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_above="@id/button_image"
-        />
+        android:layout_width="200dp"
+        android:layout_height="300dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true" />
 
     <Button
         android:id="@+id/button_image"
-        android:layout_width="105dp"
+        android:layout_width="wrap_content"
         android:layout_height="60dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
@@ -25,7 +24,7 @@
 
     <Button
         android:id="@+id/select_image"
-        android:layout_width="107dp"
+        android:layout_width="wrap_content"
         android:layout_height="60dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
@@ -36,8 +35,17 @@
         android:id="@+id/display_histogram"
         android:layout_width="148dp"
         android:layout_height="60dp"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
         android:onClick="displayHistogram"
         android:text="Display histogram" />
+
+    <Button
+        android:id="@+id/main_button_contrast_enhancement"
+        android:layout_width="146dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/display_histogram"
+        android:text="Constrast Enhancement"
+        android:onClick="launchContrastEnhancement" />
 </RelativeLayout>

@@ -32,10 +32,11 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/provider_paths"></meta-data>
+                android:resource="@xml/provider_paths" />
         </provider>
 
-        <activity android:name=".HistogramActivity"></activity>
+        <activity android:name=".HistogramActivity" />
+        <activity android:name=".ContrastEnhancementActivity"></activity>
     </application>
 
 </manifest>

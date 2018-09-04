@@ -28,7 +28,7 @@ public class HistogramActivity extends AppCompatActivity {
         series.setColor(Color.RED);
 
         redHistogramView.addSeries(series);
-        redHistogramView.setTitle("Red Histogram");
+        redHistogramView.setTitle(getString(R.string.red_histogram_title));
         redHistogramView.getViewport().setXAxisBoundsManual(true);
         redHistogramView.getViewport().setMinX(0);
         redHistogramView.getViewport().setMaxX(255);
@@ -43,7 +43,7 @@ public class HistogramActivity extends AppCompatActivity {
         series2.setColor(Color.GREEN);
 
         greenHistogramView.addSeries(series2);
-        greenHistogramView.setTitle("Green Histogram");
+        greenHistogramView.setTitle(getString(R.string.green_histogram_title));
         greenHistogramView.getViewport().setXAxisBoundsManual(true);
         greenHistogramView.getViewport().setMinX(0);
         greenHistogramView.getViewport().setMaxX(255);
@@ -57,7 +57,7 @@ public class HistogramActivity extends AppCompatActivity {
         series3.setColor(Color.BLUE);
 
         blueHistogramView.addSeries(series3);
-        blueHistogramView.setTitle("Blue Histogram");
+        blueHistogramView.setTitle(getString(R.string.blue_histogram_title));
         blueHistogramView.getViewport().setXAxisBoundsManual(true);
         blueHistogramView.getViewport().setMinX(0);
         blueHistogramView.getViewport().setMaxX(255);
@@ -72,7 +72,7 @@ public class HistogramActivity extends AppCompatActivity {
         series4.setColor(Color.GRAY);
         grayHistogramView.addSeries(series4);
 
-        grayHistogramView.setTitle("Grayscale Histogram");
+        grayHistogramView.setTitle(getString(R.string.grayscale_histogram_title));
         grayHistogramView.getViewport().setXAxisBoundsManual(true);
         grayHistogramView.getViewport().setMinX(0);
         grayHistogramView.getViewport().setMaxX(255);
