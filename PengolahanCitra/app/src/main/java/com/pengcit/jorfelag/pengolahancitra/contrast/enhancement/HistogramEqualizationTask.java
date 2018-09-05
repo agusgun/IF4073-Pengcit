@@ -10,12 +10,14 @@ import com.pengcit.jorfelag.pengolahancitra.contrast.enhancement.ContrastEnhance
 public class HistogramEqualizationTask extends AsyncTask<Bitmap, Void, Bitmap> {
 
     private ProgressDialog dialog;
-    ContrastEnhancementActivity activity;
-    ImageView resultImageView;
+    private ContrastEnhancementActivity activity;
+    private ImageView resultImageView;
+    private float weight;
 
-    public HistogramEqualizationTask(ContrastEnhancementActivity activity, ImageView resultImageView) {
+    public HistogramEqualizationTask(ContrastEnhancementActivity activity, ImageView resultImageView, float weight) {
         dialog = new ProgressDialog(activity);
         this.resultImageView = resultImageView;
+        this.weight = weight;
     }
 
     @Override
@@ -63,9 +65,9 @@ public class HistogramEqualizationTask extends AsyncTask<Bitmap, Void, Bitmap> {
 
         // Create cumulative frequencies
         for (int i = 1; i < 256; i++) {
-            redValuesFrequencies[i] += redValuesFrequencies[i - 1];
-            greenValuesFrequencies[i] += greenValuesFrequencies[i - 1];
-            blueValuesFrequencies[i] += blueValuesFrequencies[i - 1];
+            redValuesFrequencies[i] = Math.round(weight * redValuesFrequencies[i] + weight * redValuesFrequencies[i - 1]);
+            greenValuesFrequencies[i] = Math.round(weight * greenValuesFrequencies[i] + weight * greenValuesFrequencies[i - 1]);
+            blueValuesFrequencies[i] = Math.round(weight * blueValuesFrequencies[i] + weight * blueValuesFrequencies[i - 1]);
         }
 
         Integer[] Tred = new Integer[256];

@@ -171,7 +171,10 @@ public class ContrastEnhancementActivity extends AppCompatActivity {
     }
 
     public void histogramEqualizationGenerate(View view) {
-        new HistogramEqualizationTask(ContrastEnhancementActivity.this, resultImageView).execute(ContrastEnhancementActivity.this.imageBitmapOrigin);
+        float weight = Float.parseFloat(weightEditText.getText().toString());
+        Toast.makeText(this, "Value" + weight, Toast.LENGTH_SHORT).show();
+
+        new HistogramEqualizationTask(ContrastEnhancementActivity.this, resultImageView, weight).execute(ContrastEnhancementActivity.this.imageBitmapOrigin);
         resultImageView.setVisibility(View.VISIBLE);
     }
 }
