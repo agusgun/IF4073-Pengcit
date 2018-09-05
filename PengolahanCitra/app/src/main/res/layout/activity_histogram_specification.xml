@@ -1,67 +1,117 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".HistogramSpecificationActivity">
+    tools:context=".histogram.specification.HistogramSpecificationActivity">
 
     <RelativeLayout
-        android:id="@+id/equalizer_layout"
         android:layout_width="wrap_content"
-        android:layout_height="140dp">
+        android:layout_height="wrap_content">
 
-        <SeekBar
-            android:id="@+id/histogram_spesification_seekbar_point_1"
-            android:layout_width="120dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
-            android:max="150"
-            android:rotation="270" />
-
-        <TextView
-            android:id="@+id/histogram_spesification_detail_1"
+        <ImageView
+            android:id="@+id/histogram_specification_original_image"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
             android:layout_alignParentStart="true"
-            android:layout_marginStart="56dp"
-            android:text="0" />
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true" />
 
-        <SeekBar
-            android:id="@+id/histogram_spesification_seekbar_point_2"
-            android:layout_width="120dp"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:max="150"
-            android:rotation="270" />
+        <RelativeLayout
+            android:id="@+id/histogram_specification_equalizer_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="140dp"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/histogram_specification_original_image"
+            android:layout_marginTop="15dp">
 
-        <TextView
-            android:id="@+id/histogram_spesification_detail_2"
+            <SeekBar
+                android:id="@+id/histogram_specification_seekbar_point_1"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:max="150"
+                android:rotation="270" />
+
+            <TextView
+                android:id="@+id/histogram_specification_detail_1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="56dp"
+                android:text="0" />
+
+            <SeekBar
+                android:id="@+id/histogram_specification_seekbar_point_2"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:max="150"
+                android:rotation="270" />
+
+            <TextView
+                android:id="@+id/histogram_specification_detail_2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:text="0" />
+
+            <SeekBar
+                android:id="@+id/histogram_specification_seekbar_point_3"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignTop="@+id/histogram_specification_seekbar_point_1"
+                android:max="150"
+                android:rotation="270" />
+
+            <TextView
+                android:id="@+id/histogram_specification_detail_3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="55dp"
+                android:text="0" />
+
+        </RelativeLayout>
+
+        <Button
+            android:id="@+id/histogram_specification_generate_equalized_image_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
+            android:layout_below="@id/histogram_specification_equalizer_layout"
             android:layout_centerHorizontal="true"
-            android:text="0" />
+            android:onClick="generateEqualizedImage"
+            android:text="@string/generate_equalized_image" />
 
-        <SeekBar
-            android:id="@+id/histogram_spesification_seekbar_point_3"
-            android:layout_width="120dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignTop="@+id/histogram_spesification_seekbar_point_1"
-            android:max="150"
-            android:rotation="270" />
-
-        <TextView
-            android:id="@+id/histogram_spesification_detail_3"
+        <ImageView
+            android:id="@+id/histogram_specification_equalized_image"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentEnd="true"
-            android:layout_marginEnd="55dp"
-            android:text="0" />
+            android:layout_below="@id/histogram_specification_generate_equalized_image_button"
+            android:layout_centerHorizontal="true" />
+
+        <Button
+            android:id="@+id/histogram_specification_generate_image_result_button"
+            android:layout_width="217dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/histogram_specification_equalized_image"
+            android:layout_centerHorizontal="true"
+            android:onClick="generateResultImage"
+            android:text="@string/generate_histogram_specification_image" />
+
+        <ImageView
+            android:id="@+id/histogram_specification_result_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/histogram_specification_generate_image_result_button"
+            android:layout_centerHorizontal="true" />
 
     </RelativeLayout>
-</RelativeLayout>
+
+</ScrollView>

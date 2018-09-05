@@ -21,6 +21,7 @@ import com.leinardi.android.speeddial.SpeedDialActionItem;
 import com.leinardi.android.speeddial.SpeedDialView;
 import com.pengcit.jorfelag.pengolahancitra.contrast.enhancement.ContrastEnhancementActivity;
 import com.pengcit.jorfelag.pengolahancitra.histogram.CreateImageHistogramTask;
+import com.pengcit.jorfelag.pengolahancitra.histogram.specification.HistogramSpecificationActivity;
 
 import java.io.File;
 import java.io.FileNotFoundException;
