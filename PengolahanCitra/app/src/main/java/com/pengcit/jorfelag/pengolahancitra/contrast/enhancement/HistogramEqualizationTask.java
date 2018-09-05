@@ -26,7 +26,6 @@ public class HistogramEqualizationTask extends AsyncTask<Bitmap, Void, Bitmap> {
         dialog.show();
     }
 
-    //TODO: add weighting
     //TODO: local histogram equalization
     //TODO:
     //TODO: refactor

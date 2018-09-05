@@ -1,24 +1,36 @@
 package com.pengcit.jorfelag.pengolahancitra.histogram.specification;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ImageView;
 
-public class HistogramSpecificationEqualizedTask extends AsyncTask<Bitmap, Void, Bitmap> {
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.series.BarGraphSeries;
+import com.jjoe64.graphview.series.DataPoint;
+import com.pengcit.jorfelag.pengolahancitra.R;
+import com.pengcit.jorfelag.pengolahancitra.histogram.HistogramActivity;
 
+import java.util.HashMap;
+
+public class HistogramSpecificationEqualizedTask extends AsyncTask<Bitmap, Void, Integer[]> {
     private ProgressDialog dialog;
     HistogramSpecificationActivity activity;
     ImageView resultImageView;
     int seekBarValue1, seekBarValue2, seekBarValue3;
+    GraphView referencedHistogramView;
+    Bitmap imageBitmap;
 
-    public HistogramSpecificationEqualizedTask(HistogramSpecificationActivity activity, ImageView resultImageView, int seekBarValue1, int seekBarValue2, int seekBarValue3) {
+    public HistogramSpecificationEqualizedTask(HistogramSpecificationActivity activity, ImageView resultImageView, int seekBarValue1, int seekBarValue2, int seekBarValue3, GraphView referencedHistogramView) {
         dialog = new ProgressDialog(activity);
         this.resultImageView = resultImageView;
         this.seekBarValue1 = seekBarValue1;
         this.seekBarValue2 = seekBarValue2;
         this.seekBarValue3 = seekBarValue3;
+        this.referencedHistogramView = referencedHistogramView;
     }
 
     @Override
@@ -27,14 +39,8 @@ public class HistogramSpecificationEqualizedTask extends AsyncTask<Bitmap, Void,
         dialog.show();
     }
 
-    /**
-     * TBD (src: http://terminalcoders.blogspot.com/2017/02/histogram-equalisation-in-java.html)
-     * @param args The image bitmap to be extracted.
-     * @return
-     */
-    @Override
-    protected Bitmap doInBackground(Bitmap... args) {
-        Bitmap imageBitmap = args[0];
+    public Bitmap wrongFunctionArtifact(Bitmap... args) {
+        imageBitmap = args[0];
 
         int minRed, maxRed;
         int minGreen, maxGreen;
@@ -120,7 +126,6 @@ public class HistogramSpecificationEqualizedTask extends AsyncTask<Bitmap, Void,
 
         int size = processedBitmap.getHeight() * processedBitmap.getWidth();
 
-        //Todo: Check here maybe wrong
         for (int i = 0; i < 256; i++) {
             Tred[i] = (255 * interpolationRed[i]) / size;
             Tgreen[i] = (255 * interpolationGreen[i]) / size;
@@ -143,17 +148,72 @@ public class HistogramSpecificationEqualizedTask extends AsyncTask<Bitmap, Void,
         }
 
         return result;
+    }
+    /**
+     * TBD (src: http://terminalcoders.blogspot.com/2017/02/histogram-equalisation-in-java.html)
+     * @param args The value of referenced histogram.
+     * @return
+     */
+    @Override
+    protected Integer[] doInBackground(Bitmap... args) {
+        imageBitmap = args[0];
 
+        Integer[] interpolation = new Integer[256];
+
+        //Create Control Point using Normalization
+        interpolation[0] = seekBarValue1;
+        interpolation[127] = seekBarValue2;
+        interpolation[255] = seekBarValue3;
+
+        //Todo: change interpolation method
+        for (int i = 0; i < 256; i++) {
+            if (i == 0 || i == 127 || i == 255) {
+                // do nothing
+            } else if (i > 0 && i < 127) {
+                interpolation[i] = ((interpolation[0] * (127 - i) + interpolation[127] * (i - 0)) / (127 - 0));
+            } else { // (> 128) (< 255)
+                interpolation[i] = ((interpolation[127] * (255 - i) + interpolation[255] * (i - 127)) / (255 - 127));
+            }
+            Log.d("BUGGG" + String.valueOf(i) + " "," " + interpolation[i]);
+        }
+
+        return interpolation;
     }
 
     /**
      * Display image histogram.
-     * @param result RGB and grayscale values' frequencies.
+     * @param result referenced histogram.
      */
-    protected void onPostExecute(Bitmap result) {
+    protected void onPostExecute(Integer[] result) {
         if (dialog.isShowing()) {
             dialog.dismiss();
         }
-        resultImageView.setImageBitmap(result);
+
+        BarGraphSeries series = new BarGraphSeries<>(generateData(result));
+        series.setColor(Color.BLACK);
+
+        referencedHistogramView.addSeries(series);
+        referencedHistogramView.setTitle("Referenced Histogram");
+        referencedHistogramView.getViewport().setXAxisBoundsManual(true);
+        referencedHistogramView.getViewport().setMinX(0);
+        referencedHistogramView.getViewport().setMaxX(255);
+
+        // enable scaling and scrolling
+        referencedHistogramView.getViewport().setScalable(true);
+        referencedHistogramView.getViewport().setScalableY(true);
+
+        //Todo: histogram specification here
+        resultImageView.setImageBitmap(imageBitmap);
     }
+
+    private DataPoint[] generateData(Integer[] colorValuesFrequencies) {
+        DataPoint[] values = new DataPoint[colorValuesFrequencies.length];
+        for (int i=0; i < values.length; i++) {
+            DataPoint v = new DataPoint(i, colorValuesFrequencies[i]);
+            values[i] = v;
+        }
+        return values;
+    }
+
+
 }

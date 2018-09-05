@@ -26,6 +26,7 @@
     <string name="histogram_specification">Histogram Specification</string>
     <string name="generate_equalized_image">Generate Equalized Image</string>
     <string name="generate_histogram_specification_image">Generate Histogram Specification Image</string>
+    <string name="referenced_histogram_title">Referenced Histogram</string>
 
     <string-array name="contrast_enhancement_method">
         <item>Linear Stretching</item>

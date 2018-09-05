@@ -3,22 +3,28 @@ package com.pengcit.jorfelag.pengolahancitra.histogram.specification;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.media.Image;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.series.BarGraphSeries;
+import com.jjoe64.graphview.series.DataPoint;
 import com.pengcit.jorfelag.pengolahancitra.R;
 import com.pengcit.jorfelag.pengolahancitra.contrast.enhancement.ContrastEnhancementActivity;
 import com.pengcit.jorfelag.pengolahancitra.contrast.enhancement.PowerLawTask;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.HashMap;
 
 public class HistogramSpecificationActivity extends AppCompatActivity {
 
@@ -26,11 +32,14 @@ public class HistogramSpecificationActivity extends AppCompatActivity {
     TextView detailSeekBar1, detailSeekBar2, detailSeekBar3;
     int seekBarValue1, seekBarValue2, seekBarValue3;
     RelativeLayout equalizerLayout;
+    Integer[] referencedHistogramValue;
 
-    ImageView originalImageView, equalizedImageView, resultImageView;
+    ImageView originalImageView, resultImageView;
 
     Bitmap imageBitmapOrigin;
     Uri imageBitmapOriginURI;
+
+    GraphView referencedHistogramView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,7 +115,6 @@ public class HistogramSpecificationActivity extends AppCompatActivity {
         });
 
         originalImageView = (ImageView) findViewById(R.id.histogram_specification_original_image);
-        equalizedImageView = (ImageView) findViewById(R.id.histogram_specification_equalized_image);
         resultImageView = (ImageView) findViewById(R.id.histogram_specification_result_image);
 
         Intent intent = getIntent();
@@ -117,17 +125,15 @@ public class HistogramSpecificationActivity extends AppCompatActivity {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+
         imageBitmapOrigin = BitmapFactory.decodeStream(imageStream);
         originalImageView.setImageBitmap(imageBitmapOrigin);
 
+        referencedHistogramView = (GraphView) findViewById(R.id.histogram_specification_referenced_histogram);
     }
 
     public void generateEqualizedImage(View view) {
-        new HistogramSpecificationEqualizedTask(HistogramSpecificationActivity.this, equalizedImageView, seekBarValue1, seekBarValue2, seekBarValue3).execute(HistogramSpecificationActivity.this.imageBitmapOrigin);
-    }
-
-    //Todo: Histogram specification
-    public void generateResultImage(View view) {
-        
+        referencedHistogramView.removeAllSeries();
+        new HistogramSpecificationEqualizedTask(HistogramSpecificationActivity.this, resultImageView, seekBarValue1, seekBarValue2, seekBarValue3, referencedHistogramView).execute(HistogramSpecificationActivity.this.imageBitmapOrigin);
     }
 }
