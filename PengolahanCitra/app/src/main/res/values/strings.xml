@@ -23,6 +23,7 @@
     <string name="enhancement_result_image">Enhancement Result Image</string>
     <string name="enchancement_original_image">Original Image</string>
     <string name="weight">Weight</string>
+    <string name="histogram_specification">Histogram Specification</string>
 
     <string-array name="contrast_enhancement_method">
         <item>Linear Stretching</item>

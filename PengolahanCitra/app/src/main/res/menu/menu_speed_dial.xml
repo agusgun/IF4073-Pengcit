@@ -31,4 +31,12 @@
         android:orderInCategory="100"
         android:title="@string/action_contrast_enhancement"
         app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_histogram_spesification"
+        android:icon="@drawable/ic_histogram"
+        android:orderInCategory="100"
+        android:title="@string/histogram_specification"
+        app:showAsAction="always"
+        />
 </menu>

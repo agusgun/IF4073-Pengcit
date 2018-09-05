@@ -84,6 +84,9 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.action_constrast_enhancement:
                         launchContrastEnhancement();
                         return false;
+                    case R.id.action_histogram_spesification:
+                        launchHistogramSpesification();
+                        return false;
                     default:
                         return false;
                 }
@@ -162,6 +165,16 @@ public class MainActivity extends AppCompatActivity {
     public void launchContrastEnhancement() {
         if (imageBitmap != null) {
             Intent intent = new Intent(this, ContrastEnhancementActivity.class);
+            intent.putExtra("BitmapImageURI", imageBitmapURI.toString());
+            startActivity(intent);
+        } else {
+            Toast.makeText(getApplicationContext(), R.string.ask_to_select_or_capture_an_image, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void launchHistogramSpesification() {
+        if (imageBitmap != null) {
+            Intent intent = new Intent(this, HistogramSpecificationActivity.class);
             intent.putExtra("BitmapImageURI", imageBitmapURI.toString());
             startActivity(intent);
         } else {
