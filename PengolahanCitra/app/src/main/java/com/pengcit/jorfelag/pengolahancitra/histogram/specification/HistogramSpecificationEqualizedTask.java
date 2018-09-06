@@ -12,6 +12,7 @@ import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.BarGraphSeries;
 import com.jjoe64.graphview.series.DataPoint;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class HistogramSpecificationEqualizedTask extends AsyncTask<Bitmap, Void, HashMap<String, Integer[]>> {
@@ -156,25 +157,11 @@ public class HistogramSpecificationEqualizedTask extends AsyncTask<Bitmap, Void,
     protected HashMap<String, Integer[]> doInBackground(Bitmap... args) {
         imageBitmap = args[0];
 
-        Integer[] templateCumulative = new Integer[256];
-        Integer[] templateForView = new Integer[256];
+        int[] controlPoints = new int[] {seekBarValue1, seekBarValue2, seekBarValue3};
+        Integer[] templateCumulative = HistogramSplineInterpolator.interpolate(controlPoints);
+        Integer[] templateForView = templateCumulative.clone();
 
-        templateCumulative[0] = seekBarValue1;
-        templateCumulative[127] = seekBarValue2;
-        templateCumulative[255] = seekBarValue3;
-
-        //Todo: change interpolation method
-        for (int i = 0; i < 256; i++) {
-            if (i == 0 || i == 127 || i == 255) {
-                // do nothing
-            } else if (i > 0 && i < 127) {
-                templateCumulative[i] = ((templateCumulative[0] * (127 - i) + templateCumulative[127] * (i - 0)) / (127 - 0));
-            } else { // (> 128) (< 255)
-                templateCumulative[i] = ((templateCumulative[127] * (255 - i) + templateCumulative[255] * (i - 127)) / (255 - 127));
-            }
-            templateForView[i] = templateCumulative[i];
-            Log.d("BUGGG" + String.valueOf(i) + " "," " + templateCumulative[i]);
-        }
+        Log.println(Log.DEBUG, "HIST_VALUES", Arrays.toString(templateForView));
 
         Integer[] redValuesFrequencies = new Integer[256];
         Integer[] greenValuesFrequencies = new Integer[256];
@@ -324,6 +311,4 @@ public class HistogramSpecificationEqualizedTask extends AsyncTask<Bitmap, Void,
         }
         return values;
     }
-
-
 }
