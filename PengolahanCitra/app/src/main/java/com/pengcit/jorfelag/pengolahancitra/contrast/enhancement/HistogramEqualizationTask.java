@@ -5,6 +5,8 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.widget.ImageView;
 
+import com.annimon.stream.IntStream;
+import com.annimon.stream.function.IntConsumer;
 import com.pengcit.jorfelag.pengolahancitra.contrast.enhancement.ContrastEnhancementActivity;
 
 public class HistogramEqualizationTask extends AsyncTask<Bitmap, Void, Bitmap> {
@@ -35,11 +37,11 @@ public class HistogramEqualizationTask extends AsyncTask<Bitmap, Void, Bitmap> {
      * @return
      */
     protected Bitmap doInBackground(Bitmap... args) {
-        Bitmap imageBitmap = args[0];
+        final Bitmap imageBitmap = args[0];
 
-        Integer[] redValuesFrequencies = new Integer[256];
-        Integer[] greenValuesFrequencies = new Integer[256];
-        Integer[] blueValuesFrequencies = new Integer[256];
+        final Integer[] redValuesFrequencies = new Integer[256];
+        final Integer[] greenValuesFrequencies = new Integer[256];
+        final Integer[] blueValuesFrequencies = new Integer[256];
 
         for (int i = 0; i < 256; i++) {
             redValuesFrequencies[i] = 0;
@@ -47,9 +49,17 @@ public class HistogramEqualizationTask extends AsyncTask<Bitmap, Void, Bitmap> {
             blueValuesFrequencies[i] = 0;
         }
 
-        Bitmap processedBitmap = imageBitmap.copy(Bitmap.Config.ARGB_8888, true);
-        for (int x = 0; x < processedBitmap.getWidth(); x++) {
-            for (int y = 0; y < processedBitmap.getHeight(); y++) {
+        final Bitmap processedBitmap = imageBitmap.copy(Bitmap.Config.ARGB_8888, true);
+
+        final int width = processedBitmap.getWidth();
+        final int height = processedBitmap.getHeight();
+        final int size = height * width;
+
+        IntStream.range(0, size).forEach(new IntConsumer() {
+            public void accept(int value) {
+                int x = value % width;
+                int y = value / width;
+
                 int pixelColor = processedBitmap.getPixel(x, y);
 
                 int red = (pixelColor & 0x00FF0000) >> 16;
@@ -60,7 +70,7 @@ public class HistogramEqualizationTask extends AsyncTask<Bitmap, Void, Bitmap> {
                 greenValuesFrequencies[green]++;
                 blueValuesFrequencies[blue]++;
             }
-        }
+        });
 
         // Create cumulative frequencies
         for (int i = 1; i < 256; i++) {
@@ -69,11 +79,9 @@ public class HistogramEqualizationTask extends AsyncTask<Bitmap, Void, Bitmap> {
             blueValuesFrequencies[i] = Math.round(weight * blueValuesFrequencies[i] + weight * blueValuesFrequencies[i - 1]);
         }
 
-        Integer[] Tred = new Integer[256];
-        Integer[] Tgreen = new Integer[256];
-        Integer[] Tblue = new Integer[256];
-
-        int size = processedBitmap.getHeight() * processedBitmap.getWidth();
+        final Integer[] Tred = new Integer[256];
+        final Integer[] Tgreen = new Integer[256];
+        final Integer[] Tblue = new Integer[256];
 
         for (int i = 0; i < 256; i++) {
             Tred[i] = (255 * redValuesFrequencies[i]) / size;
@@ -81,9 +89,13 @@ public class HistogramEqualizationTask extends AsyncTask<Bitmap, Void, Bitmap> {
             Tblue[i] = (255 * blueValuesFrequencies[i]) / size;
         }
 
-        Bitmap result = Bitmap.createBitmap(imageBitmap.getWidth(), imageBitmap.getHeight(), Bitmap.Config.ARGB_8888);
-        for (int x = 0; x < processedBitmap.getWidth(); x++) {
-            for (int y = 0; y < processedBitmap.getHeight(); y++) {
+        final Bitmap result = Bitmap.createBitmap(imageBitmap.getWidth(), imageBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+
+        IntStream.range(0, size).forEach(new IntConsumer() {
+            public void accept(int value) {
+                int x = value % width;
+                int y = value / width;
+
                 int pixelColor = processedBitmap.getPixel(x, y);
 
                 int red = (pixelColor & 0x00FF0000) >> 16;
@@ -93,7 +105,7 @@ public class HistogramEqualizationTask extends AsyncTask<Bitmap, Void, Bitmap> {
                 int newPixelColor = (0xFF<<24) | (Tred[red]<<16) | (Tgreen[green]<<8) | Tblue[blue];
                 result.setPixel(x, y, newPixelColor);
             }
-        }
+        });
 
         return result;
     }

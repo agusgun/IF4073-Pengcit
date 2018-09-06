@@ -3,7 +3,11 @@ package com.pengcit.jorfelag.pengolahancitra.contrast.enhancement;
 import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.util.MutableInt;
 import android.widget.ImageView;
+
+import com.annimon.stream.IntStream;
+import com.annimon.stream.function.IntConsumer;
 
 public class LinearStretchingTask extends AsyncTask<Bitmap, Void, Bitmap> {
 
@@ -29,54 +33,65 @@ public class LinearStretchingTask extends AsyncTask<Bitmap, Void, Bitmap> {
      * @return
      */
     protected Bitmap doInBackground(Bitmap... args) {
-        Bitmap imageBitmap = args[0];
+        final Bitmap imageBitmap = args[0];
+        final Bitmap processedBitmap = imageBitmap.copy(Bitmap.Config.ARGB_8888, true);
 
-        int minRed, maxRed;
-        int minGreen, maxGreen;
-        int minBlue, maxBlue;
+        final int width = processedBitmap.getWidth();
+        final int height = processedBitmap.getHeight();
+        final int size = height * width;
 
-        minRed = minGreen = minBlue = 255;
-        maxRed = maxGreen = maxBlue = 0;
+        final MutableInt minRed = new MutableInt(255);
+        final MutableInt maxRed = new MutableInt(0);
+        final MutableInt minGreen = new MutableInt(255);
+        final MutableInt maxGreen = new MutableInt(0);
+        final MutableInt minBlue = new MutableInt(255);
+        final MutableInt maxBlue = new MutableInt(0);
 
-        Bitmap processedBitmap = imageBitmap.copy(Bitmap.Config.ARGB_8888, true);
-        for (int x = 0; x < processedBitmap.getWidth(); x++) {
-            for (int y = 0; y < processedBitmap.getHeight(); y++) {
+        IntStream.range(0, size).forEach(new IntConsumer() {
+            public void accept(int value) {
+                int x = value % width;
+                int y = value / width;
+
                 int pixelColor = processedBitmap.getPixel(x, y);
 
                 int red = (pixelColor & 0x00FF0000) >> 16;
                 int green = (pixelColor & 0x0000FF00) >> 8;
                 int blue = (pixelColor & 0x000000FF);
 
-                minRed = Math.min(minRed, red);
-                maxRed = Math.max(maxRed, red);
+                minRed.value = Math.min(minRed.value, red);
+                maxRed.value = Math.max(maxRed.value, red);
 
-                minGreen = Math.min(minGreen, green);
-                maxGreen = Math.max(maxGreen, green);
+                minGreen.value = Math.min(minGreen.value, green);
+                maxGreen.value = Math.max(maxGreen.value, green);
 
-                minBlue = Math.min(minBlue, blue);
-                maxBlue = Math.max(maxBlue, blue);
+                minBlue.value = Math.min(minBlue.value, blue);
+                maxBlue.value = Math.max(maxBlue.value, blue);
             }
+        });
+
+        final Integer[] Tred = new Integer[256];
+        final Integer[] Tgreen = new Integer[256];
+        final Integer[] Tblue = new Integer[256];
+
+        for (int i = minRed.value; i <= maxRed.value; i++) {
+            Tred[i] = (i - minRed.value) * (255 / (maxRed.value - minRed.value));
         }
 
-        Integer[] Tred = new Integer[256];
-        Integer[] Tgreen = new Integer[256];
-        Integer[] Tblue = new Integer[256];
-
-        for (int i = minRed; i <= maxRed; i++) {
-            Tred[i] = (i - minRed) * (255 / (maxRed - minRed));
+        for (int i = minGreen.value; i <= maxGreen.value; i++) {
+            Tgreen[i] = (i - minGreen.value) * (255 / (maxGreen.value - minGreen.value));
         }
 
-        for (int i = minGreen; i <= maxGreen; i++) {
-            Tgreen[i] = (i - minGreen) * (255 / (maxGreen - minGreen));
+        for (int i = minBlue.value; i <= maxBlue.value; i++) {
+            Tblue[i] = (i - minBlue.value) * (255 / (maxBlue.value - minBlue.value));
         }
 
-        for (int i = minBlue; i <= maxBlue; i++) {
-            Tblue[i] = (i - minBlue) * (255 / (maxBlue - minBlue));
-        }
+        final Bitmap result = Bitmap.createBitmap(imageBitmap.getWidth(), imageBitmap.getHeight(), Bitmap.Config.ARGB_8888);
 
-        Bitmap result = Bitmap.createBitmap(imageBitmap.getWidth(), imageBitmap.getHeight(), Bitmap.Config.ARGB_8888);
-        for (int x = 0; x < processedBitmap.getWidth(); x++) {
-            for (int y = 0; y < processedBitmap.getHeight(); y++) {
+        IntStream.range(0, size).forEach(new IntConsumer() {
+            public void accept(int value) {
+                int x = value % width;
+                int y = value / width;
+
                 int pixelColor = processedBitmap.getPixel(x, y);
 
                 int red = (pixelColor & 0x00FF0000) >> 16;
@@ -86,7 +101,7 @@ public class LinearStretchingTask extends AsyncTask<Bitmap, Void, Bitmap> {
                 int newPixelColor = (0xFF<<24) | (Tred[red]<<16) | (Tgreen[green]<<8) | Tblue[blue];
                 result.setPixel(x, y, newPixelColor);
             }
-        }
+        });
 
         return result;
     }

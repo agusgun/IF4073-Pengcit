@@ -5,6 +5,9 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.widget.ImageView;
 
+import com.annimon.stream.IntStream;
+import com.annimon.stream.function.IntConsumer;
+
 public class PowerLawTask extends AsyncTask<Bitmap, Void, Bitmap> {
 
     private ProgressDialog dialog;
@@ -32,10 +35,9 @@ public class PowerLawTask extends AsyncTask<Bitmap, Void, Bitmap> {
     protected Bitmap doInBackground(Bitmap... args) {
         Bitmap imageBitmap = args[0];
 
-        Bitmap processedBitmap = imageBitmap.copy(Bitmap.Config.ARGB_8888, true);
+        final Bitmap processedBitmap = imageBitmap.copy(Bitmap.Config.ARGB_8888, true);
 
-        Integer[] T = new Integer[256];
-
+        final Integer[] T = new Integer[256];
         for (int i = 0; i < 256; i++) {
             int pow = i;
             int maxPow = 255;
@@ -46,9 +48,17 @@ public class PowerLawTask extends AsyncTask<Bitmap, Void, Bitmap> {
             T[i] = pow * 255 / maxPow;
         }
 
-        Bitmap result = Bitmap.createBitmap(imageBitmap.getWidth(), imageBitmap.getHeight(), Bitmap.Config.ARGB_8888);
-        for (int x = 0; x < processedBitmap.getWidth(); x++) {
-            for (int y = 0; y < processedBitmap.getHeight(); y++) {
+        final Bitmap result = Bitmap.createBitmap(imageBitmap.getWidth(), imageBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+
+        final int width = processedBitmap.getWidth();
+        final int height = processedBitmap.getHeight();
+        final int size = height * width;
+
+        IntStream.range(0, size).forEach(new IntConsumer() {
+            public void accept(int value) {
+                int x = value % width;
+                int y = value / width;
+
                 int pixelColor = processedBitmap.getPixel(x, y);
 
                 int red = (pixelColor & 0x00FF0000) >> 16;
@@ -58,7 +68,7 @@ public class PowerLawTask extends AsyncTask<Bitmap, Void, Bitmap> {
                 int newPixelColor = (0xFF<<24) | (T[red]<<16) | (T[green]<<8) | T[blue];
                 result.setPixel(x, y, newPixelColor);
             }
-        }
+        });
 
         return result;
     }

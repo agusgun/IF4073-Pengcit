@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 
+import com.annimon.stream.IntStream;
+import com.annimon.stream.function.IntConsumer;
 import com.pengcit.jorfelag.pengolahancitra.MainActivity;
 
 import java.util.HashMap;
@@ -32,12 +34,12 @@ public class CreateImageHistogramTask extends AsyncTask<Bitmap, Void, HashMap<St
      * @return RGB and grayscale values' frequencies.
      */
     protected HashMap<String, Integer[]> doInBackground(Bitmap... args) {
-        Bitmap imageBitmap = args[0];
+        final Bitmap imageBitmap = args[0];
 
-        Integer[] redValuesFrequencies = new Integer[256];
-        Integer[] greenValuesFrequencies = new Integer[256];
-        Integer[] blueValuesFrequencies = new Integer[256];
-        Integer[] grayValuesFrequencies = new Integer[256];
+        final Integer[] redValuesFrequencies = new Integer[256];
+        final Integer[] greenValuesFrequencies = new Integer[256];
+        final Integer[] blueValuesFrequencies = new Integer[256];
+        final Integer[] grayValuesFrequencies = new Integer[256];
 
         for (int i = 0; i < 256; i++) {
             redValuesFrequencies[i] = 0;
@@ -46,9 +48,17 @@ public class CreateImageHistogramTask extends AsyncTask<Bitmap, Void, HashMap<St
             grayValuesFrequencies[i] = 0;
         }
 
-        Bitmap processedBitmap = imageBitmap.copy(Bitmap.Config.ARGB_8888, true);
-        for (int x = 0; x < processedBitmap.getWidth(); x++) {
-            for (int y = 0; y < processedBitmap.getHeight(); y++) {
+        final Bitmap processedBitmap = imageBitmap.copy(Bitmap.Config.ARGB_8888, true);
+
+        final int width = processedBitmap.getWidth();
+        final int height = processedBitmap.getHeight();
+        final int size = height * width;
+
+        IntStream.range(0, size).forEach(new IntConsumer() {
+            public void accept(int value) {
+                int x = value % width;
+                int y = value / width;
+
                 int pixelColor = processedBitmap.getPixel(x, y);
 
                 int red = (pixelColor & 0x00FF0000) >> 16;
@@ -61,7 +71,7 @@ public class CreateImageHistogramTask extends AsyncTask<Bitmap, Void, HashMap<St
                 blueValuesFrequencies[blue]++;
                 grayValuesFrequencies[gray]++;
             }
-        }
+        });
 
         HashMap<String, Integer[]> results = new HashMap<>();
         results.put("red", redValuesFrequencies);
