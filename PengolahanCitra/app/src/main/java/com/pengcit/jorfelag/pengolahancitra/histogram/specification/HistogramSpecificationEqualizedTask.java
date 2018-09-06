@@ -8,6 +8,8 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ImageView;
 
+import com.annimon.stream.IntStream;
+import com.annimon.stream.function.IntConsumer;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.BarGraphSeries;
 import com.jjoe64.graphview.series.DataPoint;
@@ -163,9 +165,9 @@ public class HistogramSpecificationEqualizedTask extends AsyncTask<Bitmap, Void,
 
         Log.println(Log.DEBUG, "HIST_VALUES", Arrays.toString(templateForView));
 
-        Integer[] redValuesFrequencies = new Integer[256];
-        Integer[] greenValuesFrequencies = new Integer[256];
-        Integer[] blueValuesFrequencies = new Integer[256];
+        final Integer[] redValuesFrequencies = new Integer[256];
+        final Integer[] greenValuesFrequencies = new Integer[256];
+        final Integer[] blueValuesFrequencies = new Integer[256];
 
         for (int i = 0; i < 256; i++) {
             redValuesFrequencies[i] = 0;
@@ -173,9 +175,17 @@ public class HistogramSpecificationEqualizedTask extends AsyncTask<Bitmap, Void,
             blueValuesFrequencies[i] = 0;
         }
 
-        Bitmap processedBitmap = imageBitmap.copy(Bitmap.Config.ARGB_8888, true);
-        for (int x = 0; x < processedBitmap.getWidth(); x++) {
-            for (int y = 0; y < processedBitmap.getHeight(); y++) {
+        final Bitmap processedBitmap = imageBitmap.copy(Bitmap.Config.ARGB_8888, true);
+
+        final int width = processedBitmap.getWidth();
+        final int height = processedBitmap.getHeight();
+        final int size = height * width;
+
+        IntStream.range(0, size).forEach(new IntConsumer() {
+            public void accept(int value) {
+                int x = value % width;
+                int y = value / width;
+
                 int pixelColor = processedBitmap.getPixel(x, y);
 
                 int red = (pixelColor & 0x00FF0000) >> 16;
@@ -186,10 +196,9 @@ public class HistogramSpecificationEqualizedTask extends AsyncTask<Bitmap, Void,
                 greenValuesFrequencies[green]++;
                 blueValuesFrequencies[blue]++;
             }
-        }
+        });
 
-
-        //Cumulative Distribution
+        // Cumulative Distribution
         for (int i = 1; i < 256; i++) {
             templateCumulative[i] += templateCumulative[i - 1];
             redValuesFrequencies[i] += redValuesFrequencies[i - 1];
@@ -197,9 +206,7 @@ public class HistogramSpecificationEqualizedTask extends AsyncTask<Bitmap, Void,
             blueValuesFrequencies[i] += blueValuesFrequencies[i - 1];
         }
 
-        //Normalize
-        int size = processedBitmap.getHeight() * processedBitmap.getWidth();
-
+        // Normalize
         for (int i = 0; i < 256; i++) {
             redValuesFrequencies[i] = (255 * redValuesFrequencies[i]) / size;
             greenValuesFrequencies[i] = (255 * greenValuesFrequencies[i]) / size;
@@ -212,7 +219,7 @@ public class HistogramSpecificationEqualizedTask extends AsyncTask<Bitmap, Void,
         Integer[] Tgreen = new Integer[256];
         Integer[] Tblue = new Integer[256];
 
-        //histogram specification
+        // Histogram specification
         for (int i = 0; i < 256; i++) {
             int j;
 
@@ -277,19 +284,26 @@ public class HistogramSpecificationEqualizedTask extends AsyncTask<Bitmap, Void,
         referencedHistogramView.getViewport().setMinX(0);
         referencedHistogramView.getViewport().setMaxX(255);
 
-        // enable scaling and scrolling
+        // Enable scaling and scrolling
         referencedHistogramView.getViewport().setScalable(true);
         referencedHistogramView.getViewport().setScalableY(true);
 
+        final Integer[] Tred = result.get("Tred");
+        final Integer[] Tgreen = result.get("Tgreen");
+        final Integer[] Tblue = result.get("Tblue");
 
-        Integer[] Tred = result.get("Tred");
-        Integer[] Tgreen = result.get("Tgreen");
-        Integer[] Tblue = result.get("Tblue");
+        final Bitmap processedBitmap = imageBitmap.copy(Bitmap.Config.ARGB_8888, true);
+        final Bitmap resultImage = Bitmap.createBitmap(imageBitmap.getWidth(), imageBitmap.getHeight(), Bitmap.Config.ARGB_8888);
 
-        Bitmap processedBitmap = imageBitmap.copy(Bitmap.Config.ARGB_8888, true);
-        Bitmap resultImage = Bitmap.createBitmap(imageBitmap.getWidth(), imageBitmap.getHeight(), Bitmap.Config.ARGB_8888);
-        for (int x = 0; x < processedBitmap.getWidth(); x++) {
-            for (int y = 0; y < processedBitmap.getHeight(); y++) {
+        final int width = processedBitmap.getWidth();
+        final int height = processedBitmap.getHeight();
+        final int size = height * width;
+
+        IntStream.range(0, size).forEach(new IntConsumer() {
+            public void accept(int value) {
+                int x = value % width;
+                int y = value / width;
+
                 int pixelColor = processedBitmap.getPixel(x, y);
 
                 int red = (pixelColor & 0x00FF0000) >> 16;
@@ -299,7 +313,8 @@ public class HistogramSpecificationEqualizedTask extends AsyncTask<Bitmap, Void,
                 int newPixelColor = (0xFF<<24) | (Tred[red]<<16) | (Tgreen[green]<<8) | Tblue[blue];
                 resultImage.setPixel(x, y, newPixelColor);
             }
-        }
+        });
+
         resultImageView.setImageBitmap(resultImage);
     }
 
