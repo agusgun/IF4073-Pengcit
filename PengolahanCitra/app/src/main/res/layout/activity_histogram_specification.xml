@@ -96,20 +96,12 @@
             android:layout_below="@id/histogram_specification_generate_equalized_image_button"
             android:layout_height="125dp" />
 
-        <Button
-            android:id="@+id/histogram_specification_generate_image_result_button"
-            android:layout_width="217dp"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/histogram_specification_referenced_histogram"
-            android:layout_centerHorizontal="true"
-            android:onClick="generateResultImage"
-            android:text="@string/generate_histogram_specification_image" />
 
         <ImageView
             android:id="@+id/histogram_specification_result_image"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/histogram_specification_generate_image_result_button"
+            android:layout_below="@id/histogram_specification_referenced_histogram"
             android:layout_centerHorizontal="true" />
 
     </RelativeLayout>
