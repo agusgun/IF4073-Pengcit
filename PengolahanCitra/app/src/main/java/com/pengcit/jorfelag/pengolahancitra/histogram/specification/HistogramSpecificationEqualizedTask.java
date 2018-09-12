@@ -100,19 +100,30 @@ public class HistogramSpecificationEqualizedTask extends AsyncTask<Bitmap, Void,
 
         // Cumulative Distribution
         for (int i = 1; i < 256; i++) {
-            templateCumulative[i] += templateCumulative[i - 1];
             redValuesFrequencies[i] += redValuesFrequencies[i - 1];
+        }
+        for (int i = 1; i < 256; i++) {
             greenValuesFrequencies[i] += greenValuesFrequencies[i - 1];
+        }
+        for (int i = 1; i < 256; i++) {
             blueValuesFrequencies[i] += blueValuesFrequencies[i - 1];
+        }
+        for (int i = 1; i < 256; i++) {
+            templateCumulative[i] += templateCumulative[i - 1];
         }
 
         // Normalize
         for (int i = 0; i < 256; i++) {
             redValuesFrequencies[i] = (255 * redValuesFrequencies[i]) / size;
+        }
+        for (int i = 0; i < 256; i++) {
             greenValuesFrequencies[i] = (255 * greenValuesFrequencies[i]) / size;
+        }
+        for (int i = 0; i < 256; i++) {
             blueValuesFrequencies[i] = (255 * blueValuesFrequencies[i]) / size;
+        }
+        for (int i = 0; i < 256; i++) {
             templateCumulative[i] = (255 * templateCumulative[i]) / templateCumulative[255];
-//            Log.d("BEHE " + i, " " + templateCumulative[i] + " " + redValuesFrequencies[i] + " " + greenValuesFrequencies[i] + " " + blueValuesFrequencies[i]);
         }
 
         Integer[] Tred = new Integer[256];
@@ -120,38 +131,25 @@ public class HistogramSpecificationEqualizedTask extends AsyncTask<Bitmap, Void,
         Integer[] Tblue = new Integer[256];
 
         // Histogram specification
-        for (int i = 0; i < 256; i++) {
-            int j;
+        for (int i = 255; i >= 0; i--) {
+            int j = (i < 255) ? Tred[i + 1] : 255;
+            do {
+                Tred[i] = j--;
+            } while (j >= 0 && redValuesFrequencies[i] <= templateCumulative[j]);
+        }
 
-            //Tred
-            j = 255;
-            while (true) {
-                Tred[i] = j;
-                j = j - 1;
-                if (j < 0 || redValuesFrequencies[i] > templateCumulative[j]) {
-                    break;
-                }
-            }
+        for (int i = 255; i >= 0; i--) {
+            int j = (i < 255) ? Tgreen[i + 1] : 255;
+            do {
+                Tgreen[i] = j--;
+            } while (j >= 0 && greenValuesFrequencies[i] <= templateCumulative[j]);
+        }
 
-            //Tgreen
-            j = 255;
-            while (true) {
-                Tgreen[i] = j;
-                j = j - 1;
-                if (j < 0 || greenValuesFrequencies[i] > templateCumulative[j]) {
-                    break;
-                }
-            }
-
-            //Tblue
-            j = 255;
-            while (true) {
-                Tblue[i] = j;
-                j = j - 1;
-                if (j < 0 || blueValuesFrequencies[i] > templateCumulative[j]) {
-                    break;
-                }
-            }
+        for (int i = 255; i >= 0; i--) {
+            int j = (i < 255) ? Tblue[i + 1] : 255;
+            do {
+                Tblue[i] = j--;
+            } while (j >= 0 && blueValuesFrequencies[i] <= templateCumulative[j]);
         }
 
         HashMap<String, Integer[]> result = new HashMap<>();
