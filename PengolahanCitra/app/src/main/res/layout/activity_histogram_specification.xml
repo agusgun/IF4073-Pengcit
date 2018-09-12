@@ -16,7 +16,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true" />
+            android:layout_centerHorizontal="true"
+            android:adjustViewBounds="true" />
 
         <GridLayout
             android:id="@+id/histogram_specification_equalizer_layout"
@@ -141,7 +142,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/histogram_specification_referenced_histogram"
-            android:layout_centerHorizontal="true" />
+            android:layout_centerHorizontal="true"
+            android:adjustViewBounds="true" />
 
     </RelativeLayout>
 
