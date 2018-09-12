@@ -6,16 +6,16 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.widget.ImageView;
 
-import com.annimon.stream.IntStream;
-import com.annimon.stream.function.IntConsumer;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.BarGraphSeries;
 import com.jjoe64.graphview.series.DataPoint;
+import com.pengcit.jorfelag.pengolahancitra.util.LoopBody;
+import com.pengcit.jorfelag.pengolahancitra.util.Parallel;
 
 import java.util.HashMap;
 
 public class HistogramSpecificationEqualizedTask extends AsyncTask<Bitmap, Void, HashMap<String, Integer[]>> {
-    HistogramSpecificationActivity activity;
+
     ImageView resultImageView;
     int[] seekBarValues;
     GraphView referencedHistogramView;
@@ -78,20 +78,23 @@ public class HistogramSpecificationEqualizedTask extends AsyncTask<Bitmap, Void,
         final int height = processedBitmap.getHeight();
         final int size = height * width;
 
-        IntStream.range(0, size).forEach(new IntConsumer() {
-            public void accept(int value) {
-                int x = value % width;
-                int y = value / width;
+        Parallel.For(0, height, new LoopBody<Integer>() {
+            @Override
+            public void run(Integer i) {
+                int[] processedPixels = new int[width];
+                processedBitmap.getPixels(processedPixels, 0, width, 0, i, width, 1);
 
-                int pixelColor = processedBitmap.getPixel(x, y);
+                for (int j = 0; j < width; ++j) {
+                    int pixelColor = processedPixels[j];
 
-                int red = (pixelColor & 0x00FF0000) >> 16;
-                int green = (pixelColor & 0x0000FF00) >> 8;
-                int blue = (pixelColor & 0x000000FF);
+                    int red = (pixelColor & 0x00FF0000) >> 16;
+                    int green = (pixelColor & 0x0000FF00) >> 8;
+                    int blue = (pixelColor & 0x000000FF);
 
-                redValuesFrequencies[red]++;
-                greenValuesFrequencies[green]++;
-                blueValuesFrequencies[blue]++;
+                    redValuesFrequencies[red]++;
+                    greenValuesFrequencies[green]++;
+                    blueValuesFrequencies[blue]++;
+                }
             }
         });
 
@@ -189,29 +192,31 @@ public class HistogramSpecificationEqualizedTask extends AsyncTask<Bitmap, Void,
         final Integer[] Tblue = result.get("Tblue");
 
         final Bitmap processedBitmap = imageBitmap.copy(Bitmap.Config.ARGB_8888, true);
-        final Bitmap resultImage = Bitmap.createBitmap(imageBitmap.getWidth(), imageBitmap.getHeight(), Bitmap.Config.ARGB_8888);
 
         final int width = processedBitmap.getWidth();
         final int height = processedBitmap.getHeight();
-        final int size = height * width;
 
-        IntStream.range(0, size).forEach(new IntConsumer() {
-            public void accept(int value) {
-                int x = value % width;
-                int y = value / width;
+        Parallel.For(0, height, new LoopBody<Integer>() {
+            @Override
+            public void run(Integer i) {
+                int[] processedPixels = new int[width];
+                processedBitmap.getPixels(processedPixels, 0, width, 0, i, width, 1);
 
-                int pixelColor = processedBitmap.getPixel(x, y);
+                for (int j = 0; j < width; ++j) {
+                    int pixelColor = processedPixels[j];
 
-                int red = (pixelColor & 0x00FF0000) >> 16;
-                int green = (pixelColor & 0x0000FF00) >> 8;
-                int blue = (pixelColor & 0x000000FF);
+                    int red = (pixelColor & 0x00FF0000) >> 16;
+                    int green = (pixelColor & 0x0000FF00) >> 8;
+                    int blue = (pixelColor & 0x000000FF);
 
-                int newPixelColor = (0xFF << 24) | (Tred[red] << 16) | (Tgreen[green] << 8) | Tblue[blue];
-                resultImage.setPixel(x, y, newPixelColor);
+                    processedPixels[j] = (0xFF<<24) | (Tred[red]<<16) | (Tgreen[green]<<8) | Tblue[blue];
+                }
+
+                processedBitmap.setPixels(processedPixels, 0, width, 0, i, width, 1);
             }
         });
 
-        resultImageView.setImageBitmap(resultImage);
+        resultImageView.setImageBitmap(processedBitmap);
 
         if (dialog.isShowing()) {
             dialog.dismiss();

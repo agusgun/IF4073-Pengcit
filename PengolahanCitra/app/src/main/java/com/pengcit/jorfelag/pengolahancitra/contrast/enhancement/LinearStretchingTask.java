@@ -6,8 +6,8 @@ import android.os.AsyncTask;
 import android.util.MutableInt;
 import android.widget.ImageView;
 
-import com.annimon.stream.IntStream;
-import com.annimon.stream.function.IntConsumer;
+import com.pengcit.jorfelag.pengolahancitra.util.LoopBody;
+import com.pengcit.jorfelag.pengolahancitra.util.Parallel;
 
 public class LinearStretchingTask extends AsyncTask<Bitmap, Void, Bitmap> {
 
@@ -38,7 +38,6 @@ public class LinearStretchingTask extends AsyncTask<Bitmap, Void, Bitmap> {
 
         final int width = processedBitmap.getWidth();
         final int height = processedBitmap.getHeight();
-        final int size = height * width;
 
         final MutableInt minRed = new MutableInt(255);
         final MutableInt maxRed = new MutableInt(0);
@@ -47,25 +46,28 @@ public class LinearStretchingTask extends AsyncTask<Bitmap, Void, Bitmap> {
         final MutableInt minBlue = new MutableInt(255);
         final MutableInt maxBlue = new MutableInt(0);
 
-        IntStream.range(0, size).forEach(new IntConsumer() {
-            public void accept(int value) {
-                int x = value % width;
-                int y = value / width;
+        Parallel.For(0, height, new LoopBody<Integer>() {
+            @Override
+            public void run(Integer i) {
+                int[] processedPixels = new int[width];
+                processedBitmap.getPixels(processedPixels, 0, width, 0, i, width, 1);
 
-                int pixelColor = processedBitmap.getPixel(x, y);
+                for (int j = 0; j < width; ++j) {
+                    int pixelColor = processedPixels[j];
 
-                int red = (pixelColor & 0x00FF0000) >> 16;
-                int green = (pixelColor & 0x0000FF00) >> 8;
-                int blue = (pixelColor & 0x000000FF);
+                    int red = (pixelColor & 0x00FF0000) >> 16;
+                    int green = (pixelColor & 0x0000FF00) >> 8;
+                    int blue = (pixelColor & 0x000000FF);
 
-                minRed.value = Math.min(minRed.value, red);
-                maxRed.value = Math.max(maxRed.value, red);
+                    minRed.value = Math.min(minRed.value, red);
+                    maxRed.value = Math.max(maxRed.value, red);
 
-                minGreen.value = Math.min(minGreen.value, green);
-                maxGreen.value = Math.max(maxGreen.value, green);
+                    minGreen.value = Math.min(minGreen.value, green);
+                    maxGreen.value = Math.max(maxGreen.value, green);
 
-                minBlue.value = Math.min(minBlue.value, blue);
-                maxBlue.value = Math.max(maxBlue.value, blue);
+                    minBlue.value = Math.min(minBlue.value, blue);
+                    maxBlue.value = Math.max(maxBlue.value, blue);
+                }
             }
         });
 
@@ -85,25 +87,27 @@ public class LinearStretchingTask extends AsyncTask<Bitmap, Void, Bitmap> {
             Tblue[i] = (i - minBlue.value) * (255 / (maxBlue.value - minBlue.value));
         }
 
-        final Bitmap result = Bitmap.createBitmap(imageBitmap.getWidth(), imageBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        Parallel.For(0, height, new LoopBody<Integer>() {
+            @Override
+            public void run(Integer i) {
+                int[] processedPixels = new int[width];
+                processedBitmap.getPixels(processedPixels, 0, width, 0, i, width, 1);
 
-        IntStream.range(0, size).forEach(new IntConsumer() {
-            public void accept(int value) {
-                int x = value % width;
-                int y = value / width;
+                for (int j = 0; j < width; ++j) {
+                    int pixelColor = processedPixels[j];
 
-                int pixelColor = processedBitmap.getPixel(x, y);
+                    int red = (pixelColor & 0x00FF0000) >> 16;
+                    int green = (pixelColor & 0x0000FF00) >> 8;
+                    int blue = (pixelColor & 0x000000FF);
 
-                int red = (pixelColor & 0x00FF0000) >> 16;
-                int green = (pixelColor & 0x0000FF00) >> 8;
-                int blue = (pixelColor & 0x000000FF);
+                    processedPixels[j] = (0xFF<<24) | (Tred[red]<<16) | (Tgreen[green]<<8) | Tblue[blue];
+                }
 
-                int newPixelColor = (0xFF<<24) | (Tred[red]<<16) | (Tgreen[green]<<8) | Tblue[blue];
-                result.setPixel(x, y, newPixelColor);
+                processedBitmap.setPixels(processedPixels, 0, width, 0, i, width, 1);
             }
         });
 
-        return result;
+        return processedBitmap;
     }
 
     /**

@@ -6,9 +6,9 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 
-import com.annimon.stream.IntStream;
-import com.annimon.stream.function.IntConsumer;
 import com.pengcit.jorfelag.pengolahancitra.MainActivity;
+import com.pengcit.jorfelag.pengolahancitra.util.LoopBody;
+import com.pengcit.jorfelag.pengolahancitra.util.Parallel;
 
 import java.util.HashMap;
 
@@ -52,24 +52,26 @@ public class CreateImageHistogramTask extends AsyncTask<Bitmap, Void, HashMap<St
 
         final int width = processedBitmap.getWidth();
         final int height = processedBitmap.getHeight();
-        final int size = height * width;
 
-        IntStream.range(0, size).forEach(new IntConsumer() {
-            public void accept(int value) {
-                int x = value % width;
-                int y = value / width;
+        Parallel.For(0, height, new LoopBody<Integer>() {
+            @Override
+            public void run(Integer i) {
+                int[] processedPixels = new int[width];
+                processedBitmap.getPixels(processedPixels, 0, width, 0, i, width, 1);
 
-                int pixelColor = processedBitmap.getPixel(x, y);
+                for (int j = 0; j < width; ++j) {
+                    int pixelColor = processedPixels[j];
 
-                int red = (pixelColor & 0x00FF0000) >> 16;
-                int green = (pixelColor & 0x0000FF00) >> 8;
-                int blue = (pixelColor & 0x000000FF);
-                int gray = (red + green + blue) / 3;
+                    int red = (pixelColor & 0x00FF0000) >> 16;
+                    int green = (pixelColor & 0x0000FF00) >> 8;
+                    int blue = (pixelColor & 0x000000FF);
+                    int gray = (red + green + blue) / 3;
 
-                redValuesFrequencies[red]++;
-                greenValuesFrequencies[green]++;
-                blueValuesFrequencies[blue]++;
-                grayValuesFrequencies[gray]++;
+                    redValuesFrequencies[red]++;
+                    greenValuesFrequencies[green]++;
+                    blueValuesFrequencies[blue]++;
+                    grayValuesFrequencies[gray]++;
+                }
             }
         });
 

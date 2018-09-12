@@ -26,7 +26,6 @@ dependencies {
     implementation 'com.android.support:support-v4:27.1.1'
     implementation "com.leinardi.android:speed-dial:1.0.2"
     implementation 'org.apache.commons:commons-math3:3.6.1'
-    implementation 'com.annimon:stream:1.2.1'
     implementation 'com.h6ah4i.android.widget.verticalseekbar:verticalseekbar:0.7.2'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'

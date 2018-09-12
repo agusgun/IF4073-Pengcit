@@ -5,9 +5,8 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.widget.ImageView;
 
-import com.annimon.stream.IntStream;
-import com.annimon.stream.function.IntConsumer;
-import com.pengcit.jorfelag.pengolahancitra.contrast.enhancement.ContrastEnhancementActivity;
+import com.pengcit.jorfelag.pengolahancitra.util.LoopBody;
+import com.pengcit.jorfelag.pengolahancitra.util.Parallel;
 
 public class HistogramEqualizationTask extends AsyncTask<Bitmap, Void, Bitmap> {
 
@@ -53,22 +52,25 @@ public class HistogramEqualizationTask extends AsyncTask<Bitmap, Void, Bitmap> {
 
         final int width = processedBitmap.getWidth();
         final int height = processedBitmap.getHeight();
-        final int size = height * width;
+        final int size = width * height;
 
-        IntStream.range(0, size).forEach(new IntConsumer() {
-            public void accept(int value) {
-                int x = value % width;
-                int y = value / width;
+        Parallel.For(0, height, new LoopBody<Integer>() {
+            @Override
+            public void run(Integer i) {
+                int[] processedPixels = new int[width];
+                processedBitmap.getPixels(processedPixels, 0, width, 0, i, width, 1);
 
-                int pixelColor = processedBitmap.getPixel(x, y);
+                for (int j = 0; j < width; ++j) {
+                    int pixelColor = processedPixels[j];
 
-                int red = (pixelColor & 0x00FF0000) >> 16;
-                int green = (pixelColor & 0x0000FF00) >> 8;
-                int blue = (pixelColor & 0x000000FF);
+                    int red = (pixelColor & 0x00FF0000) >> 16;
+                    int green = (pixelColor & 0x0000FF00) >> 8;
+                    int blue = (pixelColor & 0x000000FF);
 
-                redValuesFrequencies[red]++;
-                greenValuesFrequencies[green]++;
-                blueValuesFrequencies[blue]++;
+                    redValuesFrequencies[red]++;
+                    greenValuesFrequencies[green]++;
+                    blueValuesFrequencies[blue]++;
+                }
             }
         });
 
@@ -89,25 +91,27 @@ public class HistogramEqualizationTask extends AsyncTask<Bitmap, Void, Bitmap> {
             Tblue[i] = (255 * blueValuesFrequencies[i]) / size;
         }
 
-        final Bitmap result = Bitmap.createBitmap(imageBitmap.getWidth(), imageBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        Parallel.For(0, height, new LoopBody<Integer>() {
+            @Override
+            public void run(Integer i) {
+                int[] processedPixels = new int[width];
+                processedBitmap.getPixels(processedPixels, 0, width, 0, i, width, 1);
 
-        IntStream.range(0, size).forEach(new IntConsumer() {
-            public void accept(int value) {
-                int x = value % width;
-                int y = value / width;
+                for (int j = 0; j < width; ++j) {
+                    int pixelColor = processedPixels[j];
 
-                int pixelColor = processedBitmap.getPixel(x, y);
+                    int red = (pixelColor & 0x00FF0000) >> 16;
+                    int green = (pixelColor & 0x0000FF00) >> 8;
+                    int blue = (pixelColor & 0x000000FF);
 
-                int red = (pixelColor & 0x00FF0000) >> 16;
-                int green = (pixelColor & 0x0000FF00) >> 8;
-                int blue = (pixelColor & 0x000000FF);
+                    processedPixels[j] = (0xFF<<24) | (Tred[red]<<16) | (Tgreen[green]<<8) | Tblue[blue];
+                }
 
-                int newPixelColor = (0xFF<<24) | (Tred[red]<<16) | (Tgreen[green]<<8) | Tblue[blue];
-                result.setPixel(x, y, newPixelColor);
+                processedBitmap.setPixels(processedPixels, 0, width, 0, i, width, 1);
             }
         });
 
-        return result;
+        return processedBitmap;
     }
 
     /**
