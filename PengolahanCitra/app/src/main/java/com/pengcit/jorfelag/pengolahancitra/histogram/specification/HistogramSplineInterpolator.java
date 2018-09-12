@@ -4,7 +4,7 @@ import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 
 public class HistogramSplineInterpolator {
-    public static final int MAX_VALUE = 150;
+    public static final int MAX_VALUE = 100;
     public static final int MIN_VALUE = 0;
 
     public static Integer[] interpolate(int[] controlPoints) {

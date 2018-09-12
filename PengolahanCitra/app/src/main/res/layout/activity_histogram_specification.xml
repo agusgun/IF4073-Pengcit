@@ -18,67 +18,106 @@
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true" />
 
-        <RelativeLayout
+        <GridLayout
             android:id="@+id/histogram_specification_equalizer_layout"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="140dp"
             android:layout_alignParentStart="true"
             android:layout_below="@+id/histogram_specification_original_image"
-            android:layout_marginTop="15dp">
+            android:layout_marginTop="15dp"
+            android:columnCount="5">
 
-            <SeekBar
-                android:id="@+id/histogram_specification_seekbar_point_1"
-                android:layout_width="120dp"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:max="150"
-                android:rotation="270" />
+            <com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1">
+
+                <com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBar
+                    android:id="@+id/histogram_specification_seekbar_point_1"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    app:seekBarRotation="CW270" />
+            </com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper>
+
+            <com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1">
+
+                <com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBar
+                    android:id="@+id/histogram_specification_seekbar_point_2"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    app:seekBarRotation="CW270" />
+            </com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper>
+
+            <com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1">
+
+                <com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBar
+                    android:id="@+id/histogram_specification_seekbar_point_3"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    app:seekBarRotation="CW270" />
+            </com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper>
+
+            <com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1">
+
+                <com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBar
+                    android:id="@+id/histogram_specification_seekbar_point_4"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    app:seekBarRotation="CW270" />
+            </com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper>
+
+            <com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1">
+
+                <com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBar
+                    android:id="@+id/histogram_specification_seekbar_point_5"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    app:seekBarRotation="CW270" />
+            </com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper>
 
             <TextView
                 android:id="@+id/histogram_specification_detail_1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentStart="true"
-                android:layout_marginStart="56dp"
+                android:layout_gravity="center"
                 android:text="0" />
-
-            <SeekBar
-                android:id="@+id/histogram_specification_seekbar_point_2"
-                android:layout_width="120dp"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:max="150"
-                android:rotation="270" />
 
             <TextView
                 android:id="@+id/histogram_specification_detail_2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_centerHorizontal="true"
+                android:layout_gravity="center"
                 android:text="0" />
-
-            <SeekBar
-                android:id="@+id/histogram_specification_seekbar_point_3"
-                android:layout_width="120dp"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_alignTop="@+id/histogram_specification_seekbar_point_1"
-                android:max="150"
-                android:rotation="270" />
 
             <TextView
                 android:id="@+id/histogram_specification_detail_3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentEnd="true"
-                android:layout_marginEnd="55dp"
+                android:layout_gravity="center"
                 android:text="0" />
 
-        </RelativeLayout>
+            <TextView
+                android:id="@+id/histogram_specification_detail_4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="0" />
+
+            <TextView
+                android:id="@+id/histogram_specification_detail_5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="0" />
+
+        </GridLayout>
 
         <Button
             android:id="@+id/histogram_specification_generate_equalized_image_button"
@@ -93,8 +132,8 @@
         <com.jjoe64.graphview.GraphView
             android:id="@+id/histogram_specification_referenced_histogram"
             android:layout_width="match_parent"
-            android:layout_below="@id/histogram_specification_generate_equalized_image_button"
-            android:layout_height="125dp" />
+            android:layout_height="125dp"
+            android:layout_below="@id/histogram_specification_generate_equalized_image_button" />
 
 
         <ImageView

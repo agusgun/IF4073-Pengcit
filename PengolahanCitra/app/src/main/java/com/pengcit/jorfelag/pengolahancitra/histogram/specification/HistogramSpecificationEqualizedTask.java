@@ -1,11 +1,9 @@
 package com.pengcit.jorfelag.pengolahancitra.histogram.specification;
 
 import android.app.ProgressDialog;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.AsyncTask;
-import android.util.Log;
 import android.widget.ImageView;
 
 import com.annimon.stream.IntStream;
@@ -14,23 +12,20 @@ import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.BarGraphSeries;
 import com.jjoe64.graphview.series.DataPoint;
 
-import java.util.Arrays;
 import java.util.HashMap;
 
 public class HistogramSpecificationEqualizedTask extends AsyncTask<Bitmap, Void, HashMap<String, Integer[]>> {
-    private ProgressDialog dialog;
     HistogramSpecificationActivity activity;
     ImageView resultImageView;
-    int seekBarValue1, seekBarValue2, seekBarValue3;
+    int[] seekBarValues;
     GraphView referencedHistogramView;
     Bitmap imageBitmap;
+    private ProgressDialog dialog;
 
-    public HistogramSpecificationEqualizedTask(HistogramSpecificationActivity activity, ImageView resultImageView, int seekBarValue1, int seekBarValue2, int seekBarValue3, GraphView referencedHistogramView) {
+    public HistogramSpecificationEqualizedTask(HistogramSpecificationActivity activity, ImageView resultImageView, int[] seekBarValues, GraphView referencedHistogramView) {
         dialog = new ProgressDialog(activity);
         this.resultImageView = resultImageView;
-        this.seekBarValue1 = seekBarValue1;
-        this.seekBarValue2 = seekBarValue2;
-        this.seekBarValue3 = seekBarValue3;
+        this.seekBarValues = seekBarValues;
         this.referencedHistogramView = referencedHistogramView;
     }
 
@@ -40,118 +35,9 @@ public class HistogramSpecificationEqualizedTask extends AsyncTask<Bitmap, Void,
         dialog.show();
     }
 
-    public Bitmap wrongFunctionArtifact(Bitmap... args) {
-        imageBitmap = args[0];
-
-        int minRed, maxRed;
-        int minGreen, maxGreen;
-        int minBlue, maxBlue;
-
-        minRed = minGreen = minBlue = 255;
-        maxRed = maxGreen = maxBlue = 0;
-
-        Integer[] redValuesFrequencies = new Integer[256];
-        Integer[] greenValuesFrequencies = new Integer[256];
-        Integer[] blueValuesFrequencies = new Integer[256];
-
-        for (int i = 0; i < 256; i++) {
-            redValuesFrequencies[i] = 0;
-            greenValuesFrequencies[i] = 0;
-            blueValuesFrequencies[i] = 0;
-        }
-
-        Bitmap processedBitmap = imageBitmap.copy(Bitmap.Config.ARGB_8888, true);
-        for (int x = 0; x < processedBitmap.getWidth(); x++) {
-            for (int y = 0; y < processedBitmap.getHeight(); y++) {
-                int pixelColor = processedBitmap.getPixel(x, y);
-
-                int red = (pixelColor & 0x00FF0000) >> 16;
-                int green = (pixelColor & 0x0000FF00) >> 8;
-                int blue = (pixelColor & 0x000000FF);
-
-                minRed = Math.min(minRed, red);
-                maxRed = Math.max(maxRed, red);
-
-                minGreen = Math.min(minGreen, green);
-                maxGreen = Math.max(maxGreen, green);
-
-                minBlue = Math.min(minBlue, blue);
-                maxBlue = Math.max(maxBlue, blue);
-
-                redValuesFrequencies[red]++;
-                greenValuesFrequencies[green]++;
-                blueValuesFrequencies[blue]++;
-            }
-        }
-
-        Integer[] interpolationRed = new Integer[256];
-        Integer[] interpolationGreen = new Integer[256];
-        Integer[] interpolationBlue = new Integer[256];
-
-        //Create Control Point using Normalization
-        interpolationRed[0] = Math.round(((redValuesFrequencies[0] - minRed) / (maxRed - minRed)) * (seekBarValue1));
-        interpolationRed[127] = Math.round(((redValuesFrequencies[127] - minRed) / (maxRed - minRed)) * (seekBarValue2));
-        interpolationRed[255] = Math.round(((redValuesFrequencies[255] - minRed) / (maxRed - minRed)) * (seekBarValue3));
-
-        interpolationGreen[0] = Math.round(((greenValuesFrequencies[0] - minGreen) / (maxGreen - minGreen)) * (seekBarValue1));
-        interpolationGreen[127] = Math.round(((greenValuesFrequencies[127] - minGreen) / (maxGreen - minGreen)) * (seekBarValue2));
-        interpolationGreen[255] = Math.round(((greenValuesFrequencies[255] - minGreen) / (maxGreen - minGreen)) * (seekBarValue3));
-
-        interpolationBlue[0] = Math.round(((blueValuesFrequencies[0] - minBlue) / (maxBlue - minBlue)) * (seekBarValue1));
-        interpolationBlue[127] = Math.round(((blueValuesFrequencies[127] - minBlue) / (maxBlue - minBlue)) * (seekBarValue2));
-        interpolationBlue[255] = Math.round(((blueValuesFrequencies[255] - minBlue) / (maxBlue - minBlue)) * (seekBarValue3));
-
-
-        Log.d("BUGGGInter", String.valueOf(redValuesFrequencies[0]));
-        Log.d("BUGGGInter", String.valueOf(redValuesFrequencies[127]));
-        Log.d("BUGGGInter", String.valueOf(redValuesFrequencies[255]));
-
-        for (int i = 0; i < 256; i++) {
-            if (i == 0 || i == 127 || i == 255) {
-                // do nothing
-            } else if (i > 0 && i < 127) {
-                interpolationRed[i] = ((interpolationRed[0] * (127 - i) + interpolationRed[127] * (i - 0)) / (127 - 0));
-                interpolationGreen[i] = ((interpolationGreen[0] * (127 - i) + interpolationGreen[127] * (i - 0)) / (127 - 0));
-                interpolationBlue[i] = ((interpolationBlue[0] * (127 - i) + interpolationBlue[127] * (i - 0)) / (127 - 0));
-            } else { // (> 128) (< 255)
-                interpolationRed[i] = ((interpolationRed[127] * (255 - i) + interpolationRed[255] * (i - 127)) / (255 - 127));
-                interpolationGreen[i] = ((interpolationGreen[127] * (255 - i) + interpolationGreen[255] * (i - 127)) / (255 - 127));
-                interpolationBlue[i] = ((interpolationBlue[127] * (255 - i) + interpolationBlue[255] * (i - 127)) / (255 - 127));
-            }
-        }
-
-        // Transformation
-        Integer[] Tred = new Integer[256];
-        Integer[] Tgreen = new Integer[256];
-        Integer[] Tblue = new Integer[256];
-
-        int size = processedBitmap.getHeight() * processedBitmap.getWidth();
-
-        for (int i = 0; i < 256; i++) {
-            Tred[i] = (255 * interpolationRed[i]) / size;
-            Tgreen[i] = (255 * interpolationGreen[i]) / size;
-            Tblue[i] = (255 * interpolationBlue[i]) / size;
-            Log.d("BUGGG" + String.valueOf(i) + " " + interpolationRed[i] + " " + interpolationGreen[i] + " " + interpolationBlue[i], "R" + Tred[i] + " G" + Tgreen[i] + " B" + Tblue[i]);
-        }
-
-        Bitmap result = Bitmap.createBitmap(imageBitmap.getWidth(), imageBitmap.getHeight(), Bitmap.Config.ARGB_8888);
-        for (int x = 0; x < processedBitmap.getWidth(); x++) {
-            for (int y = 0; y < processedBitmap.getHeight(); y++) {
-                int pixelColor = processedBitmap.getPixel(x, y);
-
-                int red = (pixelColor & 0x00FF0000) >> 16;
-                int green = (pixelColor & 0x0000FF00) >> 8;
-                int blue = (pixelColor & 0x000000FF);
-
-                int newPixelColor = (0xFF<<24) | (Tred[red]<<16) | (Tgreen[green]<<8) | Tblue[blue];
-                result.setPixel(x, y, newPixelColor);
-            }
-        }
-
-        return result;
-    }
     /**
      * TBD (src: https://www.youtube.com/watch?v=YxZUnJ_Ok2w)
+     *
      * @param args Original bitmap.
      * @return
      */
@@ -159,11 +45,22 @@ public class HistogramSpecificationEqualizedTask extends AsyncTask<Bitmap, Void,
     protected HashMap<String, Integer[]> doInBackground(Bitmap... args) {
         imageBitmap = args[0];
 
-        int[] controlPoints = new int[] {seekBarValue1, seekBarValue2, seekBarValue3};
+        int[] controlPoints = seekBarValues;
+
+        // Handle all zero values
+        int sum = 0;
+        for (int point : controlPoints) {
+            sum += point;
+        }
+        if (sum == 0) {
+            for (int i = 0; i < controlPoints.length; ++i) {
+                controlPoints[i] = 1;
+            }
+        }
+
+        // Generate histogram
         Integer[] templateCumulative = HistogramSplineInterpolator.interpolate(controlPoints);
         Integer[] templateForView = templateCumulative.clone();
-
-        Log.println(Log.DEBUG, "HIST_VALUES", Arrays.toString(templateForView));
 
         final Integer[] redValuesFrequencies = new Integer[256];
         final Integer[] greenValuesFrequencies = new Integer[256];
@@ -212,7 +109,7 @@ public class HistogramSpecificationEqualizedTask extends AsyncTask<Bitmap, Void,
             greenValuesFrequencies[i] = (255 * greenValuesFrequencies[i]) / size;
             blueValuesFrequencies[i] = (255 * blueValuesFrequencies[i]) / size;
             templateCumulative[i] = (255 * templateCumulative[i]) / templateCumulative[255];
-            Log.d("BEHE " + i, " " + templateCumulative[i] + " " + redValuesFrequencies[i] + " " + greenValuesFrequencies[i] + " " + blueValuesFrequencies[i]);
+//            Log.d("BEHE " + i, " " + templateCumulative[i] + " " + redValuesFrequencies[i] + " " + greenValuesFrequencies[i] + " " + blueValuesFrequencies[i]);
         }
 
         Integer[] Tred = new Integer[256];
@@ -252,7 +149,6 @@ public class HistogramSpecificationEqualizedTask extends AsyncTask<Bitmap, Void,
                     break;
                 }
             }
-
         }
 
         HashMap<String, Integer[]> result = new HashMap<>();
@@ -266,13 +162,10 @@ public class HistogramSpecificationEqualizedTask extends AsyncTask<Bitmap, Void,
 
     /**
      * Display image histogram.
+     *
      * @param result referenced histogram.
      */
     protected void onPostExecute(HashMap<String, Integer[]> result) {
-        if (dialog.isShowing()) {
-            dialog.dismiss();
-        }
-
         Integer[] template = result.get("templateForView");
 
         BarGraphSeries series = new BarGraphSeries<>(generateData(template));
@@ -283,6 +176,9 @@ public class HistogramSpecificationEqualizedTask extends AsyncTask<Bitmap, Void,
         referencedHistogramView.getViewport().setXAxisBoundsManual(true);
         referencedHistogramView.getViewport().setMinX(0);
         referencedHistogramView.getViewport().setMaxX(255);
+        referencedHistogramView.getViewport().setYAxisBoundsManual(true);
+        referencedHistogramView.getViewport().setMinY(0);
+        referencedHistogramView.getViewport().setMaxY(100);
 
         // Enable scaling and scrolling
         referencedHistogramView.getViewport().setScalable(true);
@@ -310,17 +206,21 @@ public class HistogramSpecificationEqualizedTask extends AsyncTask<Bitmap, Void,
                 int green = (pixelColor & 0x0000FF00) >> 8;
                 int blue = (pixelColor & 0x000000FF);
 
-                int newPixelColor = (0xFF<<24) | (Tred[red]<<16) | (Tgreen[green]<<8) | Tblue[blue];
+                int newPixelColor = (0xFF << 24) | (Tred[red] << 16) | (Tgreen[green] << 8) | Tblue[blue];
                 resultImage.setPixel(x, y, newPixelColor);
             }
         });
 
         resultImageView.setImageBitmap(resultImage);
+
+        if (dialog.isShowing()) {
+            dialog.dismiss();
+        }
     }
 
     private DataPoint[] generateData(Integer[] colorValuesFrequencies) {
         DataPoint[] values = new DataPoint[colorValuesFrequencies.length];
-        for (int i=0; i < values.length; i++) {
+        for (int i = 0; i < values.length; i++) {
             DataPoint v = new DataPoint(i, colorValuesFrequencies[i]);
             values[i] = v;
         }
