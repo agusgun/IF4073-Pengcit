@@ -1,6 +1,7 @@
 package com.pengcit.jorfelag.pengolahancitra.ocr;
 
 import android.graphics.Bitmap;
+import android.util.Log;
 
 import static com.pengcit.jorfelag.pengolahancitra.util.MonochromeBitmap.BLACK;
 import static com.pengcit.jorfelag.pengolahancitra.util.MonochromeBitmap.WHITE;
@@ -52,7 +53,8 @@ public class ChainCode {
                     try {
                         next_pixel_color = image.getPixel(next_x, next_y) & 0x000000FF;
                         if (next_pixel_color == BLACK && IsBorder(image, next_x, next_y)) {
-                            stringBuilder.append(i);
+                            dir = next_dir;
+                            stringBuilder.append(dir);
                             prev_x = x;
                             prev_y = y;
                             x = next_x;
@@ -68,9 +70,6 @@ public class ChainCode {
                     i++;
                 }
             } while (!found && i < 8);
-            if (found) {
-                dir = next_dir;
-            }
         } while (i < 8 && (x != start_x || y != start_y));
 
         code = stringBuilder.toString();
