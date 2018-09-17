@@ -22,6 +22,7 @@ import com.leinardi.android.speeddial.SpeedDialView;
 import com.pengcit.jorfelag.pengolahancitra.contrast.enhancement.ContrastEnhancementActivity;
 import com.pengcit.jorfelag.pengolahancitra.histogram.CreateImageHistogramTask;
 import com.pengcit.jorfelag.pengolahancitra.histogram.specification.HistogramSpecificationActivity;
+import com.pengcit.jorfelag.pengolahancitra.ocr.OCRActivity;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -87,6 +88,9 @@ public class MainActivity extends AppCompatActivity {
                         return false;
                     case R.id.action_histogram_spesification:
                         launchHistogramSpesification();
+                        return false;
+                    case R.id.action_ocr:
+                        launchOCR();
                         return false;
                     default:
                         return false;
@@ -176,6 +180,16 @@ public class MainActivity extends AppCompatActivity {
     public void launchHistogramSpesification() {
         if (imageBitmap != null) {
             Intent intent = new Intent(this, HistogramSpecificationActivity.class);
+            intent.putExtra("BitmapImageURI", imageBitmapURI.toString());
+            startActivity(intent);
+        } else {
+            Toast.makeText(getApplicationContext(), R.string.ask_to_select_or_capture_an_image, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void launchOCR() {
+        if (imageBitmap != null) {
+            Intent intent = new Intent(this, OCRActivity.class);
             intent.putExtra("BitmapImageURI", imageBitmapURI.toString());
             startActivity(intent);
         } else {

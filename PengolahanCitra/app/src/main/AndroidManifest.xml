@@ -54,7 +54,8 @@
                 android:resource="@xml/provider_paths" />
         </provider>
 
-        <activity android:name=".histogram.specification.HistogramSpecificationActivity"></activity>
+        <activity android:name=".histogram.specification.HistogramSpecificationActivity" />
+        <activity android:name=".ocr.OCRActivity"></activity>
     </application>
 
 </manifest>

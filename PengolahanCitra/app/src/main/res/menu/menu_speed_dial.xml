@@ -39,4 +39,12 @@
         android:title="@string/histogram_specification"
         app:showAsAction="always"
         />
+
+    <item
+        android:id="@+id/action_ocr"
+        android:icon="@drawable/ic_closed_caption"
+        android:orderInCategory="100"
+        android:title="@string/ocr_text"
+        app:showAsAction="always"
+        />
 </menu>

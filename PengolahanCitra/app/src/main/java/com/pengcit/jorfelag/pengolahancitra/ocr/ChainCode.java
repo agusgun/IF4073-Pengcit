@@ -20,15 +20,24 @@ public class ChainCode {
     private static final int[] X_TRANSLATOR = {1, 1, 0, -1, -1, -1, 0, 1};
     private static final int[] Y_TRANSLATOR = {0, 1, 1, 1, 0, -1, -1, -1};
 
+    //First Pixel
+    int begin[];
+
     /**
      * Create the chain code for the image based on the starting position.
      * @param image The image in monochrome color (black and white).
-     * @param x The starting row position.
-     * @param y The starting column position.
      * @param label The label for the created chain code.
      */
-    public ChainCode(Bitmap image, int x, int y, String label) {
+    public ChainCode(Bitmap image, String label) {
         this.label = label;
+
+        begin = getFirstPixel(image);
+
+        Log.d("getFirstPixel", Integer.toString(begin[0]));
+        Log.d("getFirstPixel", Integer.toString(begin[1]));
+
+        int x = begin[0];
+        int y = begin[1];
 
         int start_x = x;
         int start_y = y;
@@ -55,6 +64,7 @@ public class ChainCode {
                         if (next_pixel_color == BLACK && IsBorder(image, next_x, next_y)) {
                             dir = next_dir;
                             stringBuilder.append(dir);
+                            Log.d("HEHEHE", "HEHEHE");
                             prev_x = x;
                             prev_y = y;
                             x = next_x;
@@ -73,6 +83,7 @@ public class ChainCode {
         } while (i < 8 && (x != start_x || y != start_y));
 
         code = stringBuilder.toString();
+        Log.d("ChainCode", code);
     }
 
     /**
@@ -109,5 +120,41 @@ public class ChainCode {
 
     public String getCode() {
         return code;
+    }
+
+    private int[] getFirstPixel(Bitmap imageBitmap) {
+        final Bitmap processedBitmap = imageBitmap.copy(Bitmap.Config.ARGB_8888, true);
+        final int width = processedBitmap.getWidth();
+        final int height = processedBitmap.getHeight();
+
+        //x,y
+        int result[] = new int[2];
+
+        //Don't Parallalize
+        int i = 0;
+        int j = 0;
+        boolean flag = false;
+        while (i < height && !flag) {
+            j = 0;
+            while (j < width && !flag) {
+                int pixelColor = processedBitmap.getPixel(j, i);
+
+                int red = (pixelColor & 0x00FF0000) >> 16;
+                int green = (pixelColor & 0x0000FF00) >> 8;
+                int blue = (pixelColor & 0x000000FF);
+                int gray = (red + green + blue) / 3;
+
+                // <= 128 then black
+                if (gray <= 128) {
+                    Log.d("x,y", Integer.toString(j) + " " + Integer.toString(i));
+                    result[0] = j;
+                    result[1] = i;
+                    flag = true;
+                }
+                j++;
+            }
+            i++;
+        }
+        return result;
     }
 }
