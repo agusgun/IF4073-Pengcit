@@ -37,14 +37,21 @@
         android:icon="@drawable/ic_histogram"
         android:orderInCategory="100"
         android:title="@string/histogram_specification"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_train_ocr"
+        android:icon="@drawable/ic_train_ocr"
+        android:orderInCategory="100"
+        android:title="@string/action_train_ocr"
         app:showAsAction="always"
         />
 
     <item
         android:id="@+id/action_ocr"
-        android:icon="@drawable/ic_closed_caption"
+        android:icon="@drawable/ic_ocr"
         android:orderInCategory="100"
-        android:title="@string/ocr_text"
+        android:title="@string/action_ocr"
         app:showAsAction="always"
         />
+
 </menu>

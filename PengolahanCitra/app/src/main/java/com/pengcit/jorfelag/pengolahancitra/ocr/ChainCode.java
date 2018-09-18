@@ -10,6 +10,7 @@ public class ChainCode {
 
     private String label;
     private String code;
+    private double[] histogram;
 
     /**
      * Directions:
@@ -30,6 +31,7 @@ public class ChainCode {
      */
     public ChainCode(Bitmap image, int x, int y, String label) {
         this.label = label;
+        histogram = new double[8];
 
         int start_x = x;
         int start_y = y;
@@ -40,7 +42,7 @@ public class ChainCode {
 
         StringBuilder stringBuilder = new StringBuilder();
         do {
-            i = 0;
+           i = 0;
             int next_x;
             int next_y;
             int next_pixel_color;
@@ -56,7 +58,7 @@ public class ChainCode {
                         if (next_pixel_color == BLACK && IsBorder(image, next_x, next_y)) {
                             dir = next_dir;
                             stringBuilder.append(dir);
-                            Log.d("HEHEHE", "HEHEHE");
+                            histogram[dir] += 1;
                             prev_x = x;
                             prev_y = y;
                             x = next_x;
@@ -75,7 +77,10 @@ public class ChainCode {
         } while (i < 8 && (x != start_x || y != start_y));
 
         code = stringBuilder.toString();
-        Log.d("ChainCode", code);
+
+       for (i = 0; i < 8; i++) {
+            histogram[i] /= code.length();
+        }
     }
 
     /**
@@ -112,5 +117,23 @@ public class ChainCode {
 
     public String getCode() {
         return code;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
+    /**
+     * Calculate dissimilarity of c1 to c2.
+     * @param c1 The chain code to compare.
+     * @param c2 The chain code to be compared.
+     * @return Dissimilarity value.
+     */
+    public static double calculateDissimilarity(ChainCode c1, ChainCode c2) {
+        double dissimilarity = 0;
+        for (int i = 0; i < 8; i++) {
+            dissimilarity += (Math.abs(c2.histogram[i] - c1.histogram[i]));
+        }
+        return dissimilarity;
     }
 }

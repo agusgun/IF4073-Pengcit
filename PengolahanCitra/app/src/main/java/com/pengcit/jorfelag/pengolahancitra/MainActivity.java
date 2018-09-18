@@ -1,6 +1,7 @@
 package com.pengcit.jorfelag.pengolahancitra;
 
 import android.Manifest;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -8,13 +9,21 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.speech.tts.TextToSpeech;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.leinardi.android.speeddial.SpeedDialActionItem;
@@ -22,21 +31,30 @@ import com.leinardi.android.speeddial.SpeedDialView;
 import com.pengcit.jorfelag.pengolahancitra.contrast.enhancement.ContrastEnhancementActivity;
 import com.pengcit.jorfelag.pengolahancitra.histogram.CreateImageHistogramTask;
 import com.pengcit.jorfelag.pengolahancitra.histogram.specification.HistogramSpecificationActivity;
-import com.pengcit.jorfelag.pengolahancitra.ocr.OCRActivity;
+import com.pengcit.jorfelag.pengolahancitra.ocr.ChainCode;
+import com.pengcit.jorfelag.pengolahancitra.ocr.OcrTask;
+import com.pengcit.jorfelag.pengolahancitra.ocr.TrainOcrTask;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
     private ImageView imageView;
-    String currentImagePath;
-    Bitmap imageBitmap;
-    Uri imageBitmapURI;
+    private TextView textView;
+    private String currentImagePath;
+    private Bitmap imageBitmap;
+    private Uri imageBitmapURI;
+
+    private TextToSpeech textToSpeech;
+    private List<ChainCode> chainCodes;
 
     /**
      * Tag for logging.
@@ -67,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         imageView = (ImageView) findViewById(R.id.imageView);
+        textView = (TextView) findViewById(R.id.textView);
 
         SpeedDialView speedDialView = findViewById(R.id.speedDial);
         speedDialView.inflate(R.menu.menu_speed_dial);
@@ -89,6 +108,9 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.action_histogram_spesification:
                         launchHistogramSpesification();
                         return false;
+                    case R.id.action_train_ocr:
+                        trainOcr();
+                        return false;
                     case R.id.action_ocr:
                         launchOCR();
                         return false;
@@ -97,6 +119,34 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        textToSpeech = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status != TextToSpeech.ERROR) {
+                    textToSpeech.setLanguage(new Locale("id","ID"));
+                }
+            }
+        });
+
+        textView.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                textToSpeech.speak(editable.toString(), TextToSpeech.QUEUE_FLUSH, null);
+            }
+        });
+
+        chainCodes = new ArrayList<>();
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) !=
                 PackageManager.PERMISSION_GRANTED) {
@@ -189,9 +239,46 @@ public class MainActivity extends AppCompatActivity {
 
     public void launchOCR() {
         if (imageBitmap != null) {
-            Intent intent = new Intent(this, OCRActivity.class);
-            intent.putExtra("BitmapImageURI", imageBitmapURI.toString());
-            startActivity(intent);
+            new OcrTask(MainActivity.this, chainCodes, textView).execute(imageBitmap);
+        } else {
+            Toast.makeText(getApplicationContext(), R.string.ask_to_select_or_capture_an_image, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void trainOcr() {
+        if (imageBitmap != null) {
+            // get ocr_label_prompt.xml view
+            LayoutInflater li = LayoutInflater.from(this);
+            View promptsView = li.inflate(R.layout.ocr_label_prompt, null);
+
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+
+            // set ocr_label_prompt.xml to alertdialog builder
+            alertDialogBuilder.setView(promptsView);
+
+            final EditText userInput = (EditText) promptsView
+                    .findViewById(R.id.editText);
+
+            alertDialogBuilder
+                    .setCancelable(false)
+                    .setPositiveButton("OK",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog,int id) {
+                                    new TrainOcrTask(MainActivity.this, chainCodes, userInput.getText().toString()).execute(imageBitmap);
+                                }
+                            })
+                    .setNegativeButton("Cancel",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog,int id) {
+                                    dialog.cancel();
+                                }
+                            });
+
+            // create alert dialog
+            AlertDialog alertDialog = alertDialogBuilder.create();
+
+            // show it
+            alertDialog.show();
         } else {
             Toast.makeText(getApplicationContext(), R.string.ask_to_select_or_capture_an_image, Toast.LENGTH_SHORT).show();
         }
@@ -200,6 +287,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
+            textView.setText("");
             imageBitmapURI = null;
             if (requestCode == IMAGE_CAPTURE) {
                 Log.e(TAG, currentImagePath);
