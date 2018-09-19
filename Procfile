@@ -1,1 +1,1 @@
-gunicorn --pythonpath WebPengolahanCitra app:app
+web: gunicorn --pythonpath WebPengolahanCitra app:app
