@@ -53,9 +53,18 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
         </provider>
+        <activity
+            android:name=".histogram.specification.HistogramSpecificationActivity"
+            android:parentActivityName=".MainActivity"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.pengcit.jorfelag.pengolahancitra.MainActivity" />
+        </activity>
 
-        <activity android:name=".histogram.specification.HistogramSpecificationActivity" />
+
         <activity android:name=".ocr.OCRActivity"></activity>
+
     </application>
 
 </manifest>
