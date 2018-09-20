@@ -29,15 +29,15 @@ def image_thinning():
       filename = secure_filename(file.filename)
 
       file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-      file.save(file_path)
+      file.save('WebPengolahanCitra/' + file_path)
 
       image_thinner = ImageThinner()
-      result = image_thinner.thin_image(convert_image2bw(array(Image.open(file_path).convert('L'))))
+      result = image_thinner.thin_image(convert_image2bw(array(Image.open('WebPengolahanCitra/' + file_path).convert('L'))))
 
       result = Image.fromarray(result)
 
       result_filepath = 'uploads/' + 'thinning_result.png'
-      result.save(result_filepath)
+      result.save('WebPengolahanCitra/' + result_filepath)
 
       return render_template('template.html', imageresult='../' + result_filepath, imagesource='../uploads/' + filename)
 
@@ -61,14 +61,14 @@ def image_thinning_base64():
       file_path = 'uploads/' + filename
 
       image_thinner = ImageThinner()
-      result = image_thinner.thin_image(convert_image2bw(array(Image.open(file_path).convert('L'))))
+      result = image_thinner.thin_image(convert_image2bw(array(Image.open('WebPengolahanCitra/' + file_path).convert('L'))))
 
       result = Image.fromarray(result)
 
       result_filepath = 'uploads/' + 'thinning_result.png'
-      result.save(result_filepath)
+      result.save('WebPengolahanCitra/' + result_filepath)
 
-      image = open(result_filepath, 'rb').read()
+      image = open('WebPengolahanCitra/' + result_filepath, 'rb').read()
       image_64encode = base64.b64encode(image)
 
       return jsonify({'result': str(image_64encode)})
@@ -82,7 +82,7 @@ def predict_digit():
       filename = secure_filename(file.filename)
 
       file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-      file.save(file_path)
+      file.save('WebPengolahanCitra/' + file_path)
 
       return render_template('template.html', imageresult='', imagesource='../uploads/' + filename)
 
@@ -106,7 +106,7 @@ def predict_digit_base64():
       return jsonify({'success': 'upload success'})
 
 def convert_base64_image(bs64_string, filename):
-  with open('uploads/' + filename, 'wb') as f:
+  with open('WebPengolahanCitra/' + 'uploads/' + filename, 'wb') as f:
     f.write(base64.decodebytes(bs64_string.encode()))
 
 from flask import send_from_directory
