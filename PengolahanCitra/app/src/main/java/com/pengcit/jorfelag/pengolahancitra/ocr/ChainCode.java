@@ -22,6 +22,9 @@ public class ChainCode {
     private static final int[] Y_TRANSLATOR = {0, 1, 1, 1, 0, -1, -1, -1};
 
 
+    public ChainCode() {
+    }
+
     /**
      * Create the chain code for the image based on the starting position.
      * @param image The image in monochrome color (black and white).
@@ -37,12 +40,14 @@ public class ChainCode {
         int start_y = y;
         int prev_x = -1;
         int prev_y = -1;
+        int prev2_x = -1;
+        int prev2_y = -1;
         int i;
         int dir = 0;
 
         StringBuilder stringBuilder = new StringBuilder();
         do {
-           i = 0;
+            i = 0;
             int next_x;
             int next_y;
             int next_pixel_color;
@@ -52,13 +57,15 @@ public class ChainCode {
                 next_dir = (dir + i) % 8;
                 next_x = x + X_TRANSLATOR[next_dir];
                 next_y = y + Y_TRANSLATOR[next_dir];
-                if (next_x != prev_x || next_y != prev_y) {
+                if ((next_x != prev2_x || next_y != prev2_y) &&(next_x != prev_x || next_y != prev_y)) {
                     try {
                         next_pixel_color = image.getPixel(next_x, next_y) & 0x000000FF;
                         if (next_pixel_color == BLACK && IsBorder(image, next_x, next_y)) {
                             dir = next_dir;
                             stringBuilder.append(dir);
                             histogram[dir] += 1;
+                            prev2_x = prev_x;
+                            prev2_y = prev_y;
                             prev_x = x;
                             prev_y = y;
                             x = next_x;

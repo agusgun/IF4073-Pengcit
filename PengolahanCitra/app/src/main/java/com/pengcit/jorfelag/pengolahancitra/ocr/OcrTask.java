@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.TextView;
 
 import com.pengcit.jorfelag.pengolahancitra.util.MonochromeBitmap;
@@ -44,6 +45,7 @@ public class OcrTask extends AsyncTask<Bitmap, Void, String> {
                     double temp;
                     for (ChainCode c : chainCodes) {
                         temp = ChainCode.calculateDissimilarity(chainCode, c);
+                        Log.i("A", "C " +  temp + " " + c.getCode());
                         if (temp < dissimilarity) {
                             dissimilarity = temp;
                             chainCode.setLabel(c.getLabel());

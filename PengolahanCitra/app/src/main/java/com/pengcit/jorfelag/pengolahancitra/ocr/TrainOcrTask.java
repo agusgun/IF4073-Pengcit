@@ -2,9 +2,12 @@ package com.pengcit.jorfelag.pengolahancitra.ocr;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 
+import com.google.gson.Gson;
 import com.pengcit.jorfelag.pengolahancitra.util.MonochromeBitmap;
 
 import java.util.List;
@@ -16,11 +19,13 @@ public class TrainOcrTask extends AsyncTask<Bitmap, Void, ChainCode> {
     private ProgressDialog dialog;
     private List<ChainCode> chainCodes;
     private String label;
+    private Editor editor;
 
-    public TrainOcrTask(Activity activity, List<ChainCode> chainCodes, String label) {
+    public TrainOcrTask(Activity activity, List<ChainCode> chainCodes, String label, Editor editor) {
         dialog = new ProgressDialog(activity);
         this.chainCodes = chainCodes;
         this.label = label;
+        this.editor = editor;
     }
 
     @Override
@@ -60,9 +65,14 @@ public class TrainOcrTask extends AsyncTask<Bitmap, Void, ChainCode> {
 
     protected void onPostExecute(ChainCode chainCode) {
         chainCodes.add(chainCode);
+        Gson gson = new Gson();
+        String json = gson.toJson(chainCodes);
+        editor.putString("ChainCodes", json);
+        editor.commit();
         if (dialog.isShowing()) {
             dialog.dismiss();
         }
+        editor = null;
         dialog = null;
         chainCodes = null;
     }

@@ -3,6 +3,7 @@ package com.pengcit.jorfelag.pengolahancitra;
 import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -26,6 +27,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.leinardi.android.speeddial.SpeedDialActionItem;
 import com.leinardi.android.speeddial.SpeedDialView;
 import com.pengcit.jorfelag.pengolahancitra.contrast.enhancement.ContrastEnhancementActivity;
@@ -45,6 +48,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import static android.content.SharedPreferences.*;
+
 public class MainActivity extends AppCompatActivity {
 
     private ImageView imageView;
@@ -53,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
     private Bitmap imageBitmap;
     private Uri imageBitmapURI;
 
+    private SharedPreferences prefs;
     private TextToSpeech textToSpeech;
     private List<ChainCode> chainCodes;
 
@@ -78,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
      */
     private static final int SELECT_IMAGE = 2;
 
+    private static final String PREFS_NAME = "ChainCode_Models";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,16 +150,25 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 textToSpeech.speak(editable.toString(), TextToSpeech.QUEUE_FLUSH, null);
+                Gson gson = new Gson();
+                String json = gson.toJson(chainCodes);
+                Log.i("B", json);
             }
         });
-
-        chainCodes = new ArrayList<>();
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) !=
                 PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     REQUEST_CAMERA);
+        }
+
+        prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = prefs.getString("ChainCodes", "");
+        chainCodes = gson.fromJson(json, new TypeToken<List<ChainCode>>(){}.getType());
+        if (chainCodes == null) {
+            chainCodes = new ArrayList<>();
         }
     }
 
@@ -264,7 +280,8 @@ public class MainActivity extends AppCompatActivity {
                     .setPositiveButton("OK",
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog,int id) {
-                                    new TrainOcrTask(MainActivity.this, chainCodes, userInput.getText().toString()).execute(imageBitmap);
+                                    Editor prefsEditor = prefs.edit();
+                                    new TrainOcrTask(MainActivity.this, chainCodes, userInput.getText().toString(), prefsEditor).execute(imageBitmap);
                                 }
                             })
                     .setNegativeButton("Cancel",
