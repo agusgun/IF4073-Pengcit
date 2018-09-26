@@ -54,4 +54,12 @@
         app:showAsAction="always"
         />
 
+    <item
+        android:id="@+id/action_skeletonize_image"
+        android:icon="@drawable/ic_skeletonize_image"
+        android:orderInCategory="100"
+        android:title="@string/action_skeletonize_image"
+        app:showAsAction="always"
+        />
+
 </menu>

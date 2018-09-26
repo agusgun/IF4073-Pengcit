@@ -34,6 +34,7 @@ import com.leinardi.android.speeddial.SpeedDialView;
 import com.pengcit.jorfelag.pengolahancitra.contrast.enhancement.ContrastEnhancementActivity;
 import com.pengcit.jorfelag.pengolahancitra.histogram.CreateImageHistogramTask;
 import com.pengcit.jorfelag.pengolahancitra.histogram.specification.HistogramSpecificationActivity;
+import com.pengcit.jorfelag.pengolahancitra.image_skeletonization.ImageSkeletonizationActivity;
 import com.pengcit.jorfelag.pengolahancitra.ocr.ChainCode;
 import com.pengcit.jorfelag.pengolahancitra.ocr.OcrTask;
 import com.pengcit.jorfelag.pengolahancitra.ocr.TrainOcrTask;
@@ -120,6 +121,9 @@ public class MainActivity extends AppCompatActivity {
                         return false;
                     case R.id.action_ocr:
                         launchOCR();
+                        return false;
+                    case R.id.action_skeletonize_image:
+                        launchImageSkeletonization();
                         return false;
                     default:
                         return false;
@@ -296,6 +300,16 @@ public class MainActivity extends AppCompatActivity {
 
             // show it
             alertDialog.show();
+        } else {
+            Toast.makeText(getApplicationContext(), R.string.ask_to_select_or_capture_an_image, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void launchImageSkeletonization() {
+        if (imageBitmap != null) {
+            Intent intent = new Intent(this, ImageSkeletonizationActivity.class);
+            intent.putExtra("BitmapImageURI", imageBitmapURI.toString());
+            startActivity(intent);
         } else {
             Toast.makeText(getApplicationContext(), R.string.ask_to_select_or_capture_an_image, Toast.LENGTH_SHORT).show();
         }
