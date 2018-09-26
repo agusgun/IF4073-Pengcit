@@ -22,7 +22,7 @@ public class ImageSkeletonizer {
 
     public ImageSkeletonizer(Bitmap bitmap) {
         this.bitmap = bitmap.copy(bitmap.getConfig(), true);
-        this.imageMatrix = convertToByteMatrix(bitmap);
+        this.imageMatrix = convertToGrayMatrix(bitmap);
     }
 
     public void process() {
@@ -65,6 +65,7 @@ public class ImageSkeletonizer {
 
             for (Point p: toClear) {
                 bitmap.setPixel(p.x, p.y, Color.WHITE);
+                imageMatrix[p.y][p.x] = 255;
             }
             toClear.clear();
         } while (firstStep.value || hasChanged.value);
@@ -129,7 +130,7 @@ public class ImageSkeletonizer {
         }
     }
 
-    public static int[][] convertToByteMatrix(final Bitmap bitmap) {
+    public static int[][] convertToGrayMatrix(final Bitmap bitmap) {
         final int width = bitmap.getWidth();
         final int height = bitmap.getHeight();
 
