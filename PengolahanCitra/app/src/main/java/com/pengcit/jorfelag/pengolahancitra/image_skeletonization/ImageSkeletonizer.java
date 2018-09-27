@@ -3,6 +3,7 @@ package com.pengcit.jorfelag.pengolahancitra.image_skeletonization;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.util.Log;
 import android.util.MutableBoolean;
 
 import com.pengcit.jorfelag.pengolahancitra.util.LoopBody;
@@ -56,8 +57,9 @@ public class ImageSkeletonizer {
 
                         if (!atLeastOneIsWhite(neighbors, firstStep.value))
                             continue;
-
-                        toClear.add(new Point(x, y));
+                        Point p = new Point();
+                        p.set(x, y);
+                        toClear.add(p);
                         hasChanged.value = true;
                     }
                 }

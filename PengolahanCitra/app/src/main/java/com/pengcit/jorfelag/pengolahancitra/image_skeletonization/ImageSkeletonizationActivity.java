@@ -26,8 +26,8 @@ public class ImageSkeletonizationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image_skeletonization);
 
-        originalImageView = findViewById(R.id.histogram_specification_original_image);
-        resultImageView = findViewById(R.id.histogram_specification_result_image);
+        originalImageView = findViewById(R.id.skeletonization_original_image);
+        resultImageView = findViewById(R.id.skeletonization_result_image);
 
         Intent intent = getIntent();
         imageBitmapOriginURI = Uri.parse(intent.getExtras().getString("BitmapImageURI"));
