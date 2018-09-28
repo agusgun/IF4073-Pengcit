@@ -9,6 +9,7 @@ import android.util.MutableBoolean;
 import com.pengcit.jorfelag.pengolahancitra.util.LoopBody;
 import com.pengcit.jorfelag.pengolahancitra.util.Parallel;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class ImageSkeletonizer {
@@ -36,41 +37,74 @@ public class ImageSkeletonizer {
         final ArrayList<Point> toClear = new ArrayList<>();
 
         do {
-            hasChanged.value = false;
             firstStep.value = !firstStep.value;
+            if (firstStep.value) {
+                hasChanged.value = false;
+            }
 
-            Parallel.For(0, height, new LoopBody<Integer>() {
-                @Override
-                public void run(Integer y) {
-                    for (int x = 0; x < width; ++x) {
-                        if (imageMatrix[y][x] > THRESHOLD)
-                            continue;
+            for (int y = 0; y < height; ++y) {
+                for (int x = 0; x < width; ++x) {
+                    if (imageMatrix[y][x] > THRESHOLD)
+                        continue;
 
-                        int[] neighbors = getNeighbors(x, y);
-                        int blackNeighbors = countBlackNeighbors(neighbors);
+                    int[] neighbors = getNeighbors(x, y);
+                    int blackNeighbors = countBlackNeighbors(neighbors);
 
-                        if (blackNeighbors < 2 || blackNeighbors > 6)
-                            continue;
+                    if (blackNeighbors < 2 || blackNeighbors > 6)
+                        continue;
 
-                        if (getTransitions(neighbors) != 1)
-                            continue;
+                    if (getTransitions(neighbors) != 1)
+                        continue;
 
-                        if (!atLeastOneIsWhite(neighbors, firstStep.value))
-                            continue;
-                        Point p = new Point();
-                        p.set(x, y);
-                        toClear.add(p);
-                        hasChanged.value = true;
-                    }
+                    if (!atLeastOneIsWhite(neighbors, firstStep.value))
+                        continue;
+                    Point p = new Point();
+                    p.set(x, y);
+                    toClear.add(p);
+                    hasChanged.value = true;
                 }
-            });
+            }
+
+//            Parallel.For(0, height, new LoopBody<Integer>() {
+//                @Override
+//                public void run(Integer y) {
+//                    for (int x = 0; x < width; ++x) {
+//                        if (imageMatrix[y][x] > THRESHOLD)
+//                            continue;
+//
+//                        int[] neighbors = getNeighbors(x, y);
+//                        int blackNeighbors = countBlackNeighbors(neighbors);
+//
+//                        if (blackNeighbors < 2 || blackNeighbors > 6)
+//                            continue;
+//
+//                        if (getTransitions(neighbors) != 1)
+//                            continue;
+//
+//                        if (!atLeastOneIsWhite(neighbors, firstStep.value))
+//                            continue;
+//                        Point p = new Point();
+//                        p.set(x, y);
+//                        toClear.add(p);
+//                        hasChanged.value = true;
+//                    }
+//                }
+//            });
 
             for (Point p: toClear) {
-                bitmap.setPixel(p.x, p.y, Color.WHITE);
-                imageMatrix[p.y][p.x] = 255;
+                if (p != null) {
+//                    bitmap.setPixel(p.x, p.y, Color.WHITE);
+                    imageMatrix[p.y][p.x] = 255;
+                }
             }
             toClear.clear();
         } while (firstStep.value || hasChanged.value);
+
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                bitmap.setPixel(j, i, (imageMatrix[i][j] == 255) ? Color.WHITE : Color.BLACK);
+            }
+        }
     }
 
     public Bitmap getBitmap() {
@@ -87,7 +121,10 @@ public class ImageSkeletonizer {
     private int[] getNeighbors(int x, int y) {
         int[] neighbors = new int[8];
         for (int i = 0; i < 8; ++i) {
-            neighbors[i] = imageMatrix[y + Y_TRANSLATION[i]][x + X_TRANSLATION[i]];
+            try {
+                neighbors[i] = imageMatrix[y + Y_TRANSLATION[i]][x + X_TRANSLATION[i]];
+            } catch (ArrayIndexOutOfBoundsException ignored) {
+            }
         }
         return neighbors;
     }
@@ -148,7 +185,13 @@ public class ImageSkeletonizer {
 
                 for (int j = 0; j < width; ++j) {
                     int pixel = processedPixels[j];
-                    imageMatrix[i][j] = getGrayLevel(pixel);
+                    if(getGrayLevel(pixel) > THRESHOLD) {
+//                        bitmap.setPixel(j, i, Color.WHITE);
+                        imageMatrix[i][j] = 255;
+                    } else {
+//                        bitmap.setPixel(j, i, Color.BLACK);
+                        imageMatrix[i][j] = 0;
+                    }
                 }
             }
         });
@@ -161,6 +204,6 @@ public class ImageSkeletonizer {
         int green = (pixel & 0x0000FF00) >> 8;
         int blue = (pixel & 0x000000FF);
 
-        return (red + green + blue) / 3;
+        return (int) (0.2989 * red + 0.5870 * green + 0.1140 * blue);
     }
 }
