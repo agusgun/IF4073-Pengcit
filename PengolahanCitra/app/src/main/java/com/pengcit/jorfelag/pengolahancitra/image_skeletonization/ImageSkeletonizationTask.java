@@ -28,7 +28,6 @@ public class ImageSkeletonizationTask extends AsyncTask<Bitmap, Void, Bitmap> {
         this.imageView = imageView;
 
         this.seekBarValue = seekBarValue;
-        Log.d("HEHEHEHE", Integer.toString(seekBarValue));
     }
 
     @Override
