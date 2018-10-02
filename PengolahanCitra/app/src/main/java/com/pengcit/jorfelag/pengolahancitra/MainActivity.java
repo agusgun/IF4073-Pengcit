@@ -85,6 +85,11 @@ public class MainActivity extends AppCompatActivity {
      */
     private static final int SELECT_IMAGE = 2;
 
+    /**
+     * Id to identify a skeletonization request
+     */
+    private static final int SKELETONIZATION_IMAGE = 3;
+
     private static final String PREFS_NAME = "ChainCode_Models";
 
     @Override
@@ -124,6 +129,9 @@ public class MainActivity extends AppCompatActivity {
                         return false;
                     case R.id.action_skeletonize_image:
                         launchImageSkeletonization();
+                        return false;
+                    case R.id.action_ocr_extended:
+                        launchOcrExtended();
                         return false;
                     default:
                         return false;
@@ -309,6 +317,16 @@ public class MainActivity extends AppCompatActivity {
         if (imageBitmap != null) {
             Intent intent = new Intent(this, ImageSkeletonizationActivity.class);
             intent.putExtra("BitmapImageURI", imageBitmapURI.toString());
+            startActivityForResult(intent, SKELETONIZATION_IMAGE);
+        } else {
+            Toast.makeText(getApplicationContext(), R.string.ask_to_select_or_capture_an_image, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void launchOcrExtended() {
+        if (imageBitmap != null) {
+            Intent intent = new Intent(this, OcrExtendedActivity.class);
+            intent.putExtra("BitmapImageURI", imageBitmapURI.toString());
             startActivity(intent);
         } else {
             Toast.makeText(getApplicationContext(), R.string.ask_to_select_or_capture_an_image, Toast.LENGTH_SHORT).show();
@@ -330,6 +348,8 @@ public class MainActivity extends AppCompatActivity {
             } else if (requestCode == SELECT_IMAGE) {
                 imageBitmapURI = data.getData();
                 imageView.setRotation(0);
+            } else if (requestCode == SKELETONIZATION_IMAGE) {
+
             }
             if (imageBitmapURI != null) {
                 imageView.setImageURI(imageBitmapURI);

@@ -36,6 +36,7 @@
     <string name="ocr_label_prompt_edit_text_hint">Label</string>
     <string name="action_skeletonize_image">Skeletonize Image</string>
     <string name="skeletonize_image">Skeletonize Image</string>
+    <string name="ocr_extended">OCR Extended</string>
 
     <string-array name="contrast_enhancement_method">
         <item>Linear Stretching</item>

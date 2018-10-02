@@ -4,11 +4,16 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.os.Environment;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.pengcit.jorfelag.pengolahancitra.ocr.ChainCode;
+import com.pengcit.jorfelag.pengolahancitra.util.ImageSaver;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.List;
 
 public class ImageSkeletonizationTask extends AsyncTask<Bitmap, Void, Bitmap> {
@@ -38,6 +43,10 @@ public class ImageSkeletonizationTask extends AsyncTask<Bitmap, Void, Bitmap> {
     @Override
     protected void onPostExecute(Bitmap bitmap) {
         imageView.setImageBitmap(bitmap);
+
+        ImageSaver imageSaver = new ImageSaver();
+        imageSaver.saveImage(bitmap, "skeletonization");
+
         if (dialog.isShowing()) {
             dialog.dismiss();
         }

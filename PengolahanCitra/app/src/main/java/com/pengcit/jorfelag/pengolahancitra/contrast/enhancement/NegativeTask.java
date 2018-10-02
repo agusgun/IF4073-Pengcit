@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.widget.ImageView;
 
+import com.pengcit.jorfelag.pengolahancitra.util.ImageSaver;
 import com.pengcit.jorfelag.pengolahancitra.util.LoopBody;
 import com.pengcit.jorfelag.pengolahancitra.util.Parallel;
 
@@ -74,6 +75,10 @@ public class NegativeTask extends AsyncTask<Bitmap, Void, Bitmap> {
         if (dialog.isShowing()) {
             dialog.dismiss();
         }
+
+        ImageSaver imageSaver = new ImageSaver();
+        imageSaver.saveImage(result, "negative");
+
         resultImageView.setImageBitmap(result);
     }
 }

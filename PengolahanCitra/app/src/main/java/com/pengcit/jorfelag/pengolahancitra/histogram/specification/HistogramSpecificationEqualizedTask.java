@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.BarGraphSeries;
 import com.jjoe64.graphview.series.DataPoint;
+import com.pengcit.jorfelag.pengolahancitra.util.ImageSaver;
 import com.pengcit.jorfelag.pengolahancitra.util.LoopBody;
 import com.pengcit.jorfelag.pengolahancitra.util.Parallel;
 
@@ -213,6 +214,9 @@ public class HistogramSpecificationEqualizedTask extends AsyncTask<Bitmap, Void,
                 processedBitmap.setPixels(processedPixels, 0, width, 0, i, width, 1);
             }
         });
+
+        ImageSaver imageSaver = new ImageSaver();
+        imageSaver.saveImage(processedBitmap, "histogram_spesification");
 
         resultImageView.setImageBitmap(processedBitmap);
 

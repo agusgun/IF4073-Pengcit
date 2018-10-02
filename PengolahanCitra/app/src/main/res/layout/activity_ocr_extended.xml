@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".OcrExtendedActivity">
+
+    <ImageView
+        android:id="@+id/ocr_extended_original_image_view"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        />
+
+    <Button
+        android:id="@+id/ocr_extended_generate_digit_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/ocr_extended_original_image_view"
+        android:layout_centerHorizontal="true"
+        android:onClick="generateDigit"
+        android:text="@string/generate_digit" />
+
+
+    <TextView
+        android:id="@+id/ocr_extended_digit_title_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/ocr_extended_digit_text_view"
+        android:layout_centerHorizontal="true"
+        android:text="@string/result" />
+
+    <TextView
+        android:id="@+id/ocr_extended_digit_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="139dp" />
+
+</RelativeLayout>

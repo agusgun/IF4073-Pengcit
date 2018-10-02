@@ -71,6 +71,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.pengcit.jorfelag.pengolahancitra.MainActivity" />
         </activity>
+        <activity android:name=".OcrExtendedActivity"></activity>
     </application>
 
 </manifest>

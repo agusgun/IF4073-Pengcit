@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.util.MutableInt;
 import android.widget.ImageView;
 
+import com.pengcit.jorfelag.pengolahancitra.util.ImageSaver;
 import com.pengcit.jorfelag.pengolahancitra.util.LoopBody;
 import com.pengcit.jorfelag.pengolahancitra.util.Parallel;
 
@@ -118,6 +119,10 @@ public class LinearStretchingTask extends AsyncTask<Bitmap, Void, Bitmap> {
         if (dialog.isShowing()) {
             dialog.dismiss();
         }
+
+        ImageSaver imageSaver = new ImageSaver();
+        imageSaver.saveImage(result, "linear_stretching");
+
         resultImageView.setImageBitmap(result);
     }
 }

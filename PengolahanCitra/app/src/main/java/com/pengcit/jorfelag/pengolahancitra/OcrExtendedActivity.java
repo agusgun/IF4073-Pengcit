@@ -1,4 +1,4 @@
-package com.pengcit.jorfelag.pengolahancitra.ocr;
+package com.pengcit.jorfelag.pengolahancitra;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -10,14 +10,13 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.pengcit.jorfelag.pengolahancitra.R;
-import com.pengcit.jorfelag.pengolahancitra.histogram.specification.HistogramSpecificationActivity;
-import com.pengcit.jorfelag.pengolahancitra.histogram.specification.HistogramSpecificationEqualizedTask;
+import com.pengcit.jorfelag.pengolahancitra.ocr.OCRActivity;
+import com.pengcit.jorfelag.pengolahancitra.ocr.OCRDigitTask;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
-public class OCRActivity extends AppCompatActivity {
+public class OcrExtendedActivity extends AppCompatActivity {
 
     Bitmap imageBitmapOrigin;
     Uri imageBitmapOriginURI;
@@ -27,10 +26,10 @@ public class OCRActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_ocr);
+        setContentView(R.layout.activity_ocr_extended);
 
-        originalImageView = (ImageView) findViewById(R.id.ocr_original_image_view);
-        digitTextView = (TextView) findViewById(R.id.ocr_digit_text_view);
+        originalImageView = (ImageView) findViewById(R.id.ocr_extended_original_image_view);
+        digitTextView = (TextView) findViewById(R.id.ocr_extended_digit_text_view);
 
         Intent intent = getIntent();
         imageBitmapOriginURI = Uri.parse(intent.getExtras().getString("BitmapImageURI"));
@@ -44,11 +43,7 @@ public class OCRActivity extends AppCompatActivity {
         originalImageView.setImageBitmap(imageBitmapOrigin);
     }
 
-
     public void generateDigit(View view) {
-        new OCRDigitTask(
-                OCRActivity.this,
-                digitTextView
-        ).execute(OCRActivity.this.imageBitmapOrigin);
+        
     }
 }
