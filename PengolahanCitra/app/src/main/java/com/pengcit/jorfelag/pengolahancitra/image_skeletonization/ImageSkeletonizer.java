@@ -20,6 +20,26 @@ public class ImageSkeletonizer {
     private final static int[] X_TRANSLATION = {0, 1, 1, 1, 0, -1, -1, -1};
     private final static int[] Y_TRANSLATION = {-1, -1, 0, 1, 1, 1, 0, -1};
 
+    // template for acute angle emphasis
+    private final static int[][][] ACUTE_ANGLE_TEMPLATE = {
+            {
+                {0, 0, 255, 0, 0}, {0, 0, 255, 0, 0}, {0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}, {-1, 0, 0, 0, -1}
+            },
+            {
+                {0, 255, 255, 0, 0}, {0, 0, 255, 0, 0}, {0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}, {-1, 0, 0, 0, -1}
+            },
+            {
+                {0, 0, 255, 255, 0}, {0, 0, 255, 0, 0}, {0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}, {-1, 0, 0, 0, -1}
+            },
+            {
+                {0, 255, 255, 0, 0}, {0, 255, 255, 0, 0}, {0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}, {-1, 0, 0, 0, -1}
+            },
+            {
+                {0, 0, 255, 255, 0}, {0, 0, 255, 255, 0}, {0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}, {-1, 0, 0, 0, -1}
+            }
+    };
+
+
     private Bitmap bitmap;
     private int[][] imageMatrix;
     private int threshold;
@@ -33,6 +53,10 @@ public class ImageSkeletonizer {
     }
 
     public void process() {
+        //Pre process
+        smoothing();
+        acuteAngleEmphasis();
+
         final MutableBoolean firstStep = new MutableBoolean(false);
         final MutableBoolean hasChanged = new MutableBoolean(false);
 
@@ -60,7 +84,8 @@ public class ImageSkeletonizer {
                 p = temp.remove();
                 int[] neighbors = getNeighbors(p.x, p.y);
                 int blackNeighbors = countBlackNeighbors(neighbors);
-                if (blackNeighbors >= 2 && blackNeighbors <= 6 && getTransitions(neighbors) == 1 && atLeastOneIsWhite(neighbors, firstStep.value)) {
+                int transitions = getTransitions(neighbors);
+                if (blackNeighbors >= 2 && blackNeighbors <= 6 && transitions == 1 && atLeastOneIsWhite(neighbors, firstStep.value)) {
                     toClear.add(p);
                     hasChanged.value = true;
                 } else {
@@ -98,6 +123,7 @@ public class ImageSkeletonizer {
             try {
                 neighbors[i] = imageMatrix[y + Y_TRANSLATION[i]][x + X_TRANSLATION[i]];
             } catch (ArrayIndexOutOfBoundsException ignored) {
+                neighbors[i] = 255;
             }
         }
         return neighbors;
@@ -180,5 +206,119 @@ public class ImageSkeletonizer {
         int blue = (pixel & 0x000000FF);
 
         return (int) (0.2989 * red + 0.5870 * green + 0.1140 * blue);
+    }
+
+    private void smoothing() {
+        Queue<Point> blackPixels = new LinkedList<>(this.blackPixels);
+        Point p;
+        while (!blackPixels.isEmpty()) {
+            p = blackPixels.remove();
+            int[] neighbors = getNeighbors(p.x, p.y);
+            int blackNeighbors = countBlackNeighbors(neighbors);
+            int transitions = getTransitions(neighbors);
+            if (blackNeighbors <= 2 && transitions < 2) {
+                imageMatrix[p.y][p.x] = 255;
+                bitmap.setPixel(p.x, p.y, Color.WHITE);
+            }
+        }
+    }
+
+    private void acuteAngleEmphasis() {
+        Queue<Point> toClear = new LinkedList<>();
+        for (int i = 0; i < bitmap.getHeight() - 5; i++) {
+            for (int j = 0; j < bitmap.getWidth() - 5; j++) {
+                for (int k = 0; k < 5; k++) {
+                    if (matchTemplate(j, i, k)) {
+                        toClear.add(new Point(j + 2, i + 2));
+                    }
+                }
+            }
+        }
+
+        boolean deleted = !toClear.isEmpty();
+        Point p;
+        while(!toClear.isEmpty()) {
+            p = toClear.remove();
+            imageMatrix[p.y][p.x] = 255;
+            bitmap.setPixel(p.x, p.y, Color.WHITE);
+        }
+
+        if (deleted) {
+            for (int i = 0; i < bitmap.getHeight() - 5; i++) {
+                for (int j = 0; j < bitmap.getWidth() - 5; j++) {
+                    for (int k = 0; k < 3; k++) {
+                        if (matchTemplate(j, i, k)) {
+                            toClear.add(new Point(j + 2, i + 2));
+                        }
+                    }
+                }
+            }
+        }
+
+        deleted = !toClear.isEmpty();
+        while(!toClear.isEmpty()) {
+            p = toClear.remove();
+            imageMatrix[p.y][p.x] = 255;
+            bitmap.setPixel(p.x, p.y, Color.WHITE);
+        }
+
+        if (deleted) {
+            for (int i = 0; i < bitmap.getHeight() - 5; i++) {
+                for (int j = 0; j < bitmap.getWidth() - 5; j++) {
+                    if (matchTemplate(j, i, 0)) {
+                        toClear.add(new Point(j + 2, i + 2));
+                    }
+                }
+            }
+        }
+
+        while(!toClear.isEmpty()) {
+            p = toClear.remove();
+            imageMatrix[p.y][p.x] = 255;
+            bitmap.setPixel(p.x, p.y, Color.WHITE);
+        }
+    }
+
+    private boolean matchTemplate(int start_x, int start_y, int template_id) {
+        int i = 0;
+        boolean matched1 = true;
+        while (i < 5 && matched1) {
+            int j = 0;
+            while (j < 5 && matched1) {
+                if (ACUTE_ANGLE_TEMPLATE[template_id][i][j] == -1) {
+                    j++;
+                    continue;
+                }
+                if (imageMatrix[start_y + i][start_x + j] != ACUTE_ANGLE_TEMPLATE[template_id][i][j]) {
+                    matched1 = false;
+                } else {
+                    j++;
+                }
+            }
+            if (matched1) {
+                i++;
+            }
+        }
+
+        i = 0;
+        boolean matched2 = true;
+        while (i < 5 && matched2) {
+            int j = 0;
+            while (j < 5 && matched2) {
+                if (ACUTE_ANGLE_TEMPLATE[template_id][4 - i][j] == -1) {
+                    j++;
+                    continue;
+                }
+                if (imageMatrix[start_y + i][start_x + j] != ACUTE_ANGLE_TEMPLATE[template_id][4 - i][j]) {
+                    matched2 = false;
+                } else {
+                    j++;
+                }
+            }
+            if (matched2) {
+                i++;
+            }
+        }
+        return matched1 || matched2;
     }
 }
