@@ -44,6 +44,6 @@ public class OcrExtendedActivity extends AppCompatActivity {
     }
 
     public void generateDigit(View view) {
-        
+
     }
 }

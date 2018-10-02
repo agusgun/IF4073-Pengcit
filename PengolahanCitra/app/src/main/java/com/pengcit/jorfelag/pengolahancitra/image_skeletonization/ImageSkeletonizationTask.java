@@ -8,6 +8,7 @@ import android.os.Environment;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.pengcit.jorfelag.pengolahancitra.ocr.ChainCode;
 import com.pengcit.jorfelag.pengolahancitra.util.ImageSaver;
@@ -20,10 +21,14 @@ public class ImageSkeletonizationTask extends AsyncTask<Bitmap, Void, Bitmap> {
 
     private ProgressDialog dialog;
     private ImageView imageView;
+    private int seekBarValue;
 
-    public ImageSkeletonizationTask(Activity activity, ImageView imageView) {
+    public ImageSkeletonizationTask(Activity activity, ImageView imageView, int seekBarValue) {
         dialog = new ProgressDialog(activity);
         this.imageView = imageView;
+
+        this.seekBarValue = seekBarValue;
+        Log.d("HEHEHEHE", Integer.toString(seekBarValue));
     }
 
     @Override
@@ -34,7 +39,7 @@ public class ImageSkeletonizationTask extends AsyncTask<Bitmap, Void, Bitmap> {
 
     @Override
     protected Bitmap doInBackground(Bitmap... args) {
-        ImageSkeletonizer imageSkeletonizer = new ImageSkeletonizer(args[0]);
+        ImageSkeletonizer imageSkeletonizer = new ImageSkeletonizer(args[0], seekBarValue);
         imageSkeletonizer.process();
 
         return imageSkeletonizer.getBitmap();

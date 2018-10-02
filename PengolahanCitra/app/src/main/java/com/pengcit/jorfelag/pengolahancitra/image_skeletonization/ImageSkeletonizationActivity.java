@@ -10,6 +10,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.SeekBar;
+import android.widget.Toast;
 
 import com.pengcit.jorfelag.pengolahancitra.R;
 
@@ -24,6 +26,9 @@ public class ImageSkeletonizationActivity extends AppCompatActivity {
 
     private Bitmap originalImageBitmap;
     private Uri imageBitmapOriginURI;
+
+    private SeekBar seekBar;
+    private int seekBarValue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,10 +49,29 @@ public class ImageSkeletonizationActivity extends AppCompatActivity {
 
         originalImageBitmap = BitmapFactory.decodeStream(imageStream);
         originalImageView.setImageBitmap(originalImageBitmap);
+
+        SeekBar seekBar = findViewById(R.id.skeletonization_seekbar);
+
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                seekBarValue = i;
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                Toast.makeText(getApplicationContext(), Integer.toString(seekBarValue), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     public void skeletonizeImage(View view) {
-        new ImageSkeletonizationTask(this, resultImageView).execute(originalImageBitmap);
+        new ImageSkeletonizationTask(this, resultImageView, seekBarValue).execute(originalImageBitmap);
     }
 
 }

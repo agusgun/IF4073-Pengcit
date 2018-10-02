@@ -37,6 +37,8 @@
     <string name="action_skeletonize_image">Skeletonize Image</string>
     <string name="skeletonize_image">Skeletonize Image</string>
     <string name="ocr_extended">OCR Extended</string>
+    <string name="_0">0</string>
+    <string name="_255">255</string>
 
     <string-array name="contrast_enhancement_method">
         <item>Linear Stretching</item>

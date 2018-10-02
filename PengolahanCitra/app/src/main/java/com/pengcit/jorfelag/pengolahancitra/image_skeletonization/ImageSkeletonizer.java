@@ -17,14 +17,16 @@ public class ImageSkeletonizer {
     private final static int[] X_TRANSLATION = {0, 1, 1, 1, 0, -1, -1, -1};
     private final static int[] Y_TRANSLATION = {-1, -1, 0, 1, 1, 1, 0, -1};
 
-    private final static int THRESHOLD = 127;
+    private static int THRESHOLD = 127;
 
     private Bitmap bitmap;
     private int[][] imageMatrix;
 
-    public ImageSkeletonizer(Bitmap bitmap) {
+    public ImageSkeletonizer(Bitmap bitmap, int threshold) {
         this.bitmap = bitmap.copy(bitmap.getConfig(), true);
         this.imageMatrix = convertToGrayMatrix(bitmap);
+        this.THRESHOLD = threshold;
+        Log.d("HEHEHEHE THRESHOLD", Integer.toString(this.THRESHOLD));
     }
 
     public void process() {
