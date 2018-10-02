@@ -104,6 +104,9 @@ public class ImageSkeletonizer {
             }
 
         } while (firstStep.value || hasChanged.value);
+
+        //post processing
+        staircaseRemoval();
     }
 
     public Bitmap getBitmap() {
@@ -320,5 +323,34 @@ public class ImageSkeletonizer {
             }
         }
         return matched1 || matched2;
+    }
+
+    private void staircaseRemoval() {
+        Queue<Point> blackPixels = new LinkedList<>(this.blackPixels);
+        this.blackPixels = new LinkedList<>();
+        Point p;
+        while (!blackPixels.isEmpty()) {
+            p = blackPixels.remove();
+            try {
+                boolean vN = imageMatrix[p.y - 1][p.x] == 0;
+                boolean vE = imageMatrix[p.y][p.x + 1] == 0;
+                boolean vNE = imageMatrix[p.y - 1][p.x + 1] == 0;
+                boolean vSW = imageMatrix[p.y + 1][p.x - 1] == 0;
+                boolean vW = imageMatrix[p.y][p.x - 1] == 0;
+                boolean vS = imageMatrix[p.y + 1][p.x] == 0;
+                boolean vNW = imageMatrix[p.y - 1][p.x - 1] == 0;
+                boolean vSE = imageMatrix[p.y + 1][p.x + 1] == 0;
+
+                if (!(vN && ((vE && !vNE && !vSW && (!vW || !vS) || (vW && !vNW && !vSE && (!vE || !vS))))) &&
+                        !(vS && ((vE && !vNW && !vSE && (!vW || !vN) || (vW && !vNE && !vSW && (!vE || !vN)))))) {
+                    this.blackPixels.add(p);
+                } else {
+                    imageMatrix[p.y][p.x] = 255;
+                    bitmap.setPixel(p.x, p.y, Color.WHITE);
+                }
+            } catch (Exception e) {
+                this.blackPixels.add(p);
+            }
+        }
     }
 }
