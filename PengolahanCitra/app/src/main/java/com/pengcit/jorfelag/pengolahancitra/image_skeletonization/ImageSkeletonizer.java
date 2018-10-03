@@ -48,7 +48,9 @@ public class ImageSkeletonizer {
     public ImageSkeletonizer(Bitmap bitmap, int threshold) {
         this.bitmap = bitmap.copy(bitmap.getConfig(), true);
         this.threshold = threshold;
+
         blackPixels = new ConcurrentLinkedQueue<>();
+
         this.imageMatrix = convertToGrayMatrix();
     }
 
@@ -107,6 +109,7 @@ public class ImageSkeletonizer {
 
         //post processing
         staircaseRemoval();
+        pruning();
         extractGeometricProperty();
     }
 
@@ -378,6 +381,103 @@ public class ImageSkeletonizer {
                 bitmap.setPixel(p.x, p.y + 1, Color.RED);
                 bitmap.setPixel(p.x, p.y - 1, Color.RED);
             }
+        }
+    }
+
+    private void pruning() {
+        int distanceThreshold = 10;
+
+        Queue<Point> intersectionPoints = new LinkedList<>();
+        Queue<Point> endPoints = new LinkedList<>();
+
+        Queue<Point> blackPixels = new LinkedList<>(this.blackPixels);
+        this.blackPixels = new LinkedList<>();
+
+        // First Add EndPoint and Intersection
+        Point p;
+
+        Queue<Point> tempBlackPixels = new LinkedList<>(blackPixels);
+        while (!tempBlackPixels.isEmpty()) {
+            p = tempBlackPixels.remove();
+            int[] neighbors = getNeighbors(p.x, p.y);
+            int blackNeighbors = countBlackNeighbors(neighbors);
+
+            if (blackNeighbors == 1) {
+                Log.d("ENDPOINTS", Integer.toString(p.x) + " "  + Integer.toString(p.y));
+                endPoints.add(p);
+            } else if (blackNeighbors >= 3) {
+                Log.d("Intersection", Integer.toString(p.x) + " "  + Integer.toString(p.y));
+                intersectionPoints.add(p);
+            }
+            Log.d("HEHEHEHE", Integer.toString(p.x) + " " + Integer.toString(p.y));
+        }
+
+        int counter = 0;
+        boolean marker = true;
+        while (marker) {
+            counter++;
+            Log.d("HEHEHEHE", Integer.toString(counter));
+            int minDistance = 255;
+            Point pEnd, pIntersect;
+            while (!endPoints.isEmpty()) {
+                pEnd = endPoints.remove();
+
+                // Clone Intersection Point
+                Queue<Point> tempIntersection = new LinkedList<>(intersectionPoints);
+
+                // Count and Delete
+                while (!tempIntersection.isEmpty()) {
+                    pIntersect = tempIntersection.remove();
+                    int distance = Math.abs(pIntersect.x - pEnd.x) + Math.abs(pIntersect.y - pEnd.y);
+                    Log.d("Distance", Integer.toString(distance));
+                    Log.d("Min Distance", Integer.toString(minDistance));
+                    Log.d("Distance Threshold", Integer.toString(distanceThreshold));
+                    if (minDistance > distance) {
+                        minDistance = distance;
+                    }
+                    Log.d("Comparing", Boolean.toString(distance <= distanceThreshold));
+                    if (distance <= distanceThreshold && pEnd.x != pIntersect.x && pEnd.y != pIntersect.y) {
+                        // Delete in Black Pixel Queue
+                        tempBlackPixels = new LinkedList<>(blackPixels);
+                        blackPixels = new LinkedList<>();
+                        while (!tempBlackPixels.isEmpty()) {
+                            p = tempBlackPixels.remove();
+                            if (p.x == pEnd.x && p.y == pEnd.y) {
+                                // do nothing
+                            } else {
+                                blackPixels.add(p);
+                            }
+                        }
+                        Log.d("DELETED", Integer.toString(pEnd.x) + " " + Integer.toString(pEnd.y));
+                        bitmap.setPixel(pEnd.x, pEnd.y, Color.WHITE);
+                        imageMatrix[pEnd.y][pEnd.x] = 255;
+                    }
+                }
+            }
+
+            if (minDistance > distanceThreshold) {
+                marker = false;
+            }
+
+            // Find New Endpoint
+            tempBlackPixels = new LinkedList<>(blackPixels);
+            while (!tempBlackPixels.isEmpty()) {
+                p = tempBlackPixels.remove();
+                int[] neighbors = getNeighbors(p.x, p.y);
+                int blackNeighbors = countBlackNeighbors(neighbors);
+
+                Log.d("Black Neighbors", Integer.toString(blackNeighbors));
+                if (blackNeighbors == 1) {
+                    endPoints.add(p);
+                    Log.d("NEW Endpoint", Integer.toString(p.x) + " " + Integer.toString(p.y));
+                }
+            }
+        }
+
+        // Add ALl Black Pixels
+        while (!blackPixels.isEmpty()) {
+            p = blackPixels.remove();
+            this.blackPixels.add(p);
         }
     }
 }

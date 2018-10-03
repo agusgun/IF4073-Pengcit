@@ -44,6 +44,8 @@ public class OcrExtendedActivity extends AppCompatActivity {
     }
 
     public void generateDigit(View view) {
-
+        new OcrExtendedTask(
+                OcrExtendedActivity.this,
+                digitTextView).execute(OcrExtendedActivity.this.imageBitmapOrigin);
     }
 }
