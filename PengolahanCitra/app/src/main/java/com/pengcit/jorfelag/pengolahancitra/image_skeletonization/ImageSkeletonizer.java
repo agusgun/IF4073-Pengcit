@@ -107,6 +107,7 @@ public class ImageSkeletonizer {
 
         //post processing
         staircaseRemoval();
+        extractGeometricProperty();
     }
 
     public Bitmap getBitmap() {
@@ -350,6 +351,32 @@ public class ImageSkeletonizer {
                 }
             } catch (Exception e) {
                 this.blackPixels.add(p);
+            }
+        }
+    }
+
+    private void extractGeometricProperty() {
+        Queue<Point> blackPixels = new LinkedList<>(this.blackPixels);
+        this.blackPixels = new LinkedList<>();
+        Point p;
+        int count = 0;
+        while (!blackPixels.isEmpty()) {
+            p = blackPixels.remove();
+            int[] neighbors = getNeighbors(p.x, p.y);
+            int blackNeighbors = countBlackNeighbors(neighbors);
+            if (blackNeighbors == 1) {
+                bitmap.setPixel(p.x, p.y, Color.GREEN);
+                bitmap.setPixel(p.x + 1, p.y, Color.GREEN);
+                bitmap.setPixel(p.x - 1, p.y, Color.GREEN);
+                bitmap.setPixel(p.x, p.y + 1, Color.GREEN);
+                bitmap.setPixel(p.x, p.y - 1, Color.GREEN);
+                count++;
+            } else if (blackNeighbors >= 3) {
+                bitmap.setPixel(p.x, p.y, Color.RED);
+                bitmap.setPixel(p.x + 1, p.y, Color.RED);
+                bitmap.setPixel(p.x - 1, p.y, Color.RED);
+                bitmap.setPixel(p.x, p.y + 1, Color.RED);
+                bitmap.setPixel(p.x, p.y - 1, Color.RED);
             }
         }
     }
