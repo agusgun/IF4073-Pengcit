@@ -61,12 +61,4 @@
         android:title="@string/action_skeletonize_image"
         app:showAsAction="always"
         />
-
-    <item
-        android:id="@+id/action_ocr_extended"
-        android:icon="@drawable/ic_ocr"
-        android:orderInCategory="100"
-        android:title="@string/ocr_extended"
-        app:showAsAction="always"
-        />
 </menu>

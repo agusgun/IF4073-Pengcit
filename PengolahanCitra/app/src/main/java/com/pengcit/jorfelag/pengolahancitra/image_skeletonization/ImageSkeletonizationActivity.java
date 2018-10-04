@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.pengcit.jorfelag.pengolahancitra.R;
@@ -23,6 +24,7 @@ import java.io.InputStream;
 public class ImageSkeletonizationActivity extends AppCompatActivity {
 
     private ImageView originalImageView, resultImageView;
+    private TextView resultTextView;
 
     private Bitmap originalImageBitmap;
     private Uri imageBitmapOriginURI;
@@ -68,10 +70,12 @@ public class ImageSkeletonizationActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), Integer.toString(seekBarValue), Toast.LENGTH_SHORT).show();
             }
         });
+
+        resultTextView = findViewById(R.id.skeletonization_text_view);
     }
 
     public void skeletonizeImage(View view) {
-        new ImageSkeletonizationTask(this, resultImageView, seekBarValue).execute(originalImageBitmap);
+        new ImageSkeletonizationTask(this, resultImageView, resultTextView, seekBarValue).execute(originalImageBitmap);
     }
 
 }

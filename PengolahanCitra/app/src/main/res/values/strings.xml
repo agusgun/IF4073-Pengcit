@@ -34,9 +34,8 @@
     <string name="action_train_ocr">Train OCR</string>
     <string name="ocr_label_prompt_text_view">Type The Label:</string>
     <string name="ocr_label_prompt_edit_text_hint">Label</string>
-    <string name="action_skeletonize_image">Skeletonize Image</string>
+    <string name="action_skeletonize_image">Skeletonize Image + OCR</string>
     <string name="skeletonize_image">Skeletonize Image</string>
-    <string name="ocr_extended">OCR Extended</string>
     <string name="_0">0</string>
     <string name="_255">255</string>
 

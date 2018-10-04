@@ -130,9 +130,6 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.action_skeletonize_image:
                         launchImageSkeletonization();
                         return false;
-                    case R.id.action_ocr_extended:
-                        launchOcrExtended();
-                        return false;
                     default:
                         return false;
                 }
@@ -318,16 +315,6 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(this, ImageSkeletonizationActivity.class);
             intent.putExtra("BitmapImageURI", imageBitmapURI.toString());
             startActivityForResult(intent, SKELETONIZATION_IMAGE);
-        } else {
-            Toast.makeText(getApplicationContext(), R.string.ask_to_select_or_capture_an_image, Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    public void launchOcrExtended() {
-        if (imageBitmap != null) {
-            Intent intent = new Intent(this, OcrExtendedActivity.class);
-            intent.putExtra("BitmapImageURI", imageBitmapURI.toString());
-            startActivity(intent);
         } else {
             Toast.makeText(getApplicationContext(), R.string.ask_to_select_or_capture_an_image, Toast.LENGTH_SHORT).show();
         }
