@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".LoadImageFragment">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/load_image_fr_iv_orig"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="5dp"
+                android:minHeight="200dp"
+                android:minWidth="150dp"
+                android:scaleType="fitCenter" />
+
+            <TextView
+                android:id="@+id/load_image_fr_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/load_image_fr_iv_orig"
+                android:layout_centerHorizontal="true"
+                android:text="@string/load_image_fr_tv_text" />
+
+            <Button
+                android:id="@+id/load_image_fr_btn_take_image"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/load_image_fr_tv"
+                android:layout_centerHorizontal="true"
+                android:layout_marginEnd="50dp"
+                android:layout_marginStart="50dp"
+                android:layout_marginTop="20dp"
+                android:drawableStart="@android:drawable/ic_menu_camera"
+                android:text="@string/load_image_fr_btn_take_image_text" />
+
+            <Button
+                android:id="@+id/load_image_fr_btn_load_image"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/load_image_fr_btn_take_image"
+                android:layout_centerHorizontal="true"
+                android:layout_marginEnd="50dp"
+                android:layout_marginStart="50dp"
+                android:layout_marginTop="20dp"
+                android:drawableStart="@android:drawable/ic_menu_gallery"
+                android:text="@string/load_image_fr_btn_load_image_text" />
+
+            <Button
+                android:id="@+id/load_image_fr_btn_save_image"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/load_image_fr_btn_load_image"
+                android:layout_centerHorizontal="true"
+                android:layout_marginEnd="50dp"
+                android:layout_marginStart="50dp"
+                android:layout_marginTop="20dp"
+                android:drawableStart="@android:drawable/ic_menu_save"
+                android:text="@string/load_image_fr_btn_save_image_text" />
+
+        </RelativeLayout>
+    </ScrollView>
+</FrameLayout>

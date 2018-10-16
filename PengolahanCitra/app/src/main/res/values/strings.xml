@@ -39,6 +39,11 @@
     <string name="_0">0</string>
     <string name="_255">255</string>
 
+    <string name="load_image_fr_tv_text">Please take or load an image first</string>
+    <string name="load_image_fr_btn_take_image_text">Take an Image</string>
+    <string name="load_image_fr_btn_load_image_text">Load Image</string>
+    <string name="load_image_fr_btn_save_image_text">Save Image</string>
+
     <string-array name="contrast_enhancement_method">
         <item>Linear Stretching</item>
         <item>Histogram Equalization</item>

@@ -11,9 +11,12 @@ import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.speech.tts.TextToSpeech;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -33,6 +36,7 @@ import com.leinardi.android.speeddial.SpeedDialActionItem;
 import com.leinardi.android.speeddial.SpeedDialView;
 import com.pengcit.jorfelag.pengolahancitra.contrast.enhancement.ContrastEnhancementActivity;
 import com.pengcit.jorfelag.pengolahancitra.histogram.CreateImageHistogramTask;
+import com.pengcit.jorfelag.pengolahancitra.histogram.ShowHistogramFragment;
 import com.pengcit.jorfelag.pengolahancitra.histogram.specification.HistogramSpecificationActivity;
 import com.pengcit.jorfelag.pengolahancitra.image_skeletonization.ImageSkeletonizationActivity;
 import com.pengcit.jorfelag.pengolahancitra.ocr.ChainCode;
@@ -51,7 +55,9 @@ import java.util.Locale;
 
 import static android.content.SharedPreferences.*;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+        implements LoadImageFragment.OnFragmentInteractionListener,
+            ShowHistogramFragment.OnFragmentInteractionListener {
 
     private ImageView imageView;
     private TextView textView;
@@ -96,6 +102,41 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        TabLayout tabLayout = findViewById(R.id.main_act_tab_layout);
+
+        tabLayout.addTab(tabLayout.newTab().setText("File"));
+        tabLayout.addTab(tabLayout.newTab().setText("Show Histogram"));
+
+        final ViewPager viewPager = findViewById(R.id.main_act_pager);
+        final PagerAdapter adapter = new TabPagerAdapter(
+                getSupportFragmentManager(), tabLayout.getTabCount());
+        viewPager.setAdapter(adapter);
+
+        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                viewPager.setCurrentItem(tab.getPosition());
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+                viewPager.setCurrentItem(tab.getPosition());
+            }
+        });
+
+
+
+
+
+
+        /**** LEGACY ****/
 
         imageView = (ImageView) findViewById(R.id.imageView);
         textView = (TextView) findViewById(R.id.textView);
@@ -322,6 +363,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
         if (resultCode == RESULT_OK) {
             textView.setText("");
             imageBitmapURI = null;
@@ -369,5 +412,10 @@ public class MainActivity extends AppCompatActivity {
 
         currentImagePath = image.getAbsolutePath();
         return image;
+    }
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
     }
 }
