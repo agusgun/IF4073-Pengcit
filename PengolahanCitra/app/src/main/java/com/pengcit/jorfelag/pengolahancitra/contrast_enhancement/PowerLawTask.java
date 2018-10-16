@@ -1,7 +1,6 @@
 package com.pengcit.jorfelag.pengolahancitra.contrast_enhancement;
 
 import android.graphics.Bitmap;
-import android.util.MutableInt;
 
 import com.pengcit.jorfelag.pengolahancitra.util.LoopBody;
 import com.pengcit.jorfelag.pengolahancitra.util.Parallel;
@@ -15,6 +14,7 @@ public class PowerLawTask extends BaseContrastEnhancementTask {
     }
 
     //TODO: refactor
+
     /**
      * TBD (src: http://terminalcoders.blogspot.com/2017/02/histogram-equalisation-in-java.html)
      *

@@ -26,19 +26,16 @@ import com.pengcit.jorfelag.pengolahancitra.SharedViewModel;
 
 public class HistogramSpecificationFragment extends Fragment {
     private final static int NUM_POINTS = 5;
-
+    private SharedViewModel model;
     private SeekBar[] seekBars;
     private TextView[] seekBarLabels;
     private int[] seekBarValues;
-
     private ImageView originalImageView;
     private ImageView resultImageView;
     private TextView loadTextView;
     private Button processButton;
     private Button commitButton;
     private GraphView referencedHistogram;
-
-    SharedViewModel model;
     private Bitmap originalBitmap;
     private Bitmap resultBitmap;
 
@@ -145,7 +142,7 @@ public class HistogramSpecificationFragment extends Fragment {
                 fr.commitButton.setVisibility(View.GONE);
             }
         });
-        
+
         return view;
     }
 
@@ -170,10 +167,6 @@ public class HistogramSpecificationFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
-    }
-
-    public interface OnFragmentInteractionListener {
-        void onFragmentInteraction(Uri uri);
     }
 
     public int[] getSeekBarValues() {
@@ -209,5 +202,9 @@ public class HistogramSpecificationFragment extends Fragment {
             values[i] = v;
         }
         return values;
+    }
+
+    public interface OnFragmentInteractionListener {
+        void onFragmentInteraction(Uri uri);
     }
 }

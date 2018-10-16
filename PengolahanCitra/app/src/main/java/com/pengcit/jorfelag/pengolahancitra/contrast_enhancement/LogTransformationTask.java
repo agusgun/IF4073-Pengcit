@@ -1,7 +1,6 @@
 package com.pengcit.jorfelag.pengolahancitra.contrast_enhancement;
 
 import android.graphics.Bitmap;
-import android.util.MutableInt;
 
 import com.pengcit.jorfelag.pengolahancitra.util.LoopBody;
 import com.pengcit.jorfelag.pengolahancitra.util.Parallel;

@@ -1,18 +1,10 @@
 package com.pengcit.jorfelag.pengolahancitra.contrast_enhancement;
 
-import android.app.ProgressDialog;
 import android.graphics.Bitmap;
-import android.os.AsyncTask;
 import android.util.MutableInt;
-import android.widget.ImageView;
 
-import com.pengcit.jorfelag.pengolahancitra.contrast.enhancement.ContrastEnhancementActivity;
-import com.pengcit.jorfelag.pengolahancitra.histogram.ShowHistogramFragment;
-import com.pengcit.jorfelag.pengolahancitra.util.ImageSaver;
 import com.pengcit.jorfelag.pengolahancitra.util.LoopBody;
 import com.pengcit.jorfelag.pengolahancitra.util.Parallel;
-
-import java.lang.ref.WeakReference;
 
 public class LinearStretchingTask extends BaseContrastEnhancementTask {
 

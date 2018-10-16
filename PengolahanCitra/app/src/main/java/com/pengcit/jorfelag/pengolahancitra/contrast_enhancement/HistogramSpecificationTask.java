@@ -3,7 +3,6 @@ package com.pengcit.jorfelag.pengolahancitra.contrast_enhancement;
 import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
-import android.util.MutableInt;
 
 import com.pengcit.jorfelag.pengolahancitra.histogram.HistogramSplineInterpolator;
 import com.pengcit.jorfelag.pengolahancitra.util.LoopBody;
@@ -155,7 +154,7 @@ public class HistogramSpecificationTask extends AsyncTask<Bitmap, Void, Bitmap> 
                     int green = (pixelColor & 0x0000FF00) >> 8;
                     int blue = (pixelColor & 0x000000FF);
 
-                    processedPixels[j] = (0xFF<<24) | (Tred[red]<<16) | (Tgreen[green]<<8) | Tblue[blue];
+                    processedPixels[j] = (0xFF << 24) | (Tred[red] << 16) | (Tgreen[green] << 8) | Tblue[blue];
                 }
 
                 processedBitmap.setPixels(processedPixels, 0, width, 0, i, width, 1);

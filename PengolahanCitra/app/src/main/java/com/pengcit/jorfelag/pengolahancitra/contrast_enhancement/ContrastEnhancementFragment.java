@@ -24,8 +24,6 @@ import android.widget.Toast;
 import com.pengcit.jorfelag.pengolahancitra.R;
 import com.pengcit.jorfelag.pengolahancitra.SharedViewModel;
 
-import org.apache.commons.math3.geometry.euclidean.twod.Line;
-
 public class ContrastEnhancementFragment extends Fragment {
 
     private final static int LINEAR_STRETCHING = 0;
@@ -33,7 +31,7 @@ public class ContrastEnhancementFragment extends Fragment {
     private final static int LOG_TRANSFORM = 2;
     private final static int POWER_LAW = 3;
     private final static int NEGATIVE = 4;
-
+    private SharedViewModel model;
     private ImageView originalImageView;
     private ImageView resultImageView;
     private TextView loadTextView;
@@ -41,8 +39,6 @@ public class ContrastEnhancementFragment extends Fragment {
     private Button processButton;
     private Button commitButton;
     private Spinner spinner;
-
-    SharedViewModel model;
     private Bitmap originalBitmap;
     private Bitmap resultBitmap;
 
@@ -122,8 +118,13 @@ public class ContrastEnhancementFragment extends Fragment {
                             new LinearStretchingTask(fr).execute(originalBitmap);
                             break;
                         case HISTOGRAM_EQUALIZATION:
-                            float weight = Float.parseFloat(weightEditText.getText().toString());
-                            new HistogramEqualizationTask(fr, weight).execute(originalBitmap);
+                            try {
+                                float weight = Float.parseFloat(weightEditText.getText().toString());
+                                new HistogramEqualizationTask(fr, weight).execute(originalBitmap);
+                            } catch (NumberFormatException e) {
+                                Toast.makeText(fr.getContext(),
+                                        "Invalid weight input", Toast.LENGTH_SHORT).show();
+                            }
                             break;
                         case LOG_TRANSFORM:
                             new LogTransformationTask(fr).execute(originalBitmap);
@@ -178,13 +179,13 @@ public class ContrastEnhancementFragment extends Fragment {
         mListener = null;
     }
 
-    public interface OnFragmentInteractionListener {
-        void onFragmentInteraction(Uri uri);
-    }
-
     public void setResultImageView(Bitmap bitmap) {
         resultBitmap = bitmap;
         resultImageView.setImageBitmap(bitmap);
         commitButton.setVisibility(View.VISIBLE);
+    }
+
+    public interface OnFragmentInteractionListener {
+        void onFragmentInteraction(Uri uri);
     }
 }
