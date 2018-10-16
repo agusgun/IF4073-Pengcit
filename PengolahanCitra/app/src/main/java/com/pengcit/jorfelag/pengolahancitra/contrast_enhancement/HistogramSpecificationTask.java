@@ -24,6 +24,13 @@ public class HistogramSpecificationTask extends AsyncTask<Bitmap, Void, Bitmap> 
         seekBarValues = fr.getSeekBarValues();
     }
 
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+        dialog.setMessage("Processing image, please wait...");
+        dialog.show();
+    }
+
     /**
      * TBD (src: https://www.youtube.com/watch?v=YxZUnJ_Ok2w)
      *
@@ -178,4 +185,6 @@ public class HistogramSpecificationTask extends AsyncTask<Bitmap, Void, Bitmap> 
         fr.setUpHistogram(templateForView);
         fr.setResultImageView(result);
     }
+
+
 }

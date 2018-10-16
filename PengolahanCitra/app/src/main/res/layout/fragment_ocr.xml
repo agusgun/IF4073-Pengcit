@@ -24,6 +24,14 @@
                 android:minWidth="150dp"
                 android:scaleType="fitCenter" />
 
+            <TextView
+                android:id="@+id/ocr_fr_tv_load_first"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@id/ocr_fr_iv_orig"
+                android:layout_centerHorizontal="true"
+                android:text="@string/load_image_fr_tv_text" />
+
             <SeekBar
                 android:id="@+id/ocr_fr_seekbar"
                 android:layout_width="349dp"
@@ -84,8 +92,20 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/ocr_fr_tv_result_title"
                 android:layout_centerHorizontal="true"
-                android:layout_marginBottom="10dp"
+                android:layout_marginBottom="20dp"
                 android:textSize = "32sp"/>
+
+            <Button
+                android:id="@+id/ocr_fr_btn_commit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/ocr_fr_tv_result"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="10dp"
+                android:layout_marginEnd="50dp"
+                android:layout_marginStart="50dp"
+                android:text="@string/contrast_enhancement_fr_btn_commit_text"
+                android:visibility="gone" />
 
         </RelativeLayout>
 
