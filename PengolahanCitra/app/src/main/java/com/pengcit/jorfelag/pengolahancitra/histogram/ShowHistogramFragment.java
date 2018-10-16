@@ -101,6 +101,7 @@ public class ShowHistogramFragment extends Fragment {
         BarGraphSeries series = new BarGraphSeries<>(generateData(data));
         series.setColor(color);
 
+        g.removeAllSeries();
         g.addSeries(series);
         g.setTitle(title);
         g.getViewport().setXAxisBoundsManual(true);

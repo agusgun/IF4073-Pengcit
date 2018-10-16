@@ -81,10 +81,10 @@ public class LoadImageFragment extends Fragment {
             public void onChanged(@Nullable Bitmap bitmap) {
                 if (bitmap != null) {
                     origImageView.setImageBitmap(bitmap);
-                    textView.setText("");
+                    textView.setVisibility(View.GONE);
                 } else {
                     origImageView.setImageResource(android.R.color.transparent);
-                    textView.setText(getResources().getString(R.string.load_image_fr_tv_text));
+                    textView.setVisibility(View.VISIBLE);
                 }
             }
         });

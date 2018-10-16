@@ -5,6 +5,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
 import com.pengcit.jorfelag.pengolahancitra.contrast_enhancement.ContrastEnhancementFragment;
+import com.pengcit.jorfelag.pengolahancitra.contrast_enhancement.HistogramSpecificationFragment;
 import com.pengcit.jorfelag.pengolahancitra.histogram.ShowHistogramFragment;
 
 public class TabPagerAdapter extends FragmentPagerAdapter {
@@ -26,6 +27,8 @@ public class TabPagerAdapter extends FragmentPagerAdapter {
                 return new ShowHistogramFragment();
             case 2:
                 return new ContrastEnhancementFragment();
+            case 3:
+                return new HistogramSpecificationFragment();
             default:
                 return null;
         }

@@ -18,6 +18,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.pengcit.jorfelag.pengolahancitra.R;
 import com.pengcit.jorfelag.pengolahancitra.SharedViewModel;
@@ -34,6 +36,7 @@ public class ContrastEnhancementFragment extends Fragment {
 
     private ImageView originalImageView;
     private ImageView resultImageView;
+    private TextView loadTextView;
     private EditText weightEditText;
     private Button processButton;
     private Button commitButton;
@@ -62,6 +65,7 @@ public class ContrastEnhancementFragment extends Fragment {
 
         originalImageView = view.findViewById(R.id.contrast_enhancement_fr_iv_orig);
         resultImageView = view.findViewById(R.id.contrast_enhancement_fr_iv_result);
+        loadTextView = view.findViewById(R.id.contrast_enhancement_fr_tv_load_first);
         weightEditText = view.findViewById(R.id.contrast_enhancement_fr_tv_weight);
         processButton = view.findViewById(R.id.contrast_enhancement_fr_btn_process);
         commitButton = view.findViewById(R.id.contrast_enhancement_fr_btn_commit);
@@ -71,9 +75,13 @@ public class ContrastEnhancementFragment extends Fragment {
         model.getBitmapLiveData().observe(this, new Observer<Bitmap>() {
             @Override
             public void onChanged(@Nullable Bitmap bitmap) {
+                originalBitmap = bitmap;
                 if (bitmap != null) {
-                    originalBitmap = bitmap;
                     originalImageView.setImageBitmap(bitmap);
+                    loadTextView.setVisibility(View.GONE);
+                } else {
+                    originalImageView.setImageResource(android.R.color.transparent);
+                    loadTextView.setVisibility(View.VISIBLE);
                 }
             }
         });
@@ -108,23 +116,28 @@ public class ContrastEnhancementFragment extends Fragment {
         processButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                switch (spinner.getSelectedItemPosition()) {
-                    case LINEAR_STRETCHING:
-                        new LinearStretchingTask(fr).execute(originalBitmap);
-                        break;
-                    case HISTOGRAM_EQUALIZATION:
-                        float weight = Float.parseFloat(weightEditText.getText().toString());
-                        new HistogramEqualizationTask(fr, weight).execute(originalBitmap);
-                        break;
-                    case LOG_TRANSFORM:
-                        new LogTransformationTask(fr).execute(originalBitmap);
-                        break;
-                    case POWER_LAW:
-                        new PowerLawTask(fr).execute(originalBitmap);
-                        break;
-                    case NEGATIVE:
-                        new NegativeTask(fr).execute(originalBitmap);
-                        break;
+                if (originalBitmap != null) {
+                    switch (spinner.getSelectedItemPosition()) {
+                        case LINEAR_STRETCHING:
+                            new LinearStretchingTask(fr).execute(originalBitmap);
+                            break;
+                        case HISTOGRAM_EQUALIZATION:
+                            float weight = Float.parseFloat(weightEditText.getText().toString());
+                            new HistogramEqualizationTask(fr, weight).execute(originalBitmap);
+                            break;
+                        case LOG_TRANSFORM:
+                            new LogTransformationTask(fr).execute(originalBitmap);
+                            break;
+                        case POWER_LAW:
+                            new PowerLawTask(fr).execute(originalBitmap);
+                            break;
+                        case NEGATIVE:
+                            new NegativeTask(fr).execute(originalBitmap);
+                            break;
+                    }
+                } else {
+                    Toast.makeText(fr.getContext(),
+                            R.string.ask_to_select_or_capture_an_image, Toast.LENGTH_SHORT).show();
                 }
             }
         });

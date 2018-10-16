@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".contrast_enhancement.HistogramSpecificationFragment">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/histogram_specification_fr_iv_orig"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_margin="5dp"
+                android:adjustViewBounds="true"
+                android:minHeight="200dp"
+                android:minWidth="150dp"
+                android:scaleType="fitCenter" />
+
+            <TextView
+                android:id="@+id/histogram_specification_fr_tv_load_first"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@id/histogram_specification_fr_iv_orig"
+                android:layout_centerHorizontal="true"
+                android:text="@string/load_image_fr_tv_text" />
+
+            <GridLayout
+                android:id="@+id/histogram_specification_fr_grid_eq"
+                android:layout_width="match_parent"
+                android:layout_height="140dp"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/histogram_specification_fr_iv_orig"
+                android:layout_marginTop="15dp"
+                android:columnCount="5">
+
+                <com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1">
+
+                    <com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBar
+                        android:id="@+id/histogram_specification_fr_seekbar_1"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        app:seekBarRotation="CW270" />
+                </com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper>
+
+                <com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1">
+
+                    <com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBar
+                        android:id="@+id/histogram_specification_fr_seekbar_2"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        app:seekBarRotation="CW270" />
+                </com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper>
+
+                <com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1">
+
+                    <com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBar
+                        android:id="@+id/histogram_specification_fr_seekbar_3"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        app:seekBarRotation="CW270" />
+                </com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper>
+
+                <com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1">
+
+                    <com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBar
+                        android:id="@+id/histogram_specification_fr_seekbar_4"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        app:seekBarRotation="CW270" />
+                </com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper>
+
+                <com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1">
+
+                    <com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBar
+                        android:id="@+id/histogram_specification_fr_seekbar_5"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        app:seekBarRotation="CW270" />
+                </com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper>
+
+                <TextView
+                    android:id="@+id/histogram_specification_fr_label_1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="0" />
+
+                <TextView
+                    android:id="@+id/histogram_specification_fr_label_2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="0" />
+
+                <TextView
+                    android:id="@+id/histogram_specification_fr_label_3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="0" />
+
+                <TextView
+                    android:id="@+id/histogram_specification_fr_label_4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="0" />
+
+                <TextView
+                    android:id="@+id/histogram_specification_fr_label_5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="0" />
+
+            </GridLayout>
+
+            <Button
+                android:id="@+id/histogram_specification_fr_btn_process"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/histogram_specification_fr_grid_eq"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="10dp"
+                android:layout_marginEnd="50dp"
+                android:layout_marginStart="50dp"
+                android:text="@string/contrast_enhancement_fr_btn_process_text" />
+
+            <com.jjoe64.graphview.GraphView
+                android:id="@+id/histogram_specification_fr_referenced_histogram"
+                android:layout_width="match_parent"
+                android:layout_height="125dp"
+                android:layout_below="@id/histogram_specification_fr_btn_process" />
+
+            <ImageView
+                android:id="@+id/histogram_specification_fr_iv_result"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/histogram_specification_fr_referenced_histogram"
+                android:layout_centerHorizontal="true"
+                android:layout_margin="5dp"
+                android:adjustViewBounds="true"
+                android:minHeight="200dp"
+                android:minWidth="150dp"
+                android:scaleType="fitCenter" />
+
+            <Button
+                android:id="@+id/histogram_specification_fr_btn_commit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/histogram_specification_fr_iv_result"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="10dp"
+                android:layout_marginEnd="50dp"
+                android:layout_marginStart="50dp"
+                android:text="@string/contrast_enhancement_fr_btn_commit_text"
+                android:visibility="gone" />
+
+        </RelativeLayout>
+
+    </ScrollView>
+
+</FrameLayout>

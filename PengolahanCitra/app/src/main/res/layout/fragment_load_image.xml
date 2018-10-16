@@ -28,7 +28,7 @@
                 android:id="@+id/load_image_fr_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/load_image_fr_iv_orig"
+                android:layout_alignBottom="@id/load_image_fr_iv_orig"
                 android:layout_centerHorizontal="true"
                 android:text="@string/load_image_fr_tv_text" />
 
@@ -36,7 +36,7 @@
                 android:id="@+id/load_image_fr_btn_take_image"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/load_image_fr_tv"
+                android:layout_below="@id/load_image_fr_iv_orig"
                 android:layout_centerHorizontal="true"
                 android:layout_marginEnd="50dp"
                 android:layout_marginStart="50dp"

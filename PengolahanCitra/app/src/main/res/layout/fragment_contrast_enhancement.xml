@@ -34,20 +34,28 @@
                     android:layout_height="wrap_content"
                     android:layout_centerHorizontal="true"
                     android:layout_margin="5dp"
+                    android:adjustViewBounds="true"
                     android:minHeight="200dp"
                     android:minWidth="150dp"
-                    android:scaleType="fitCenter"
-                    android:adjustViewBounds="true"/>
+                    android:scaleType="fitCenter" />
+
+                <TextView
+                    android:id="@+id/contrast_enhancement_fr_tv_load_first"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/contrast_enhancement_fr_iv_orig"
+                    android:layout_centerHorizontal="true"
+                    android:text="@string/load_image_fr_tv_text" />
 
                 <EditText
                     android:id="@+id/contrast_enhancement_fr_tv_weight"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
                     android:layout_below="@id/contrast_enhancement_fr_iv_orig"
-                    android:padding="10dp"
                     android:hint="@string/weight"
                     android:inputType="number"
-                    android:visibility="gone"/>
+                    android:padding="10dp"
+                    android:visibility="gone" />
 
                 <Button
                     android:id="@+id/contrast_enhancement_fr_btn_process"
@@ -55,9 +63,9 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@id/contrast_enhancement_fr_tv_weight"
                     android:layout_centerHorizontal="true"
+                    android:layout_marginBottom="10dp"
                     android:layout_marginEnd="50dp"
                     android:layout_marginStart="50dp"
-                    android:layout_marginBottom="10dp"
                     android:text="@string/contrast_enhancement_fr_btn_process_text" />
 
                 <ImageView
@@ -67,10 +75,10 @@
                     android:layout_below="@id/contrast_enhancement_fr_btn_process"
                     android:layout_centerHorizontal="true"
                     android:layout_margin="5dp"
+                    android:adjustViewBounds="true"
                     android:minHeight="200dp"
                     android:minWidth="150dp"
-                    android:scaleType="fitCenter"
-                    android:adjustViewBounds="true"/>
+                    android:scaleType="fitCenter" />
 
                 <Button
                     android:id="@+id/contrast_enhancement_fr_btn_commit"
@@ -78,9 +86,9 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@id/contrast_enhancement_fr_iv_result"
                     android:layout_centerHorizontal="true"
+                    android:layout_marginBottom="10dp"
                     android:layout_marginEnd="50dp"
                     android:layout_marginStart="50dp"
-                    android:layout_marginBottom="10dp"
                     android:text="@string/contrast_enhancement_fr_btn_commit_text"
                     android:visibility="gone" />
 
