@@ -6,6 +6,7 @@ import android.graphics.Point;
 import android.util.Log;
 import android.util.MutableBoolean;
 
+import com.pengcit.jorfelag.pengolahancitra.FeatureExtractor;
 import com.pengcit.jorfelag.pengolahancitra.util.LoopBody;
 import com.pengcit.jorfelag.pengolahancitra.util.Parallel;
 
@@ -38,6 +39,8 @@ public class ImageSkeletonizer {
 
     private ArrayList<Point> endpoints;
     private ArrayList<Point> intersections;
+    private ArrayList<Point> pertigaan;
+    private ArrayList<Point> perempatan;
 
     public ImageSkeletonizer(Bitmap bitmap, int threshold) {
         this.bitmap = bitmap.copy(bitmap.getConfig(), true);
@@ -46,6 +49,8 @@ public class ImageSkeletonizer {
         blackPixels = new ConcurrentLinkedQueue<>();
         endpoints = new ArrayList<>();
         intersections = new ArrayList<>();
+        pertigaan = new ArrayList<>();
+        perempatan = new ArrayList<>();
 
         this.imageMatrix = convertToGrayMatrix();
     }
@@ -374,6 +379,13 @@ public class ImageSkeletonizer {
                 bitmap.setPixel(p.x, p.y + 1, Color.GREEN);
                 bitmap.setPixel(p.x, p.y - 1, Color.GREEN);
             } else if (blackNeighbors >= 3) {
+                // Add Pertigaan and Perempatan
+                if (blackNeighbors == 3) {
+                    pertigaan.add(p);
+                } else if (blackNeighbors == 4) {
+                    perempatan.add(p);
+                }
+                // Add Intersection
                 intersections.add(p);
 
                 bitmap.setPixel(p.x, p.y, Color.RED);
@@ -386,7 +398,7 @@ public class ImageSkeletonizer {
     }
 
     private void pruneSkeleton() {
-        int distanceThreshold = 10;
+        int distanceThreshold = 12;
 
         Queue<Point> intersectionPoints = new LinkedList<>();
         Queue<Point> endPoints = new LinkedList<>();
@@ -404,20 +416,20 @@ public class ImageSkeletonizer {
             int blackNeighbors = countBlackNeighbors(neighbors);
 
             if (blackNeighbors == 1) {
-                Log.d("ENDPOINTS", Integer.toString(p.x) + " "  + Integer.toString(p.y));
+//                Log.d("ENDPOINTS", Integer.toString(p.x) + " "  + Integer.toString(p.y));
                 endPoints.add(p);
             } else if (blackNeighbors >= 3) {
-                Log.d("Intersection", Integer.toString(p.x) + " "  + Integer.toString(p.y));
+//                Log.d("Intersection", Integer.toString(p.x) + " "  + Integer.toString(p.y));
                 intersectionPoints.add(p);
             }
-            Log.d("HEHEHEHE", Integer.toString(p.x) + " " + Integer.toString(p.y));
+//            Log.d("HEHEHEHE", Integer.toString(p.x) + " " + Integer.toString(p.y));
         }
 
         int counter = 0;
         boolean marker = true;
         while (marker && counter < 50) {
             counter++;
-            Log.d("HEHEHEHE", Integer.toString(counter));
+//            Log.d("HEHEHEHE", Integer.toString(counter));
             int minDistance = 255;
             Point pEnd, pIntersect;
             while (!endPoints.isEmpty()) {
@@ -430,13 +442,13 @@ public class ImageSkeletonizer {
                 while (!tempIntersection.isEmpty()) {
                     pIntersect = tempIntersection.remove();
                     int distance = Math.abs(pIntersect.x - pEnd.x) + Math.abs(pIntersect.y - pEnd.y);
-                    Log.d("Distance", Integer.toString(distance));
-                    Log.d("Min Distance", Integer.toString(minDistance));
-                    Log.d("Distance Threshold", Integer.toString(distanceThreshold));
+//                    Log.d("Distance", Integer.toString(distance));
+//                    Log.d("Min Distance", Integer.toString(minDistance));
+//                    Log.d("Distance Threshold", Integer.toString(distanceThreshold));
                     if (minDistance > distance) {
                         minDistance = distance;
                     }
-                    Log.d("Comparing", Boolean.toString(distance <= distanceThreshold));
+//                    Log.d("Comparing", Boolean.toString(distance <= distanceThreshold));
                     if (distance <= distanceThreshold && pEnd.x != pIntersect.x && pEnd.y != pIntersect.y) {
                         // Delete in Black Pixel Queue
                         tempBlackPixels = new LinkedList<>(blackPixels);
@@ -449,7 +461,7 @@ public class ImageSkeletonizer {
                                 blackPixels.add(p);
                             }
                         }
-                        Log.d("DELETED", Integer.toString(pEnd.x) + " " + Integer.toString(pEnd.y));
+//                        Log.d("DELETED", Integer.toString(pEnd.x) + " " + Integer.toString(pEnd.y));
                         bitmap.setPixel(pEnd.x, pEnd.y, Color.WHITE);
                         imageMatrix[pEnd.y][pEnd.x] = 255;
                     }
@@ -467,10 +479,10 @@ public class ImageSkeletonizer {
                 int[] neighbors = getNeighbors(p.x, p.y);
                 int blackNeighbors = countBlackNeighbors(neighbors);
 
-                Log.d("Black Neighbors", Integer.toString(blackNeighbors));
+//                Log.d("Black Neighbors", Integer.toString(blackNeighbors));
                 if (blackNeighbors == 1) {
                     endPoints.add(p);
-                    Log.d("NEW Endpoint", Integer.toString(p.x) + " " + Integer.toString(p.y));
+//                    Log.d("NEW Endpoint", Integer.toString(p.x) + " " + Integer.toString(p.y));
                 }
             }
         }
@@ -508,6 +520,46 @@ public class ImageSkeletonizer {
                 }
             }
         }
+
+        // Combine close perempatan into one
+        Iterator<Point> itPerempatan = perempatan.iterator();
+        if (itPerempatan.hasNext()) {
+            Point curr = itPerempatan.next();
+            while (itPerempatan.hasNext()) {
+                Point next = itPerempatan.next();
+
+                if (Math.abs(curr.x - next.x) < 5 && Math.abs(curr.y - next.y) < 5) {
+                    itPerempatan.remove();
+                } else {
+                    curr = next;
+                }
+            }
+        }
+
+        // Combine close perempatan into one
+        Iterator<Point> itPertigaan = pertigaan.iterator();
+        if (itPertigaan.hasNext()) {
+            Point curr = itPertigaan.next();
+            while (itPertigaan.hasNext()) {
+                Point next = itPertigaan.next();
+
+                if (Math.abs(curr.x - next.x) < 5 && Math.abs(curr.y - next.y) < 5) {
+                    itPertigaan.remove();
+                } else {
+                    curr = next;
+                }
+            }
+        }
+
+        // Feature Extractor
+        FeatureExtractor featureExtractor = new FeatureExtractor(endpoints, intersections,
+                imageMatrix, bitmap, pertigaan, perempatan);
+
+        Log.d("Jumlah Endpoint:", Integer.toString(featureExtractor.getNumberOfEndpoints()));
+        Log.d("Jumlah Intersection:", Integer.toString(featureExtractor.getNumberOfIntersection()));
+        Log.d("Jumlah Pertigaan:", Integer.toString(featureExtractor.getNumberOfPertigaan()));
+        Log.d("Jumlah Perempatan:", Integer.toString(featureExtractor.getNumberOfPerempatan()));
+        Log.d("Jumlah Komponen:", Integer.toString(featureExtractor.getNumberOfComponent()));
 
         // Count number of endpoints and intersections
         switch (endpoints.size()) {
