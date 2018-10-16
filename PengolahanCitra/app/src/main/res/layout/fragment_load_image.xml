@@ -18,10 +18,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="5dp"
+                android:layout_margin="5dp"
                 android:minHeight="200dp"
                 android:minWidth="150dp"
-                android:scaleType="fitCenter" />
+                android:scaleType="fitCenter"
+                android:adjustViewBounds="true"/>
 
             <TextView
                 android:id="@+id/load_image_fr_tv"
@@ -39,7 +40,7 @@
                 android:layout_centerHorizontal="true"
                 android:layout_marginEnd="50dp"
                 android:layout_marginStart="50dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginBottom="10dp"
                 android:drawableStart="@android:drawable/ic_menu_camera"
                 android:text="@string/load_image_fr_btn_take_image_text" />
 
@@ -51,7 +52,7 @@
                 android:layout_centerHorizontal="true"
                 android:layout_marginEnd="50dp"
                 android:layout_marginStart="50dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginBottom="10dp"
                 android:drawableStart="@android:drawable/ic_menu_gallery"
                 android:text="@string/load_image_fr_btn_load_image_text" />
 
@@ -63,7 +64,7 @@
                 android:layout_centerHorizontal="true"
                 android:layout_marginEnd="50dp"
                 android:layout_marginStart="50dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginBottom="10dp"
                 android:drawableStart="@android:drawable/ic_menu_save"
                 android:text="@string/load_image_fr_btn_save_image_text" />
 
