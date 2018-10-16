@@ -46,6 +46,7 @@
     <string name="load_image_fr_btn_generate_text">Generate Image</string>
     <string name="contrast_enhancement_fr_btn_process_text">Process Image</string>
     <string name="contrast_enhancement_fr_btn_commit_text">Commit Changes</string>
+    <string name="ocr_fr_btn_process_text">Skeletonize and Predict</string>
 
     <string-array name="contrast_enhancement_method">
         <item>Linear Stretching</item>

@@ -41,6 +41,7 @@ import com.pengcit.jorfelag.pengolahancitra.histogram.CreateImageHistogramTask;
 import com.pengcit.jorfelag.pengolahancitra.histogram.ShowHistogramFragment;
 import com.pengcit.jorfelag.pengolahancitra.histogram.specification.HistogramSpecificationActivity;
 import com.pengcit.jorfelag.pengolahancitra.image_skeletonization.ImageSkeletonizationActivity;
+import com.pengcit.jorfelag.pengolahancitra.image_skeletonization.OCRFragment;
 import com.pengcit.jorfelag.pengolahancitra.ocr.ChainCode;
 import com.pengcit.jorfelag.pengolahancitra.ocr.OcrTask;
 import com.pengcit.jorfelag.pengolahancitra.ocr.TrainOcrTask;
@@ -61,7 +62,8 @@ public class MainActivity extends AppCompatActivity implements
         LoadImageFragment.OnFragmentInteractionListener,
         ShowHistogramFragment.OnFragmentInteractionListener,
         ContrastEnhancementFragment.OnFragmentInteractionListener,
-        HistogramSpecificationFragment.OnFragmentInteractionListener {
+        HistogramSpecificationFragment.OnFragmentInteractionListener,
+        OCRFragment.OnFragmentInteractionListener {
 
     private ImageView imageView;
     private TextView textView;
@@ -113,6 +115,7 @@ public class MainActivity extends AppCompatActivity implements
         tabLayout.addTab(tabLayout.newTab().setText("Show Histogram"));
         tabLayout.addTab(tabLayout.newTab().setText("Enhance Contrast"));
         tabLayout.addTab(tabLayout.newTab().setText("Histogram Specification"));
+        tabLayout.addTab(tabLayout.newTab().setText("OCR"));
 
         final ViewPager viewPager = findViewById(R.id.main_act_pager);
         final PagerAdapter adapter = new TabPagerAdapter(
