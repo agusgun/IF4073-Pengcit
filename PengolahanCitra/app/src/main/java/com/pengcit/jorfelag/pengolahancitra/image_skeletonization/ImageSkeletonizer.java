@@ -616,7 +616,8 @@ public class ImageSkeletonizer {
             }
         }
 
-        return label + " " + minDissimilarity;
+//        return label + " " + minDissimilarity;
+        return label;
 
 // old predictor (only for digits)
 //        // Sort endpoints by increasing y value
