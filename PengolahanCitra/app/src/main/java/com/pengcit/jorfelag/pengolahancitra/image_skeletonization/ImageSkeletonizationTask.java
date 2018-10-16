@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 import com.pengcit.jorfelag.pengolahancitra.util.ImageSaver;
 
-public class ImageSkeletonizationTask extends AsyncTask<Bitmap, Void, Pair<Bitmap, Integer>> {
+public class ImageSkeletonizationTask extends AsyncTask<Bitmap, Void, Pair<Bitmap, String>> {
 
     private ProgressDialog dialog;
     private ImageView imageView;
@@ -33,7 +33,7 @@ public class ImageSkeletonizationTask extends AsyncTask<Bitmap, Void, Pair<Bitma
     }
 
     @Override
-    protected Pair<Bitmap, Integer> doInBackground(Bitmap... args) {
+    protected Pair<Bitmap, String> doInBackground(Bitmap... args) {
         ImageSkeletonizer imageSkeletonizer = new ImageSkeletonizer(args[0], seekBarValue);
         imageSkeletonizer.process();
 
@@ -42,12 +42,12 @@ public class ImageSkeletonizationTask extends AsyncTask<Bitmap, Void, Pair<Bitma
 
     @SuppressLint("SetTextI18n")
     @Override
-    protected void onPostExecute(Pair<Bitmap, Integer> result) {
+    protected void onPostExecute(Pair<Bitmap, String> result) {
         Bitmap bitmap = result.first;
-        int prediction = result.second;
+        String prediction = result.second;
 
         imageView.setImageBitmap(bitmap);
-        textView.setText(Integer.toString(prediction));
+        textView.setText(prediction);
 
         ImageSaver imageSaver = new ImageSaver();
         imageSaver.saveImage(bitmap, "skeletonization");

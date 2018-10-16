@@ -221,5 +221,6 @@ public class FeatureExtractor {
         }
 
         //TODO: Implement
+        return null;
     }
 }

@@ -106,4 +106,4 @@ class HistogramMaker:
         # show()
 
 histogram_maker = HistogramMaker()
-histogram_maker.histogram_from_image("0.bmp")
+histogram_maker.histogram_from_image("X.bmp")
