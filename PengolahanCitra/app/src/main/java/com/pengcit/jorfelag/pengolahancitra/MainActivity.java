@@ -35,6 +35,7 @@ import com.google.gson.reflect.TypeToken;
 import com.leinardi.android.speeddial.SpeedDialActionItem;
 import com.leinardi.android.speeddial.SpeedDialView;
 import com.pengcit.jorfelag.pengolahancitra.contrast.enhancement.ContrastEnhancementActivity;
+import com.pengcit.jorfelag.pengolahancitra.contrast_enhancement.ContrastEnhancementFragment;
 import com.pengcit.jorfelag.pengolahancitra.histogram.CreateImageHistogramTask;
 import com.pengcit.jorfelag.pengolahancitra.histogram.ShowHistogramFragment;
 import com.pengcit.jorfelag.pengolahancitra.histogram.specification.HistogramSpecificationActivity;
@@ -55,9 +56,10 @@ import java.util.Locale;
 
 import static android.content.SharedPreferences.*;
 
-public class MainActivity extends AppCompatActivity
-        implements LoadImageFragment.OnFragmentInteractionListener,
-            ShowHistogramFragment.OnFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity implements
+        LoadImageFragment.OnFragmentInteractionListener,
+        ShowHistogramFragment.OnFragmentInteractionListener,
+        ContrastEnhancementFragment.OnFragmentInteractionListener {
 
     private ImageView imageView;
     private TextView textView;
@@ -107,6 +109,7 @@ public class MainActivity extends AppCompatActivity
 
         tabLayout.addTab(tabLayout.newTab().setText("File"));
         tabLayout.addTab(tabLayout.newTab().setText("Show Histogram"));
+        tabLayout.addTab(tabLayout.newTab().setText("Enhance Contrast"));
 
         final ViewPager viewPager = findViewById(R.id.main_act_pager);
         final PagerAdapter adapter = new TabPagerAdapter(

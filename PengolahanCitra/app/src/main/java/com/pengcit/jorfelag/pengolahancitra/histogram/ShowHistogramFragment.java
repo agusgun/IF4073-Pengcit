@@ -29,9 +29,6 @@ import java.util.HashMap;
 
 public class ShowHistogramFragment extends Fragment {
 
-    private Bitmap imgBitmap;
-    private boolean bitmapChanged = false;
-
     private GraphView redHistogram;
     private GraphView greenHistogram;
     private GraphView blueHistogram;
@@ -65,22 +62,12 @@ public class ShowHistogramFragment extends Fragment {
             @Override
             public void onChanged(@Nullable Bitmap bitmap) {
                 if (bitmap != null) {
-                    imgBitmap = bitmap;
-                    bitmapChanged = true;
-                    new CreateHistogramTask(fr).execute(imgBitmap);
+                    new CreateHistogramTask(fr).execute(bitmap);
                 }
             }
         });
 
         return view;
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        if (bitmapChanged) {
-            new CreateHistogramTask(this).execute(imgBitmap);
-        }
     }
 
     public void onButtonPressed(Uri uri) {
@@ -220,8 +207,6 @@ public class ShowHistogramFragment extends Fragment {
                     fr.getString(R.string.blue_histogram_title), Color.BLUE);
             fr.setUpHistogram(fr.grayHistogram, result.get("gray"),
                     fr.getString(R.string.grayscale_histogram_title), Color.GRAY);
-
-            fr.bitmapChanged = false;
         }
     }
 }

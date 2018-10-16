@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".contrast_enhancement.ContrastEnhancementFragment">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <Spinner
+            android:id="@+id/contrast_enhancement_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true" />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginBottom="48dp"
+            android:focusableInTouchMode="true">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/contrast_enhancement_fr_iv_orig"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_margin="5dp"
+                    android:minHeight="200dp"
+                    android:minWidth="150dp"
+                    android:scaleType="fitCenter"
+                    android:adjustViewBounds="true"/>
+
+                <EditText
+                    android:id="@+id/contrast_enhancement_fr_tv_weight"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_below="@id/contrast_enhancement_fr_iv_orig"
+                    android:padding="10dp"
+                    android:hint="@string/weight"
+                    android:inputType="number"
+                    android:visibility="gone"/>
+
+                <Button
+                    android:id="@+id/contrast_enhancement_fr_btn_process"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/contrast_enhancement_fr_tv_weight"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginEnd="50dp"
+                    android:layout_marginStart="50dp"
+                    android:layout_marginBottom="10dp"
+                    android:text="@string/contrast_enhancement_fr_btn_process_text" />
+
+                <ImageView
+                    android:id="@+id/contrast_enhancement_fr_iv_result"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/contrast_enhancement_fr_btn_process"
+                    android:layout_centerHorizontal="true"
+                    android:layout_margin="5dp"
+                    android:minHeight="200dp"
+                    android:minWidth="150dp"
+                    android:scaleType="fitCenter"
+                    android:adjustViewBounds="true"/>
+
+                <Button
+                    android:id="@+id/contrast_enhancement_fr_btn_commit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/contrast_enhancement_fr_iv_result"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginEnd="50dp"
+                    android:layout_marginStart="50dp"
+                    android:layout_marginBottom="10dp"
+                    android:text="@string/contrast_enhancement_fr_btn_commit_text"
+                    android:visibility="gone" />
+
+            </RelativeLayout>
+
+        </ScrollView>
+
+    </RelativeLayout>
+
+</FrameLayout>

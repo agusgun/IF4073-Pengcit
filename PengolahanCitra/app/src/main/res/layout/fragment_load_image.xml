@@ -69,5 +69,7 @@
                 android:text="@string/load_image_fr_btn_save_image_text" />
 
         </RelativeLayout>
+
     </ScrollView>
+
 </FrameLayout>
