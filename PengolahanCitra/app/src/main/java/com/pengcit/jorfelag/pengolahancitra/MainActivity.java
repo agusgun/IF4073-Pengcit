@@ -150,41 +150,41 @@ public class MainActivity extends AppCompatActivity implements
         imageView = (ImageView) findViewById(R.id.imageView);
         textView = (TextView) findViewById(R.id.textView);
 
-        SpeedDialView speedDialView = findViewById(R.id.speedDial);
-        speedDialView.inflate(R.menu.menu_speed_dial);
-        speedDialView.setOnActionSelectedListener(new SpeedDialView.OnActionSelectedListener() {
-            @Override
-            public boolean onActionSelected(SpeedDialActionItem speedDialActionItem) {
-                switch (speedDialActionItem.getId()) {
-                    case R.id.action_camera:
-                        takePicture();
-                        return false; // true to keep the Speed Dial open
-                    case R.id.action_select_picture:
-                        selectPicture();
-                        return false;
-                    case R.id.action_show_histogram:
-                        showHistogram();
-                        return false;
-                    case R.id.action_constrast_enhancement:
-                        launchContrastEnhancement();
-                        return false;
-                    case R.id.action_histogram_spesification:
-                        launchHistogramSpesification();
-                        return false;
-                    case R.id.action_train_ocr:
-                        trainOcr();
-                        return false;
-                    case R.id.action_ocr:
-                        launchOCR();
-                        return false;
-                    case R.id.action_skeletonize_image:
-                        launchImageSkeletonization();
-                        return false;
-                    default:
-                        return false;
-                }
-            }
-        });
+//        SpeedDialView speedDialView = findViewById(R.id.speedDial);
+//        speedDialView.inflate(R.menu.menu_speed_dial);
+//        speedDialView.setOnActionSelectedListener(new SpeedDialView.OnActionSelectedListener() {
+//            @Override
+//            public boolean onActionSelected(SpeedDialActionItem speedDialActionItem) {
+//                switch (speedDialActionItem.getId()) {
+//                    case R.id.action_camera:
+//                        takePicture();
+//                        return false; // true to keep the Speed Dial open
+//                    case R.id.action_select_picture:
+//                        selectPicture();
+//                        return false;
+//                    case R.id.action_show_histogram:
+//                        showHistogram();
+//                        return false;
+//                    case R.id.action_constrast_enhancement:
+//                        launchContrastEnhancement();
+//                        return false;
+//                    case R.id.action_histogram_spesification:
+//                        launchHistogramSpesification();
+//                        return false;
+//                    case R.id.action_train_ocr:
+//                        trainOcr();
+//                        return false;
+//                    case R.id.action_ocr:
+//                        launchOCR();
+//                        return false;
+//                    case R.id.action_skeletonize_image:
+//                        launchImageSkeletonization();
+//                        return false;
+//                    default:
+//                        return false;
+//                }
+//            }
+//        });
 
         textToSpeech = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
             @Override
