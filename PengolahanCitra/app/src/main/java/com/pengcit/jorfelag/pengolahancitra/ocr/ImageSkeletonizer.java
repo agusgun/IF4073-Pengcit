@@ -1,4 +1,4 @@
-package com.pengcit.jorfelag.pengolahancitra.image_skeletonization;
+package com.pengcit.jorfelag.pengolahancitra.ocr;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;

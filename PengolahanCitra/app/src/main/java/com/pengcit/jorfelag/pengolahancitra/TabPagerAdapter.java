@@ -7,7 +7,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import com.pengcit.jorfelag.pengolahancitra.contrast_enhancement.ContrastEnhancementFragment;
 import com.pengcit.jorfelag.pengolahancitra.contrast_enhancement.HistogramSpecificationFragment;
 import com.pengcit.jorfelag.pengolahancitra.histogram.ShowHistogramFragment;
-import com.pengcit.jorfelag.pengolahancitra.image_skeletonization.OCRFragment;
+import com.pengcit.jorfelag.pengolahancitra.ocr.OCRFragment;
 
 public class TabPagerAdapter extends FragmentPagerAdapter {
 
