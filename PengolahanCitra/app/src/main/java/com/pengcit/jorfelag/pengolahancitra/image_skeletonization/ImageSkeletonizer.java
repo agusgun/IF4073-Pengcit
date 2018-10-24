@@ -5,11 +5,13 @@ import android.graphics.Color;
 import android.graphics.Point;
 import android.util.Log;
 import android.util.MutableBoolean;
+import android.util.Pair;
 
 import com.pengcit.jorfelag.pengolahancitra.ocr.ASCIIFeatures;
 import com.pengcit.jorfelag.pengolahancitra.util.LoopBody;
 import com.pengcit.jorfelag.pengolahancitra.util.Parallel;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -559,6 +561,114 @@ public class ImageSkeletonizer {
         }
     }
 
+    public ArrayList<Point> findBoundary() {
+        ArrayList<Point> boundary = new ArrayList<>();
+        int minX = 9999, minY = 9999;
+        int maxX = -9999, maxY = -9999;
+
+        // Assumption: 1 Image
+        for (int i = 0; i < imageMatrix.length; i++) {
+            for (int j = 0; j < imageMatrix[0].length; j++) {
+                if (imageMatrix[i][j] == 0) {
+                    if (j < minX) {
+                        minX = j;
+                    }
+                    if (j > maxX) {
+                        maxX = j;
+                    }
+                    if (i < minY) {
+                        minY = i;
+                    }
+                    if (i > maxY) {
+                        maxY = i;
+                    }
+                }
+            }
+        }
+        Point boundaryX = new Point(minX, maxX);
+        Point boundaryY = new Point(minY, maxY);
+        boundary.add(boundaryX);
+        boundary.add(boundaryY);
+        Log.d("Boundary:", Integer.toString(minX) + " " + Integer.toString(maxX) + " " +
+                Integer.toString(minY) + " " + Integer.toString(maxY));
+        return boundary;
+    }
+
+    public float calculateFeature(int[][] matrix) {
+        float result = 0;
+        int matrixSize = 10;
+
+        for (int i = 0; i < matrixSize; i++) {
+            for (int j = 0; j < i + 1; j++) {
+                if (matrix[j][i - j] == 0) {
+                    result += 1;
+                }
+            }
+        }
+        for (int i = 0; i < matrixSize - 1; i++) {
+            for (int j = 0; j < matrixSize - 1 - i; j++) {
+                if (matrix[j + i + 1][matrixSize - j - 1] == 0) {
+                    result += 1;
+                }
+            }
+        }
+        result /= 19.0;
+        return result;
+    }
+
+    public float[][] calculateDiagonalFeatures(int minX, int maxX, int minY, int maxY) {
+        float[][] diagonalFeatures = new float[9][6];
+        int counterY = 0;
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
+                diagonalFeatures[i][j] = 0;
+            }
+        }
+        for (int i = minY; i < maxY + 1; i+= 10) {
+            counterY++;
+            if (i + 10 > maxY || counterY > 9) break;
+
+            int counterX = 0;
+            for (int j = minX; j < maxX + 1; j += 10) {
+                counterX++;
+                if (j + 10 > maxX || counterX > 6) break;
+                int[][] diagonalMatrix = new int[10][10];
+                for (int k = 0; k < 10; k++) {
+                    for (int l = 0; l < 10; l++) {
+                        diagonalMatrix[k][l] = imageMatrix[i + k][j + l];
+                    }
+                }
+                diagonalFeatures[i][j] = calculateFeature(diagonalMatrix);
+            }
+        }
+        return diagonalFeatures;
+    }
+
+    public Pair<float[], float[]> calculateVerticalHorizontalFeatures(float[][] diagonalFeatures) {
+        float[] verticalFeatures = new float[9];
+        float[] horizontalFeatures = new float[6];
+
+        for (int i = 0; i < 9; i++) {
+            float horizontal = 0;
+            for (int j = 0; j < 6; j++) {
+                horizontal += diagonalFeatures[i][j];
+            }
+            horizontal /= 6.0;
+            verticalFeatures[i] = horizontal;
+        }
+
+        for (int j = 0; j < 6; j++) {
+            float vertical = 0;
+            for (int i = 0; i < 9; i++) {
+                vertical += diagonalFeatures[i][j];
+            }
+            vertical /= 9.0;
+            horizontalFeatures[j] = vertical;
+        }
+        Pair<float[], float[]> result = new Pair<>(verticalFeatures, horizontalFeatures);
+        return result;
+    }
+    
     public String predict() {
         double[] features = new double[13];
         features[0] = numOfComponents;
@@ -569,6 +679,14 @@ public class ImageSkeletonizer {
         for (int i = 0; i < 8; i++) {
             features[5 + i] = directionCodeFrequency[i];
         }
+        Log.d("Features", "{" + Double.toString(features[0]) + ", " +
+                Double.toString(features[1]) + ", " + Double.toString(features[2]) + ", " +
+                Double.toString(features[3]) + ", " + Double.toString(features[4]) + ", " +
+                Double.toString(features[5]) + ", " + Double.toString(features[6]) + ", " +
+                Double.toString(features[7]) + ", " + Double.toString(features[8]) + ", " +
+                Double.toString(features[9]) + ", " + Double.toString(features[10]) + ", " +
+                Double.toString(features[11]) + ", " + Double.toString(features[12]) + "}");
+
 
         double minDissimilarity = 999999999;
         double dissimilarity = 0;
