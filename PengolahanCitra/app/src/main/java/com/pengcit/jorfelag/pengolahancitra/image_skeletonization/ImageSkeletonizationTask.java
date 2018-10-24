@@ -35,7 +35,7 @@ public class ImageSkeletonizationTask extends AsyncTask<Bitmap, Void, Pair<Bitma
     @Override
     protected Pair<Bitmap, String> doInBackground(Bitmap... args) {
         ImageSkeletonizer imageSkeletonizer = new ImageSkeletonizer(args[0], seekBarValue);
-        imageSkeletonizer.process();
+        imageSkeletonizer.process(12, 50);
 
         return new Pair<>(imageSkeletonizer.getBitmap(), imageSkeletonizer.predict());
     }

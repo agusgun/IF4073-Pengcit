@@ -3,6 +3,7 @@ package com.pengcit.jorfelag.pengolahancitra.image_skeletonization;
 import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.util.Pair;
 
 import java.lang.ref.WeakReference;
@@ -13,11 +14,17 @@ public class OCRTask extends AsyncTask<Bitmap, Void, Pair<Bitmap, String>> {
     private ProgressDialog dialog;
 
     private int threshold;
+    private int distanceThreshold;
+    private int counterThreshold;
 
     public OCRTask(OCRFragment fr) {
         fragmentRef = new WeakReference<>(fr);
         dialog = new ProgressDialog(fr.getContext());
         threshold = fr.getThreshold();
+        distanceThreshold = fr.getDistanceThreshold();
+        counterThreshold = fr.getCounterThreshold();
+
+        Log.d("Threshold:", Integer.toString(distanceThreshold) + " " + Integer.toString(counterThreshold));
     }
 
     @Override
@@ -30,7 +37,7 @@ public class OCRTask extends AsyncTask<Bitmap, Void, Pair<Bitmap, String>> {
     @Override
     protected Pair<Bitmap, String> doInBackground(Bitmap... bitmaps) {
         ImageSkeletonizer imageSkeletonizer = new ImageSkeletonizer(bitmaps[0], threshold);
-        imageSkeletonizer.process();
+        imageSkeletonizer.process(distanceThreshold, counterThreshold);
 
         return new Pair<>(imageSkeletonizer.getBitmap(), imageSkeletonizer.predict());
     }

@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -32,8 +33,12 @@ public class OCRFragment extends Fragment {
     private Bitmap originalBitmap;
     private Bitmap resultBitmap;
     private SeekBar seekBar;
+    private EditText distanceEditText;
+    private EditText counterEditText;
 
     private int threshold;
+    private int distanceThreshold;
+    private int counterThreshold;
 
     private OnFragmentInteractionListener mListener;
 
@@ -59,6 +64,8 @@ public class OCRFragment extends Fragment {
         processButton = view.findViewById(R.id.ocr_fr_btn_process);
         commitButton = view.findViewById(R.id.ocr_fr_btn_commit);
         seekBar = view.findViewById(R.id.ocr_fr_seekbar);
+        distanceEditText = view.findViewById(R.id.ocr_fr_edittext_distance);
+        counterEditText = view.findViewById(R.id.ocr_fr_edittext_counter);
 
         model = ViewModelProviders.of(getActivity()).get(SharedViewModel.class);
         model.getBitmapLiveData().observe(this, new Observer<Bitmap>() {
@@ -98,6 +105,8 @@ public class OCRFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (originalBitmap != null) {
+                    counterThreshold = Integer.parseInt(counterEditText.getText().toString());
+                    distanceThreshold = Integer.parseInt(distanceEditText.getText().toString());
                     new OCRTask(fr).execute(originalBitmap);
                 } else {
                     Toast.makeText(fr.getContext(),
@@ -122,6 +131,10 @@ public class OCRFragment extends Fragment {
     public int getThreshold() {
         return threshold;
     }
+
+    public int getDistanceThreshold() { return distanceThreshold; }
+
+    public int getCounterThreshold() { return counterThreshold; }
 
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {

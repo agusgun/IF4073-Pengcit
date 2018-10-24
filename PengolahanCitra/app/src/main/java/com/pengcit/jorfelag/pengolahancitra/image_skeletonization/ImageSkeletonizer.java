@@ -63,7 +63,7 @@ public class ImageSkeletonizer {
         this.imageMatrix = convertToGrayMatrix();
     }
 
-    public void process() {
+    public void process(int distanceThreshold, int counterThreshold) {
         //Pre process
         smoothImage();
         acuteAngleEmphasis();
@@ -118,7 +118,7 @@ public class ImageSkeletonizer {
 
         //post processing
         staircaseRemoval();
-        pruneSkeleton();
+        pruneSkeleton(distanceThreshold, counterThreshold);
         extractGeometricProperty();
     }
 
@@ -422,8 +422,7 @@ public class ImageSkeletonizer {
         }
     }
 
-    private void pruneSkeleton() {
-        int distanceThreshold = 12;
+    private void pruneSkeleton(int distanceThreshold, int counterThreshold) {
 
         Queue<Point> intersectionPoints = new LinkedList<>();
         Queue<Point> endPoints = new LinkedList<>();
@@ -451,7 +450,7 @@ public class ImageSkeletonizer {
 
         int counter = 0;
         boolean marker = true;
-        while (marker && counter < 50) {
+        while (marker && counter < counterThreshold) {
             counter++;
             int minDistance = 255;
             Point pEnd, pIntersect;
@@ -668,7 +667,7 @@ public class ImageSkeletonizer {
         Pair<float[], float[]> result = new Pair<>(verticalFeatures, horizontalFeatures);
         return result;
     }
-    
+
     public String predict() {
         double[] features = new double[13];
         features[0] = numOfComponents;
