@@ -7,17 +7,16 @@ import android.util.Log;
 import android.util.MutableBoolean;
 import android.util.Pair;
 
-import com.pengcit.jorfelag.pengolahancitra.ocr.ASCIIFeatures;
 import com.pengcit.jorfelag.pengolahancitra.util.LoopBody;
 import com.pengcit.jorfelag.pengolahancitra.util.Parallel;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Stack;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ImageSkeletonizer {
@@ -545,17 +544,23 @@ public class ImageSkeletonizer {
     }
 
     private void dfs(Point p) {
-        for (int i = 0; i < 8; i++) {
-            int next_x = p.x + X_TRANSLATION[i];
-            int next_y = p.y + Y_TRANSLATION[i];
-            try {
-                if (imageMatrix[next_y][next_x] == 0 && !visited[next_y][next_x]) {
-                    directionCodeFrequency[i]++;
-                    visited[next_y][next_x] = true;
-                    dfs(new Point(next_x, next_y));
-                }
-            } catch (ArrayIndexOutOfBoundsException ignored) {
+        Stack<Point> stack = new Stack<>();
+        stack.push(p);
 
+        while (!stack.empty()) {
+            Point curr = stack.pop();
+
+            for (int i = 0; i < 8; ++i) {
+                Point next = new Point(curr.x + X_TRANSLATION[i], curr.y + Y_TRANSLATION[i]);
+                try {
+                    if (imageMatrix[next.y][next.x] == 0 && !visited[next.y][next.x]) {
+                        directionCodeFrequency[i]++;
+                        visited[next.y][next.x] = true;
+                        stack.push(next);
+                    }
+                } catch (ArrayIndexOutOfBoundsException ignored) {
+
+                }
             }
         }
     }
