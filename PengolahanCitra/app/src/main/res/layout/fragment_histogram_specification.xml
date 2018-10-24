@@ -134,28 +134,28 @@
 
             </GridLayout>
 
+            <com.jjoe64.graphview.GraphView
+                android:id="@+id/histogram_specification_fr_referenced_histogram"
+                android:layout_width="match_parent"
+                android:layout_height="125dp"
+                android:layout_below="@id/histogram_specification_fr_grid_eq" />
+
             <Button
                 android:id="@+id/histogram_specification_fr_btn_process"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/histogram_specification_fr_grid_eq"
+                android:layout_below="@id/histogram_specification_fr_referenced_histogram"
                 android:layout_centerHorizontal="true"
                 android:layout_marginBottom="10dp"
                 android:layout_marginEnd="50dp"
                 android:layout_marginStart="50dp"
                 android:text="@string/contrast_enhancement_fr_btn_process_text" />
 
-            <com.jjoe64.graphview.GraphView
-                android:id="@+id/histogram_specification_fr_referenced_histogram"
-                android:layout_width="match_parent"
-                android:layout_height="125dp"
-                android:layout_below="@id/histogram_specification_fr_btn_process" />
-
             <ImageView
                 android:id="@+id/histogram_specification_fr_iv_result"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/histogram_specification_fr_referenced_histogram"
+                android:layout_below="@id/histogram_specification_fr_btn_process"
                 android:layout_centerHorizontal="true"
                 android:layout_margin="5dp"
                 android:adjustViewBounds="true"
