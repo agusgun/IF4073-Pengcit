@@ -33,6 +33,9 @@ public class ImageSkeletonizer {
             {{0, 0, 255, 255, 0}, {0, 0, 255, 255, 0}, {0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}, {-1, 0, 0, 0, -1}}
     };
 
+    private final static int MIN_RESIZED_HEIGHT = 64;
+    private final static int MIN_RESIZED_WIDTH = 64;
+
     private Bitmap bitmap;
     private int[][] imageMatrix;
     private int threshold;
@@ -48,7 +51,19 @@ public class ImageSkeletonizer {
     private boolean [][] visited;
 
     public ImageSkeletonizer(Bitmap bitmap, int threshold) {
-        this.bitmap = bitmap.copy(bitmap.getConfig(), true);
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        int resizedWidth, resizedHeight;
+
+        if (width >= height) {   // Landscape
+            resizedHeight = Math.min(height, MIN_RESIZED_HEIGHT);
+            resizedWidth = Math.min(width, resizedHeight * width / height);
+        } else {    // Portrait
+            resizedWidth = Math.min(width, MIN_RESIZED_WIDTH);
+            resizedHeight = Math.min(height, resizedWidth * height / width);
+        }
+
+        this.bitmap = Bitmap.createScaledBitmap(bitmap, resizedWidth, resizedHeight, true);
         this.threshold = threshold;
 
         this.blackPixels = new ConcurrentLinkedQueue<>();
@@ -57,86 +72,26 @@ public class ImageSkeletonizer {
         this.intersections_4 = new ArrayList<>();
         this.singlePoints = new ArrayList<>();
 
-        directionCodeFrequency = new double[8];
+        this.directionCodeFrequency = new double[8];
 
         this.imageMatrix = convertToGrayMatrix();
     }
 
     public void process(int distanceThreshold, int counterThreshold) {
-        //Pre process
+        // Pre-process
         smoothImage();
-        acuteAngleEmphasis();
+        emphasizeAcuteAngles();
 
-        final MutableBoolean firstStep = new MutableBoolean(false);
-        final MutableBoolean hasChanged = new MutableBoolean(false);
+        // Process
+        skeletonize();
 
-        Queue<Point> toClear = new LinkedList<>();
-        Queue<Point> step2 = new LinkedList<>();
-        Queue<Point> temp;
-        Point p;
-
-        do {
-            firstStep.value = !firstStep.value;
-            if (firstStep.value) {
-                hasChanged.value = false;
-            }
-
-            if (firstStep.value) {
-                temp = blackPixels;
-            } else {
-                temp = step2;
-            }
-
-            while (!temp.isEmpty()) {
-                p = temp.remove();
-                int[] neighbors = getNeighbors(p.x, p.y);
-                int blackNeighbors = countBlackNeighbors(neighbors);
-                int transitions = getTransitions(neighbors);
-                if (blackNeighbors >= 2 && blackNeighbors <= 6 && transitions == 1 && atLeastOneIsWhite(neighbors, firstStep.value)) {
-                    toClear.add(p);
-                    hasChanged.value = true;
-                } else {
-                    if (firstStep.value) {
-                        step2.add(p);
-                    } else {
-                        blackPixels.add(p);
-                    }
-                }
-            }
-
-            while(!toClear.isEmpty()) {
-                p = toClear.remove();
-                imageMatrix[p.y][p.x] = 255;
-            }
-
-        } while (firstStep.value || hasChanged.value);
-
-        //post processing
-        staircaseRemoval();
+        // Post-process
+        removeStaircase();
         pruneSkeleton(distanceThreshold, counterThreshold);
         extractGeometricProperty();
 
         // Apply changes to bitmap
-        final int width = bitmap.getWidth();
-        final int height = bitmap.getHeight();
-
-        Parallel.For(0, height, new LoopBody<Integer>() {
-            @Override
-            public void run(Integer y) {
-                int[] processedPixels = new int[width];
-                bitmap.getPixels(processedPixels, 0, width, 0, y, width, 1);
-
-                for (int x = 0; x < width; ++x) {
-                    if (imageMatrix[y][x] > threshold) {
-                        processedPixels[x] = Color.WHITE;
-                    } else {
-                        processedPixels[x] = Color.BLACK;
-                    }
-                }
-
-                bitmap.setPixels(processedPixels, 0, width, 0, y, width, 1);
-            }
-        });
+        applyChangesToBitmap();
     }
 
     public Bitmap getBitmap() {
@@ -231,12 +186,84 @@ public class ImageSkeletonizer {
         return imageMatrix;
     }
 
+    private void applyChangesToBitmap() {
+        final int width = bitmap.getWidth();
+        final int height = bitmap.getHeight();
+
+        Parallel.For(0, height, new LoopBody<Integer>() {
+            @Override
+            public void run(Integer y) {
+                int[] processedPixels = new int[width];
+                bitmap.getPixels(processedPixels, 0, width, 0, y, width, 1);
+
+                for (int x = 0; x < width; ++x) {
+                    if (imageMatrix[y][x] > threshold) {
+                        processedPixels[x] = Color.WHITE;
+                    } else {
+                        processedPixels[x] = Color.BLACK;
+                    }
+                }
+
+                bitmap.setPixels(processedPixels, 0, width, 0, y, width, 1);
+            }
+        });
+    }
+
     private static int getGrayLevel(int pixel) {
         int red = (pixel & 0x00FF0000) >> 16;
         int green = (pixel & 0x0000FF00) >> 8;
         int blue = (pixel & 0x000000FF);
 
         return (int) (0.2989 * red + 0.5870 * green + 0.1140 * blue);
+    }
+
+    /**
+     * Skeletonize using Zhang-Suen algorithm
+     */
+    private void skeletonize() {
+        final MutableBoolean firstStep = new MutableBoolean(false);
+        final MutableBoolean hasChanged = new MutableBoolean(false);
+
+        Queue<Point> toClear = new LinkedList<>();
+        Queue<Point> step2 = new LinkedList<>();
+        Queue<Point> temp;
+        Point p;
+
+        do {
+            firstStep.value = !firstStep.value;
+            if (firstStep.value) {
+                hasChanged.value = false;
+            }
+
+            if (firstStep.value) {
+                temp = blackPixels;
+            } else {
+                temp = step2;
+            }
+
+            while (!temp.isEmpty()) {
+                p = temp.remove();
+                int[] neighbors = getNeighbors(p.x, p.y);
+                int blackNeighbors = countBlackNeighbors(neighbors);
+                int transitions = getTransitions(neighbors);
+
+                if (blackNeighbors >= 2 && blackNeighbors <= 6 && transitions == 1 && atLeastOneIsWhite(neighbors, firstStep.value)) {
+                    toClear.add(p);
+                    hasChanged.value = true;
+                } else {
+                    if (firstStep.value) {
+                        step2.add(p);
+                    } else {
+                        blackPixels.add(p);
+                    }
+                }
+            }
+
+            while(!toClear.isEmpty()) {
+                p = toClear.remove();
+                imageMatrix[p.y][p.x] = 255;
+            }
+        } while (firstStep.value || hasChanged.value);
     }
 
     private void smoothImage() {
@@ -254,7 +281,7 @@ public class ImageSkeletonizer {
         }
     }
 
-    private void acuteAngleEmphasis() {
+    private void emphasizeAcuteAngles() {
         Queue<Point> toClear = new LinkedList<>();
         for (int i = 0; i < bitmap.getHeight() - 5; i++) {
             for (int j = 0; j < bitmap.getWidth() - 5; j++) {
@@ -350,10 +377,11 @@ public class ImageSkeletonizer {
         return matched1 || matched2;
     }
 
-    private void staircaseRemoval() {
+    private void removeStaircase() {
         Queue<Point> blackPixels = new LinkedList<>(this.blackPixels);
         this.blackPixels = new LinkedList<>();
         Point p;
+
         while (!blackPixels.isEmpty()) {
             p = blackPixels.remove();
             try {
@@ -433,7 +461,6 @@ public class ImageSkeletonizer {
     }
 
     private void pruneSkeleton(int distanceThreshold, int counterThreshold) {
-
         Queue<Point> intersectionPoints = new LinkedList<>();
         Queue<Point> endPoints = new LinkedList<>();
 
