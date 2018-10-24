@@ -23,6 +23,7 @@ import com.jjoe64.graphview.series.BarGraphSeries;
 import com.jjoe64.graphview.series.DataPoint;
 import com.pengcit.jorfelag.pengolahancitra.R;
 import com.pengcit.jorfelag.pengolahancitra.SharedViewModel;
+import com.pengcit.jorfelag.pengolahancitra.histogram.HistogramSplineInterpolator;
 
 public class HistogramSpecificationFragment extends Fragment {
     private final static int NUM_POINTS = 5;
@@ -30,6 +31,7 @@ public class HistogramSpecificationFragment extends Fragment {
     private SeekBar[] seekBars;
     private TextView[] seekBarLabels;
     private int[] seekBarValues;
+    private Integer[] histogramValues;
     private ImageView originalImageView;
     private ImageView resultImageView;
     private TextView loadTextView;
@@ -83,16 +85,19 @@ public class HistogramSpecificationFragment extends Fragment {
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                     progressChangedValue = progress;
                     seekBarLabels[index].setText(Integer.toString(progress));
+                    updateHistogram();
                 }
 
                 @Override
                 public void onStartTrackingTouch(SeekBar seekBar) {
-
+                    seekBarValues[index] = progressChangedValue;
+                    updateHistogram();
                 }
 
                 @Override
                 public void onStopTrackingTouch(SeekBar seekBar) {
                     seekBarValues[index] = progressChangedValue;
+                    updateHistogram();
                 }
             });
         }
@@ -169,8 +174,8 @@ public class HistogramSpecificationFragment extends Fragment {
         mListener = null;
     }
 
-    public int[] getSeekBarValues() {
-        return seekBarValues;
+    public Integer[] getHistogramValues() {
+        return histogramValues;
     }
 
     public void setResultImageView(Bitmap bitmap) {
@@ -189,10 +194,32 @@ public class HistogramSpecificationFragment extends Fragment {
         referencedHistogram.getViewport().setXAxisBoundsManual(true);
         referencedHistogram.getViewport().setMinX(0);
         referencedHistogram.getViewport().setMaxX(255);
+        referencedHistogram.getViewport().setYAxisBoundsManual(true);
+        referencedHistogram.getViewport().setMinY(0);
+        referencedHistogram.getViewport().setMaxY(100);
 
         // enable scaling and scrolling
         referencedHistogram.getViewport().setScalable(true);
         referencedHistogram.getViewport().setScalableY(true);
+    }
+
+    public void updateHistogram() {
+        int[] controlPoints = seekBarValues;
+
+        // Handle all zero values
+        int sum = 0;
+        for (int point : controlPoints) {
+            sum += point;
+        }
+        if (sum == 0) {
+            for (int i = 0; i < controlPoints.length; ++i) {
+                controlPoints[i] = 1;
+            }
+        }
+
+        // Generate histogram
+        histogramValues = HistogramSplineInterpolator.interpolate(controlPoints);
+        setUpHistogram(histogramValues);
     }
 
     private DataPoint[] generateData(Integer[] colorValuesFrequencies) {

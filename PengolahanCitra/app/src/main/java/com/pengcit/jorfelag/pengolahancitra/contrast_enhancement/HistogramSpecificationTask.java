@@ -15,13 +15,12 @@ public class HistogramSpecificationTask extends AsyncTask<Bitmap, Void, Bitmap> 
     private WeakReference<HistogramSpecificationFragment> fragmentRef;
     private ProgressDialog dialog;
 
-    private int[] seekBarValues;
-    private Integer[] templateForView;
+    private Integer[] histogramValues;
 
     public HistogramSpecificationTask(HistogramSpecificationFragment fr) {
         fragmentRef = new WeakReference<>(fr);
         dialog = new ProgressDialog(fr.getContext());
-        seekBarValues = fr.getSeekBarValues();
+        histogramValues = fr.getHistogramValues();
     }
 
     @Override
@@ -41,22 +40,7 @@ public class HistogramSpecificationTask extends AsyncTask<Bitmap, Void, Bitmap> 
     protected Bitmap doInBackground(Bitmap... args) {
         final Bitmap imageBitmap = args[0];
 
-        int[] controlPoints = seekBarValues;
-
-        // Handle all zero values
-        int sum = 0;
-        for (int point : controlPoints) {
-            sum += point;
-        }
-        if (sum == 0) {
-            for (int i = 0; i < controlPoints.length; ++i) {
-                controlPoints[i] = 1;
-            }
-        }
-
-        // Generate histogram
-        Integer[] templateCumulative = HistogramSplineInterpolator.interpolate(controlPoints);
-        templateForView = templateCumulative.clone();
+        Integer[] templateCumulative = histogramValues;
 
         final Integer[] redValuesFrequencies = new Integer[256];
         final Integer[] greenValuesFrequencies = new Integer[256];
@@ -182,7 +166,6 @@ public class HistogramSpecificationTask extends AsyncTask<Bitmap, Void, Bitmap> 
             dialog.dismiss();
         }
 
-        fr.setUpHistogram(templateForView);
         fr.setResultImageView(result);
     }
 
