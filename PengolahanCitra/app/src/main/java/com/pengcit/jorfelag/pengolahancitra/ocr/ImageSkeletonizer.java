@@ -70,9 +70,6 @@ public class ImageSkeletonizer {
         final MutableBoolean firstStep = new MutableBoolean(false);
         final MutableBoolean hasChanged = new MutableBoolean(false);
 
-        final int width = bitmap.getWidth();
-        final int height = bitmap.getHeight();
-
         Queue<Point> toClear = new LinkedList<>();
         Queue<Point> step2 = new LinkedList<>();
         Queue<Point> temp;
@@ -110,7 +107,6 @@ public class ImageSkeletonizer {
             while(!toClear.isEmpty()) {
                 p = toClear.remove();
                 imageMatrix[p.y][p.x] = 255;
-                bitmap.setPixel(p.x, p.y, Color.WHITE);
             }
 
         } while (firstStep.value || hasChanged.value);
@@ -119,6 +115,28 @@ public class ImageSkeletonizer {
         staircaseRemoval();
         pruneSkeleton(distanceThreshold, counterThreshold);
         extractGeometricProperty();
+
+        // Apply changes to bitmap
+        final int width = bitmap.getWidth();
+        final int height = bitmap.getHeight();
+
+        Parallel.For(0, height, new LoopBody<Integer>() {
+            @Override
+            public void run(Integer y) {
+                int[] processedPixels = new int[width];
+                bitmap.getPixels(processedPixels, 0, width, 0, y, width, 1);
+
+                for (int x = 0; x < width; ++x) {
+                    if (imageMatrix[y][x] > threshold) {
+                        processedPixels[x] = Color.WHITE;
+                    } else {
+                        processedPixels[x] = Color.BLACK;
+                    }
+                }
+
+                bitmap.setPixels(processedPixels, 0, width, 0, y, width, 1);
+            }
+        });
     }
 
     public Bitmap getBitmap() {
@@ -202,10 +220,8 @@ public class ImageSkeletonizer {
                     int pixel = processedPixels[x];
                     if(getGrayLevel(pixel) > threshold) {
                         imageMatrix[y][x] = 255;
-                        bitmap.setPixel(x, y, Color.WHITE);
                     } else {
                         imageMatrix[y][x] = 0;
-                        bitmap.setPixel(x, y, Color.BLACK);
                         blackPixels.add(new Point(x, y));
                     }
                 }
@@ -234,7 +250,6 @@ public class ImageSkeletonizer {
 
             if (blackNeighbors <= 2 && transitions < 2) {
                 imageMatrix[p.y][p.x] = 255;
-                bitmap.setPixel(p.x, p.y, Color.WHITE);
             }
         }
     }
@@ -256,7 +271,6 @@ public class ImageSkeletonizer {
         while(!toClear.isEmpty()) {
             p = toClear.remove();
             imageMatrix[p.y][p.x] = 255;
-            bitmap.setPixel(p.x, p.y, Color.WHITE);
         }
 
         if (deleted) {
@@ -275,7 +289,6 @@ public class ImageSkeletonizer {
         while(!toClear.isEmpty()) {
             p = toClear.remove();
             imageMatrix[p.y][p.x] = 255;
-            bitmap.setPixel(p.x, p.y, Color.WHITE);
         }
 
         if (deleted) {
@@ -291,7 +304,6 @@ public class ImageSkeletonizer {
         while(!toClear.isEmpty()) {
             p = toClear.remove();
             imageMatrix[p.y][p.x] = 255;
-            bitmap.setPixel(p.x, p.y, Color.WHITE);
         }
     }
 
@@ -359,7 +371,6 @@ public class ImageSkeletonizer {
                     this.blackPixels.add(p);
                 } else {
                     imageMatrix[p.y][p.x] = 255;
-                    bitmap.setPixel(p.x, p.y, Color.WHITE);
                 }
             } catch (Exception e) {
                 this.blackPixels.add(p);
@@ -483,7 +494,6 @@ public class ImageSkeletonizer {
                             }
                         }
 //                        Log.d("DELETED", Integer.toString(pEnd.x) + " " + Integer.toString(pEnd.y));
-                        bitmap.setPixel(pEnd.x, pEnd.y, Color.WHITE);
                         imageMatrix[pEnd.y][pEnd.x] = 255;
                     }
                 }
@@ -559,7 +569,6 @@ public class ImageSkeletonizer {
                         stack.push(next);
                     }
                 } catch (ArrayIndexOutOfBoundsException ignored) {
-
                 }
             }
         }
@@ -680,9 +689,8 @@ public class ImageSkeletonizer {
         features[2] = endPoints.size();
         features[3] = intersections_3.size();
         features[4] = intersections_4.size();
-        for (int i = 0; i < 8; i++) {
-            features[5 + i] = directionCodeFrequency[i];
-        }
+        System.arraycopy(directionCodeFrequency, 0, features, 5, 8);
+
         Log.d("Features", "{" + Double.toString(features[0]) + ", " +
                 Double.toString(features[1]) + ", " + Double.toString(features[2]) + ", " +
                 Double.toString(features[3]) + ", " + Double.toString(features[4]) + ", " +
@@ -691,10 +699,10 @@ public class ImageSkeletonizer {
                 Double.toString(features[9]) + ", " + Double.toString(features[10]) + ", " +
                 Double.toString(features[11]) + ", " + Double.toString(features[12]) + "}");
 
-
-        double minDissimilarity = 999999999;
+        double minDissimilarity = Double.MAX_VALUE;
         double dissimilarity = 0;
         String label = "unknown";
+
         for (int i = 0; i < ASCIIFeatures.labels.length; i++) {
             dissimilarity = calculateDissimilarity(features, ASCIIFeatures.features_vector[i]);
             if (dissimilarity < minDissimilarity) {
@@ -706,32 +714,29 @@ public class ImageSkeletonizer {
             label = "space";
         }
 
+        // Special cases
         if (label.equals("'")) {
             Queue<Point> blackPixels = new LinkedList<>(this.blackPixels);
             Point p;
-            double halfHeight = (double) bitmap.getHeight() / (double) 2;
+
+            final double halfHeight = (double) bitmap.getHeight() / (double) 2;
             boolean isApostrophe = true;
             while (isApostrophe && !blackPixels.isEmpty()) {
                 p = blackPixels.remove();
-                if (p.y > halfHeight) {
-                    isApostrophe = false;
-                }
+                isApostrophe = p.y <= halfHeight;
             }
             if (!isApostrophe) {
                 label = "l";
             }
-        }
-
-        if (label.equals("-")) {
+        } else if (label.equals("-")) {
             Queue<Point> blackPixels = new LinkedList<>(this.blackPixels);
             Point p;
-            double twoThirdHeight = (double) (2 * bitmap.getHeight()) / (double) 3;
+
+            final double twoThirdsHeight = (double) (2 * bitmap.getHeight()) / (double) 3;
             boolean isUnderscore = true;
             while (isUnderscore && !blackPixels.isEmpty()) {
                 p = blackPixels.remove();
-                if (p.y < twoThirdHeight) {
-                    isUnderscore = false;
-                }
+                isUnderscore = p.y >= twoThirdsHeight;
             }
             if (isUnderscore) {
                 label = "_";
@@ -826,8 +831,6 @@ public class ImageSkeletonizer {
 //                        }
 //                }
 //        }
-
-
     }
 
     private double calculateDissimilarity(double[] v1, double[] v2) {
