@@ -34,7 +34,7 @@ public class FeatureGenerator {
         }
     }
 
-    public static void generateFeatures() {
+    public static void generateFeaturesText() {
         // Open files
         File dataDir = new File("data");
         IOFileFilter filter = new IOFileFilter() {
@@ -81,7 +81,8 @@ public class FeatureGenerator {
 
                 BufferedImage img = ImageIO.read(f);
                 ImageSkeletonizer isk = new ImageSkeletonizer(img, 127);
-                features.append(isk.process(12, 50)).append(",\n");
+                double[] fe = isk.process(12, 50);
+                features.append(Arrays.toString(fe)).append(",\n");
             } catch (IOException ioe) {
                 ioe.printStackTrace();
             }
@@ -97,7 +98,68 @@ public class FeatureGenerator {
         }
     }
 
+    public static void generateFeaturesCsv() {
+        // Open files
+        File dataDir = new File("data");
+        IOFileFilter filter = new IOFileFilter() {
+            private final FileNameExtensionFilter filter =
+                    new FileNameExtensionFilter("Image files", ImageIO.getReaderFileSuffixes());
+            public boolean accept(File file) {
+                return filter.accept(file);
+            }
+            public boolean accept(File dir, String name) {
+                File file = new File(dir.getAbsolutePath() + name);
+                return filter.accept(file);
+            }
+        };
+
+        Iterator<File> fileIterator = FileUtils.iterateFilesAndDirs(dataDir, filter, TrueFileFilter.INSTANCE);
+        StringBuilder sb = new StringBuilder();
+        StringBuilder features = new StringBuilder().append("FEATURES\n");
+        StringBuilder labels = new StringBuilder().append("LABELS\n");
+
+        char prevLabel = '\0';
+        int k = 0;
+        while (fileIterator.hasNext()) {
+            try {
+                File f = fileIterator.next();
+                if (!f.isFile()) {
+                    continue;
+                }
+
+                char label = f.getParentFile().getName().charAt(0);
+                if (label == prevLabel) {
+                    if (++k > 10) {
+                        continue;
+                    }
+                } else {
+                    prevLabel = label;
+                    k = 1;
+                }
+
+                BufferedImage img = ImageIO.read(f);
+                ImageSkeletonizer isk = new ImageSkeletonizer(img, 127);
+                double[] fe = isk.process(12, 50);
+
+                for (double d: fe) {
+                    sb.append(d).append(", ");
+                }
+                sb.append(label).append("\n");
+
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
+            }
+        }
+
+        String fname = "ascii_features.csv";
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(fname))) {
+            bw.write(sb.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void main(String[] args) {
-        generateFeatures();
+        generateFeaturesCsv();
     }
 }

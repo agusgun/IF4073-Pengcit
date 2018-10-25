@@ -47,6 +47,8 @@ public class ImageSkeletonizer {
     private ArrayList<Point> singlePoints;
     private int numOfComponents;
     private double [] directionCodeFrequency;
+    private double[] verticalFeatures;
+    private double[] horizontalFeatures;
 
     private boolean [][] visited;
 
@@ -89,6 +91,12 @@ public class ImageSkeletonizer {
         removeStaircase();
         pruneSkeleton(distanceThreshold, counterThreshold);
         extractGeometricProperty();
+
+        List<Integer> boundary = findBoundary();
+        double[][] diagonalFeatures = calculateDiagonalFeatures(boundary.get(0), boundary.get(1), boundary.get(2), boundary.get(3));
+        Pair<double[], double[]> vhFeatures = calculateVerticalHorizontalFeatures(diagonalFeatures);
+        verticalFeatures = vhFeatures.first;
+        horizontalFeatures = vhFeatures.second;
 
         // Apply changes to bitmap
         applyChangesToBitmap();
@@ -601,8 +609,8 @@ public class ImageSkeletonizer {
         }
     }
 
-    public ArrayList<Point> findBoundary() {
-        ArrayList<Point> boundary = new ArrayList<>();
+    public ArrayList<Integer> findBoundary() {
+        ArrayList<Integer> boundary = new ArrayList<>();
         int minX = 9999, minY = 9999;
         int maxX = -9999, maxY = -9999;
 
@@ -625,10 +633,11 @@ public class ImageSkeletonizer {
                 }
             }
         }
-        Point boundaryX = new Point(minX, maxX);
-        Point boundaryY = new Point(minY, maxY);
-        boundary.add(boundaryX);
-        boundary.add(boundaryY);
+
+        boundary.add(minX);
+        boundary.add(maxX);
+        boundary.add(minY);
+        boundary.add(maxY);
         Log.d("Boundary:", Integer.toString(minX) + " " + Integer.toString(maxX) + " " +
                 Integer.toString(minY) + " " + Integer.toString(maxY));
         return boundary;
@@ -656,8 +665,8 @@ public class ImageSkeletonizer {
         return result;
     }
 
-    public float[][] calculateDiagonalFeatures(int minX, int maxX, int minY, int maxY) {
-        float[][] diagonalFeatures = new float[9][6];
+    public double[][] calculateDiagonalFeatures(int minX, int maxX, int minY, int maxY) {
+        double[][] diagonalFeatures = new double[9][6];
         int counterY = 0;
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 9; j++) {
@@ -684,12 +693,12 @@ public class ImageSkeletonizer {
         return diagonalFeatures;
     }
 
-    public Pair<float[], float[]> calculateVerticalHorizontalFeatures(float[][] diagonalFeatures) {
-        float[] verticalFeatures = new float[9];
-        float[] horizontalFeatures = new float[6];
+    public Pair<double[], double[]> calculateVerticalHorizontalFeatures(double[][] diagonalFeatures) {
+        double[] verticalFeatures = new double[9];
+        double[] horizontalFeatures = new double[6];
 
         for (int i = 0; i < 9; i++) {
-            float horizontal = 0;
+            double horizontal = 0;
             for (int j = 0; j < 6; j++) {
                 horizontal += diagonalFeatures[i][j];
             }
@@ -698,25 +707,26 @@ public class ImageSkeletonizer {
         }
 
         for (int j = 0; j < 6; j++) {
-            float vertical = 0;
+            double vertical = 0;
             for (int i = 0; i < 9; i++) {
                 vertical += diagonalFeatures[i][j];
             }
             vertical /= 9.0;
             horizontalFeatures[j] = vertical;
         }
-        Pair<float[], float[]> result = new Pair<>(verticalFeatures, horizontalFeatures);
-        return result;
+        return new Pair<>(verticalFeatures, horizontalFeatures);
     }
 
     public String predict() {
-        double[] features = new double[13];
+        double[] features = new double[28];
         features[0] = numOfComponents;
         features[1] = singlePoints.size();
         features[2] = endPoints.size();
         features[3] = intersections_3.size();
         features[4] = intersections_4.size();
         System.arraycopy(directionCodeFrequency, 0, features, 5, 8);
+        System.arraycopy(verticalFeatures, 0, features, 13, 9);
+        System.arraycopy(horizontalFeatures, 0, features, 22, 6);
 
         Log.d("Features", "{" + Double.toString(features[0]) + ", " +
                 Double.toString(features[1]) + ", " + Double.toString(features[2]) + ", " +

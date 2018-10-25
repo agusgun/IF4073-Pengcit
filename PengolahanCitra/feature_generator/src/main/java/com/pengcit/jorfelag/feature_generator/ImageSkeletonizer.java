@@ -39,6 +39,8 @@ public class ImageSkeletonizer {
     private ArrayList<Point> singlePoints;
     private int numOfComponents;
     private double [] directionCodeFrequency;
+    private double[] verticalFeatures;
+    private double[] horizontalFeatures;
 
     private boolean [][] visited;
 
@@ -69,7 +71,7 @@ public class ImageSkeletonizer {
         this.imageMatrix = convertToGrayMatrix();
     }
 
-    public String process(int distanceThreshold, int counterThreshold) {
+    public double[] process(int distanceThreshold, int counterThreshold) {
         // Pre-process
         smoothImage();
         emphasizeAcuteAngles();
@@ -82,21 +84,23 @@ public class ImageSkeletonizer {
         pruneSkeleton(distanceThreshold, counterThreshold);
         extractGeometricProperty();
 
-        double[] features = new double[13];
+        List<Integer> boundary = findBoundary();
+        double[][] diagonalFeatures = calculateDiagonalFeatures(boundary.get(0), boundary.get(1), boundary.get(2), boundary.get(3));
+        Pair<double[], double[]> vhFeatures = calculateVerticalHorizontalFeatures(diagonalFeatures);
+        verticalFeatures = vhFeatures.first;
+        horizontalFeatures = vhFeatures.second;
+
+        double[] features = new double[28];
         features[0] = numOfComponents;
         features[1] = singlePoints.size();
         features[2] = endPoints.size();
         features[3] = intersections_3.size();
         features[4] = intersections_4.size();
         System.arraycopy(directionCodeFrequency, 0, features, 5, 8);
+        System.arraycopy(verticalFeatures, 0, features, 13, 9);
+        System.arraycopy(horizontalFeatures, 0, features, 22, 6);
 
-        return ("{" + Double.toString(features[0]) + ", " +
-                Double.toString(features[1]) + ", " + Double.toString(features[2]) + ", " +
-                Double.toString(features[3]) + ", " + Double.toString(features[4]) + ", " +
-                Double.toString(features[5]) + ", " + Double.toString(features[6]) + ", " +
-                Double.toString(features[7]) + ", " + Double.toString(features[8]) + ", " +
-                Double.toString(features[9]) + ", " + Double.toString(features[10]) + ", " +
-                Double.toString(features[11]) + ", " + Double.toString(features[12]) + "}");
+        return features;
     }
 
     public BufferedImage getBufferedImage() {
@@ -581,8 +585,8 @@ public class ImageSkeletonizer {
         }
     }
 
-    public ArrayList<Point> findBoundary() {
-        ArrayList<Point> boundary = new ArrayList<>();
+    public ArrayList<Integer> findBoundary() {
+        ArrayList<Integer> boundary = new ArrayList<>();
         int minX = 9999, minY = 9999;
         int maxX = -9999, maxY = -9999;
 
@@ -605,12 +609,11 @@ public class ImageSkeletonizer {
                 }
             }
         }
-        Point boundaryX = new Point(minX, maxX);
-        Point boundaryY = new Point(minY, maxY);
-        boundary.add(boundaryX);
-        boundary.add(boundaryY);
-//        Log.d("Boundary:", Integer.toString(minX) + " " + Integer.toString(maxX) + " " +
-//                Integer.toString(minY) + " " + Integer.toString(maxY));
+
+        boundary.add(minX);
+        boundary.add(maxX);
+        boundary.add(minY);
+        boundary.add(maxY);
         return boundary;
     }
 
@@ -619,7 +622,7 @@ public class ImageSkeletonizer {
         int matrixSize = 10;
 
         for (int i = 0; i < matrixSize; i++) {
-            for (int j = 0; j < i + 1; j++) {
+            for (int j = 0; j < i; j++) {
                 if (matrix[j][i - j] == 0) {
                     result += 1;
                 }
@@ -636,11 +639,11 @@ public class ImageSkeletonizer {
         return result;
     }
 
-    public float[][] calculateDiagonalFeatures(int minX, int maxX, int minY, int maxY) {
-        float[][] diagonalFeatures = new float[9][6];
+    public double[][] calculateDiagonalFeatures(int minX, int maxX, int minY, int maxY) {
+        double[][] diagonalFeatures = new double[9][6];
         int counterY = 0;
         for (int i = 0; i < 9; i++) {
-            for (int j = 0; j < 9; j++) {
+            for (int j = 0; j < 6; j++) {
                 diagonalFeatures[i][j] = 0;
             }
         }
@@ -654,7 +657,9 @@ public class ImageSkeletonizer {
                 if (j + 10 > maxX || counterX > 6) break;
                 int[][] diagonalMatrix = new int[10][10];
                 for (int k = 0; k < 10; k++) {
-                    System.arraycopy(imageMatrix[i + k], j, diagonalMatrix[k], 0, 10);
+                    for (int l = 0; l < 10; l++) {
+                        diagonalMatrix[k][l] = imageMatrix[i + k][j + l];
+                    }
                 }
                 diagonalFeatures[i][j] = calculateFeature(diagonalMatrix);
             }
@@ -662,12 +667,12 @@ public class ImageSkeletonizer {
         return diagonalFeatures;
     }
 
-    public Pair<float[], float[]> calculateVerticalHorizontalFeatures(float[][] diagonalFeatures) {
-        float[] verticalFeatures = new float[9];
-        float[] horizontalFeatures = new float[6];
+    public Pair<double[], double[]> calculateVerticalHorizontalFeatures(double[][] diagonalFeatures) {
+        double[] verticalFeatures = new double[9];
+        double[] horizontalFeatures = new double[6];
 
         for (int i = 0; i < 9; i++) {
-            float horizontal = 0;
+            double horizontal = 0;
             for (int j = 0; j < 6; j++) {
                 horizontal += diagonalFeatures[i][j];
             }
@@ -676,7 +681,7 @@ public class ImageSkeletonizer {
         }
 
         for (int j = 0; j < 6; j++) {
-            float vertical = 0;
+            double vertical = 0;
             for (int i = 0; i < 9; i++) {
                 vertical += diagonalFeatures[i][j];
             }
