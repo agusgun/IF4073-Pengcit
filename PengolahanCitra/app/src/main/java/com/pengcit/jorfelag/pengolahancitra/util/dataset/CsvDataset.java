@@ -18,7 +18,7 @@ public class CsvDataset extends Dataset {
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream[0]))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                final String[] split = line.split(",");
+                final String[] split = line.split(", ");
                 final double[] features = new double[split.length - 1];
                 for (int i = 0; i < split.length - 1; i++)
                     features[i] = Double.parseDouble(split[i]);
