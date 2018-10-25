@@ -55,7 +55,7 @@ public class ImageSkeletonizer {
             resizedHeight = Math.min(height, resizedWidth * height / width);
         }
 
-        this.bitmap = Util.resize(bitmap, resizedHeight, resizedHeight);
+        this.bitmap = Util.resize(bitmap, resizedHeight, resizedWidth);
         this.threshold = threshold;
 
         this.blackPixels = new ConcurrentLinkedQueue<>();

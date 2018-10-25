@@ -1,9 +1,19 @@
 package com.pengcit.jorfelag.feature_generator;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.IOFileFilter;
+import org.apache.commons.io.filefilter.TrueFileFilter;
+
+import java.awt.image.BufferedImage;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Iterator;
+
+import javax.imageio.ImageIO;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class FeatureGenerator {
 
@@ -24,27 +34,70 @@ public class FeatureGenerator {
         }
     }
 
-    public static void main(String[] args) {
+    public static void generateFeatures() {
         // Open files
-//        File dataDir = new File("data");
-//        IOFileFilter filter = new IOFileFilter() {
-//            private final FileNameExtensionFilter filter =
-//                    new FileNameExtensionFilter("Image files", ImageIO.getReaderFileSuffixes());
-//            public boolean accept(File file) {
-//                return filter.accept(file);
-//            }
-//            public boolean accept(File dir, String name) {
-//                File file = new File(dir.getAbsolutePath() + name);
-//                return filter.accept(file);
-//            }
-//        };
-//
-//        Iterator<File> fileIterator = FileUtils.iterateFilesAndDirs(dataDir, filter, TrueFileFilter.INSTANCE);
-//        while (fileIterator.hasNext()) {
-//            File f = fileIterator.next();
-//
-//            System.out.println(f.getAbsolutePath());
-//        }
-        convertASCIIFeaturesToCSV();
+        File dataDir = new File("data");
+        IOFileFilter filter = new IOFileFilter() {
+            private final FileNameExtensionFilter filter =
+                    new FileNameExtensionFilter("Image files", ImageIO.getReaderFileSuffixes());
+            public boolean accept(File file) {
+                return filter.accept(file);
+            }
+            public boolean accept(File dir, String name) {
+                File file = new File(dir.getAbsolutePath() + name);
+                return filter.accept(file);
+            }
+        };
+
+        Iterator<File> fileIterator = FileUtils.iterateFilesAndDirs(dataDir, filter, TrueFileFilter.INSTANCE);
+        StringBuilder features = new StringBuilder().append("FEATURES\n");
+        StringBuilder labels = new StringBuilder().append("LABELS\n");
+
+        int n = 0;
+        char prevLabel = '\0';
+        int k = 0;
+        while (fileIterator.hasNext()) {
+            try {
+                File f = fileIterator.next();
+                if (!f.isFile()) {
+                    continue;
+                }
+
+                char label = f.getParentFile().getName().charAt(0);
+                if (label == prevLabel) {
+                    if (++k > 5) {
+                        continue;
+                    }
+                } else {
+                    prevLabel = label;
+                    k = 1;
+                }
+
+                labels.append("\'").append(label).append("\', ");
+
+                if (++n % 10 == 0) {
+                    labels.append('\n');
+                }
+
+                BufferedImage img = ImageIO.read(f);
+                ImageSkeletonizer isk = new ImageSkeletonizer(img, 127);
+                features.append(isk.process(12, 50)).append(",\n");
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
+            }
+        }
+
+        String fname = "ascii_features.txt";
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(fname))) {
+            bw.write(labels.toString());
+            bw.write("\n\n");
+            bw.write(features.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void main(String[] args) {
+        generateFeatures();
     }
 }
