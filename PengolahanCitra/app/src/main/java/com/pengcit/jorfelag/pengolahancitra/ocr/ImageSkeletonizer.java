@@ -669,7 +669,7 @@ public class ImageSkeletonizer {
         double[][] diagonalFeatures = new double[9][6];
         int counterY = 0;
         for (int i = 0; i < 9; i++) {
-            for (int j = 0; j < 9; j++) {
+            for (int j = 0; j < 6; j++) {
                 diagonalFeatures[i][j] = 0;
             }
         }
@@ -687,7 +687,7 @@ public class ImageSkeletonizer {
                         diagonalMatrix[k][l] = imageMatrix[i + k][j + l];
                     }
                 }
-                diagonalFeatures[i][j] = calculateFeature(diagonalMatrix);
+                diagonalFeatures[counterY - 1][counterX - 1] = calculateFeature(diagonalMatrix);
             }
         }
         return diagonalFeatures;
@@ -724,6 +724,12 @@ public class ImageSkeletonizer {
         features[2] = endPoints.size();
         features[3] = intersections_3.size();
         features[4] = intersections_4.size();
+        ArrayList<Integer> boundary = findBoundary();
+        Log.d("Boundary", Integer.toString(boundary.get(0)) + " " + Integer.toString(boundary.get(1)) +
+                " " + Integer.toString(boundary.get(2)) + " " + Integer.toString(boundary.get(3)));
+        double[][] diagonalFeatures = calculateDiagonalFeatures(boundary.get(0), boundary.get(1),
+                boundary.get(2), boundary.get(3));
+
         System.arraycopy(directionCodeFrequency, 0, features, 5, 8);
         System.arraycopy(verticalFeatures, 0, features, 13, 9);
         System.arraycopy(horizontalFeatures, 0, features, 22, 6);
