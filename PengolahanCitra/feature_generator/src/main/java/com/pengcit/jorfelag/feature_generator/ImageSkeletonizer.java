@@ -29,7 +29,7 @@ public class ImageSkeletonizer {
     private final static int MIN_RESIZED_WIDTH = 64;
 
     private BufferedImage bitmap;
-    private int[][] imageMatrix;
+    public int[][] imageMatrix;
     private int threshold;
     private Queue<Point> blackPixels;
 
@@ -57,7 +57,7 @@ public class ImageSkeletonizer {
             resizedHeight = Math.min(height, resizedWidth * height / width);
         }
 
-        this.bitmap = Util.resize(bitmap, resizedHeight, resizedWidth);
+        this.bitmap = Util.resize(bitmap, resizedWidth, resizedHeight);
         this.threshold = threshold;
 
         this.blackPixels = new ConcurrentLinkedQueue<>();
@@ -585,7 +585,6 @@ public class ImageSkeletonizer {
         }
     }
 
-
     public ArrayList<Integer> findBoundary() {
         ArrayList<Integer> boundary = new ArrayList<>();
         int minX = 9999, minY = 9999;
@@ -691,7 +690,7 @@ public class ImageSkeletonizer {
         }
         return new Pair<>(verticalFeatures, horizontalFeatures);
     }
-
+    
     private double calculateDissimilarity(double[] v1, double[] v2) {
         double result = 0;
         double error;

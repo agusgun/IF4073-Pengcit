@@ -26,7 +26,7 @@ public class FeatureGenerator {
                 String s = Arrays.toString(ASCIIFeatures.features_vector[i]);
                 s = s.substring(1, s.length() - 1);
 
-                s += ", \"" + ASCIIFeatures.labels[i] + "\"\n";
+                s += ASCIIFeatures.labels[i] + "\n";
                 bw.write(s);
             }
         } catch (IOException e) {
@@ -130,7 +130,7 @@ public class FeatureGenerator {
 
                 char label = f.getParentFile().getName().charAt(0);
                 if (label == prevLabel) {
-                    if (++k > 10) {
+                    if (++k > 20) {
                         continue;
                     }
                 } else {
@@ -140,7 +140,12 @@ public class FeatureGenerator {
 
                 BufferedImage img = ImageIO.read(f);
                 ImageSkeletonizer isk = new ImageSkeletonizer(img, 127);
+
                 double[] fe = isk.process(12, 50);
+
+                if (f.getPath().equals("data\\0\\0.png")) {
+                    System.out.println(Arrays.toString(fe));
+                }
 
                 for (double d: fe) {
                     sb.append(d).append(", ");

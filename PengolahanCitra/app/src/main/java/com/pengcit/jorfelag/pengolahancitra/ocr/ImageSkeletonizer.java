@@ -4,13 +4,13 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.util.Log;
-import android.util.MutableBoolean;
 import android.util.Pair;
 
 import com.pengcit.jorfelag.pengolahancitra.util.LoopBody;
 import com.pengcit.jorfelag.pengolahancitra.util.Parallel;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -229,8 +229,8 @@ public class ImageSkeletonizer {
      * Skeletonize using Zhang-Suen algorithm
      */
     private void skeletonize() {
-        final MutableBoolean firstStep = new MutableBoolean(false);
-        final MutableBoolean hasChanged = new MutableBoolean(false);
+        boolean firstStep = false;
+        boolean hasChanged = false;
 
         Queue<Point> toClear = new LinkedList<>();
         Queue<Point> step2 = new LinkedList<>();
@@ -238,12 +238,12 @@ public class ImageSkeletonizer {
         Point p;
 
         do {
-            firstStep.value = !firstStep.value;
-            if (firstStep.value) {
-                hasChanged.value = false;
+            firstStep = !firstStep;
+            if (firstStep) {
+                hasChanged = false;
             }
 
-            if (firstStep.value) {
+            if (firstStep) {
                 temp = blackPixels;
             } else {
                 temp = step2;
@@ -255,11 +255,11 @@ public class ImageSkeletonizer {
                 int blackNeighbors = countBlackNeighbors(neighbors);
                 int transitions = getTransitions(neighbors);
 
-                if (blackNeighbors >= 2 && blackNeighbors <= 6 && transitions == 1 && atLeastOneIsWhite(neighbors, firstStep.value)) {
+                if (blackNeighbors >= 2 && blackNeighbors <= 6 && transitions == 1 && atLeastOneIsWhite(neighbors, firstStep)) {
                     toClear.add(p);
-                    hasChanged.value = true;
+                    hasChanged = true;
                 } else {
-                    if (firstStep.value) {
+                    if (firstStep) {
                         step2.add(p);
                     } else {
                         blackPixels.add(p);
@@ -271,7 +271,7 @@ public class ImageSkeletonizer {
                 p = toClear.remove();
                 imageMatrix[p.y][p.x] = 255;
             }
-        } while (firstStep.value || hasChanged.value);
+        } while (firstStep || hasChanged);
     }
 
     private void smoothImage() {
@@ -754,16 +754,25 @@ public class ImageSkeletonizer {
 //            }
 //        }
 
+        Log.d("SIZE", bitmap.getWidth() + " " + bitmap.getHeight());
+
         List<String> labels = ASCIIDataset.instance.getLabelsList();
         List<double[]> featuresData = ASCIIDataset.instance.getFeaturesList();
 
+        int minI = 0;
         for (int i = 0; i < labels.size(); ++i) {
             dissimilarity = calculateDissimilarity(features, featuresData.get(i));
             if (dissimilarity < minDissimilarity) {
                 label = labels.get(i);
                 minDissimilarity = dissimilarity;
+                minI = i;
             }
         }
+
+        Log.d("Curr features", Arrays.toString(features));
+        Log.d("Closest Features", Arrays.toString(featuresData.get(minI)));
+        Log.d("Distance", Double.toString(minDissimilarity));
+        Log.d("Label", label);
 
         if (label.equals(" ")) {
             label = "space";
