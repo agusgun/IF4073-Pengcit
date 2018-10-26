@@ -21,6 +21,8 @@ import android.widget.Toast;
 import com.pengcit.jorfelag.pengolahancitra.R;
 import com.pengcit.jorfelag.pengolahancitra.SharedViewModel;
 
+import java.io.IOException;
+
 public class OCRFragment extends Fragment {
 
     private SharedViewModel model;
@@ -124,6 +126,17 @@ public class OCRFragment extends Fragment {
                 fr.commitButton.setVisibility(View.GONE);
             }
         });
+
+        // Init ASCII dataset
+        try {
+            if (ASCIIDataset.instance == null) {
+                ASCIIDataset.init(view.getContext());
+            }
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+            Toast.makeText(view.getContext(),
+                    "Unable to init char dataset", Toast.LENGTH_SHORT).show();
+        }
 
         return view;
     }

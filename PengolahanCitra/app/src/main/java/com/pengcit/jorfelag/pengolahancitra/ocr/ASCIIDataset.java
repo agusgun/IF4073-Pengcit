@@ -11,7 +11,7 @@ import java.io.InputStream;
 
 public class ASCIIDataset {
 
-    public static Dataset instance;
+    public static Dataset instance = null;
 
     private ASCIIDataset() {}
 

@@ -746,13 +746,25 @@ public class ImageSkeletonizer {
         double dissimilarity = 0;
         String label = "unknown";
 
-        for (int i = 0; i < ASCIIFeatures.labels.length; i++) {
-            dissimilarity = calculateDissimilarity(features, ASCIIFeatures.features_vector[i]);
+//        for (int i = 0; i < ASCIIFeatures.labels.length; i++) {
+//            dissimilarity = calculateDissimilarity(features, ASCIIFeatures.features_vector[i]);
+//            if (dissimilarity < minDissimilarity) {
+//                minDissimilarity = dissimilarity;
+//                label = Character.toString(ASCIIFeatures.labels[i]);
+//            }
+//        }
+
+        List<String> labels = ASCIIDataset.instance.getLabelsList();
+        List<double[]> featuresData = ASCIIDataset.instance.getFeaturesList();
+
+        for (int i = 0; i < labels.size(); ++i) {
+            dissimilarity = calculateDissimilarity(features, featuresData.get(i));
             if (dissimilarity < minDissimilarity) {
+                label = labels.get(i);
                 minDissimilarity = dissimilarity;
-                label = Character.toString(ASCIIFeatures.labels[i]);
             }
         }
+
         if (label.equals(" ")) {
             label = "space";
         }

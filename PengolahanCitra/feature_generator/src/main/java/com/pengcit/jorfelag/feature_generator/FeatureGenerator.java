@@ -126,6 +126,7 @@ public class FeatureGenerator {
                 if (!f.isFile()) {
                     continue;
                 }
+                System.out.println(f.getPath());
 
                 char label = f.getParentFile().getName().charAt(0);
                 if (label == prevLabel) {

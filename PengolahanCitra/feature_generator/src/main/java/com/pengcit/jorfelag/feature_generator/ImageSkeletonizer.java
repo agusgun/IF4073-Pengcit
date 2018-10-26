@@ -585,6 +585,7 @@ public class ImageSkeletonizer {
         }
     }
 
+
     public ArrayList<Integer> findBoundary() {
         ArrayList<Integer> boundary = new ArrayList<>();
         int minX = 9999, minY = 9999;
@@ -622,7 +623,7 @@ public class ImageSkeletonizer {
         int matrixSize = 10;
 
         for (int i = 0; i < matrixSize; i++) {
-            for (int j = 0; j < i; j++) {
+            for (int j = 0; j < i + 1; j++) {
                 if (matrix[j][i - j] == 0) {
                     result += 1;
                 }
@@ -661,7 +662,7 @@ public class ImageSkeletonizer {
                         diagonalMatrix[k][l] = imageMatrix[i + k][j + l];
                     }
                 }
-                diagonalFeatures[i][j] = calculateFeature(diagonalMatrix);
+                diagonalFeatures[counterY - 1][counterX - 1] = calculateFeature(diagonalMatrix);
             }
         }
         return diagonalFeatures;
