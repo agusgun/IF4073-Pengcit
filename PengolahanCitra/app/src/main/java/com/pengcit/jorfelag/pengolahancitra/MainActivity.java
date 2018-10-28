@@ -17,6 +17,7 @@ import com.pengcit.jorfelag.pengolahancitra.contrast_enhancement.ContrastEnhance
 import com.pengcit.jorfelag.pengolahancitra.contrast_enhancement.HistogramSpecificationFragment;
 import com.pengcit.jorfelag.pengolahancitra.histogram.ShowHistogramFragment;
 import com.pengcit.jorfelag.pengolahancitra.ocr.OCRFragment;
+import com.pengcit.jorfelag.pengolahancitra.preprocess.PreprocessOperatorFragment;
 
 import java.util.Locale;
 
@@ -25,7 +26,8 @@ public class MainActivity extends AppCompatActivity implements
         ShowHistogramFragment.OnFragmentInteractionListener,
         ContrastEnhancementFragment.OnFragmentInteractionListener,
         HistogramSpecificationFragment.OnFragmentInteractionListener,
-        OCRFragment.OnFragmentInteractionListener {
+        OCRFragment.OnFragmentInteractionListener,
+        PreprocessOperatorFragment.OnFragmentInteractionListener {
 
     private TextToSpeech textToSpeech;
 
@@ -70,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements
         tabLayout.addTab(tabLayout.newTab().setText("Enhance Contrast"));
         tabLayout.addTab(tabLayout.newTab().setText("Histogram Specification"));
         tabLayout.addTab(tabLayout.newTab().setText("OCR"));
+        tabLayout.addTab(tabLayout.newTab().setText("Preprocess Operator"));
 
         final ViewPager viewPager = findViewById(R.id.main_act_pager);
         final PagerAdapter adapter = new TabPagerAdapter(

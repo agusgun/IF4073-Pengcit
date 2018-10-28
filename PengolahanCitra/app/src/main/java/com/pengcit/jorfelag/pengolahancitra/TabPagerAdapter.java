@@ -8,6 +8,7 @@ import com.pengcit.jorfelag.pengolahancitra.contrast_enhancement.ContrastEnhance
 import com.pengcit.jorfelag.pengolahancitra.contrast_enhancement.HistogramSpecificationFragment;
 import com.pengcit.jorfelag.pengolahancitra.histogram.ShowHistogramFragment;
 import com.pengcit.jorfelag.pengolahancitra.ocr.OCRFragment;
+import com.pengcit.jorfelag.pengolahancitra.preprocess.PreprocessOperatorFragment;
 
 public class TabPagerAdapter extends FragmentPagerAdapter {
 
@@ -32,6 +33,8 @@ public class TabPagerAdapter extends FragmentPagerAdapter {
                 return new HistogramSpecificationFragment();
             case 4:
                 return new OCRFragment();
+            case 5:
+                return new PreprocessOperatorFragment();
             default:
                 return null;
         }

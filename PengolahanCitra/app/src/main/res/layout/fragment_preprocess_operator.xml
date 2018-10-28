@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".preprocess.PreprocessOperatorFragment">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <Spinner
+            android:id="@+id/preprocess_operator_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true" />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginBottom="48dp"
+            android:focusableInTouchMode="true">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/preprocess_operator_fr_iv_orig"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_margin="5dp"
+                    android:adjustViewBounds="true"
+                    android:minHeight="200dp"
+                    android:minWidth="150dp"
+                    android:scaleType="fitCenter" />
+
+                <TextView
+                    android:id="@+id/preprocess_operator_fr_tv_load_first"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/preprocess_operator_fr_iv_orig"
+                    android:layout_centerHorizontal="true"
+                    android:text="@string/load_image_fr_tv_text" />
+
+
+                <Button
+                    android:id="@+id/preprocess_operator_fr_btn_process"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/preprocess_operator_fr_iv_orig"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginEnd="50dp"
+                    android:layout_marginStart="50dp"
+                    android:text="@string/contrast_enhancement_fr_btn_process_text" />
+
+                <ImageView
+                    android:id="@+id/preprocess_operator_fr_iv_result"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/preprocess_operator_fr_btn_process"
+                    android:layout_centerHorizontal="true"
+                    android:layout_margin="5dp"
+                    android:adjustViewBounds="true"
+                    android:minHeight="200dp"
+                    android:minWidth="150dp"
+                    android:scaleType="fitCenter" />
+
+                <Button
+                    android:id="@+id/preprocess_operator_fr_btn_commit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/preprocess_operator_fr_iv_result"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginEnd="50dp"
+                    android:layout_marginStart="50dp"
+                    android:text="@string/contrast_enhancement_fr_btn_commit_text"
+                    android:visibility="gone" />
+
+            </RelativeLayout>
+
+        </ScrollView>
+
+    </RelativeLayout>
+
+</FrameLayout>

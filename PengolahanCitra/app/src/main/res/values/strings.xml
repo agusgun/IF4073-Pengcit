@@ -33,4 +33,13 @@
         <item>Power Law</item>
         <item>Negative</item>
     </string-array>
+
+    <string-array name="preprocess_operator_method">
+        <item>Median Filter</item>
+        <item>Difference Operator</item>
+        <item>Difference Homogen Operator</item>
+    </string-array>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
