@@ -12,10 +12,12 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,15 +31,20 @@ public class PreprocessOperatorFragment extends Fragment {
 
     private final static int MEDIAN_FILTER = 0;
     private final static int DIFFERENCE_OPERATOR = 1;
-    private final static int DIFFERENCE_HOMOGEN_OPERATOR = 2;
+    private final static int GRADIENT_OPERATOR = 2;
+
+    private final static int SOBEL = 0;
+    private final static int SCHARR = 1;
 
     private ImageView originalImageView;
     private ImageView resultImageView;
     private TextView loadTextView;
     private EditText kernelSizeEditText;
+    private LinearLayout kernelLinearLayout;
     private Button processButton;
     private Button commitButton;
     private Spinner spinner;
+    private Spinner kernelSpinner;
     private SharedViewModel model;
     private Bitmap originalBitmap;
     private Bitmap resultBitmap;
@@ -60,9 +67,11 @@ public class PreprocessOperatorFragment extends Fragment {
         resultImageView = view.findViewById(R.id.preprocess_operator_fr_iv_result);
         loadTextView = view.findViewById(R.id.preprocess_operator_fr_tv_load_first);
         kernelSizeEditText = view.findViewById(R.id.preprocess_operator_fr_tv_kernel_size);
+        kernelLinearLayout = view.findViewById(R.id.preprocess_operator_layout_kernel);
         processButton = view.findViewById(R.id.preprocess_operator_fr_btn_process);
         commitButton = view.findViewById(R.id.preprocess_operator_fr_btn_commit);
         spinner = view.findViewById(R.id.preprocess_operator_spinner);
+        kernelSpinner = view.findViewById(R.id.preprocess_operator_spinner_kernel);
 
         model = ViewModelProviders.of(getActivity()).get(SharedViewModel.class);
         model.getBitmapLiveData().observe(this, new Observer<Bitmap>() {
@@ -87,6 +96,33 @@ public class PreprocessOperatorFragment extends Fragment {
         );
         methodListAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
         spinner.setAdapter(methodListAdapter);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position == MEDIAN_FILTER) {
+                    kernelSizeEditText.setVisibility(View.VISIBLE);
+                } else {
+                    kernelSizeEditText.setVisibility(View.INVISIBLE);
+                }
+
+                if (position == GRADIENT_OPERATOR) {
+                    kernelLinearLayout.setVisibility(View.VISIBLE);
+                } else {
+                    kernelLinearLayout.setVisibility(View.INVISIBLE);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) { }
+        });
+
+        ArrayAdapter<CharSequence> kernelListAdapter = ArrayAdapter.createFromResource(
+                view.getContext(),
+                R.array.gradient_operator_kernel,
+                R.layout.support_simple_spinner_dropdown_item
+        );
+        kernelListAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
+        kernelSpinner.setAdapter(kernelListAdapter);
 
         // Process button listener
         final PreprocessOperatorFragment fr = this;
@@ -99,23 +135,13 @@ public class PreprocessOperatorFragment extends Fragment {
                     return;
                 }
 
-                int kernelSize;
-                try {
-                    kernelSize = Integer.parseInt(kernelSizeEditText.getText().toString());
-                } catch (NumberFormatException e) {
-                    Toast.makeText(fr.getContext(),
-                            "Invalid weight input", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                if (kernelSize % 2 == 0 || kernelSize <= 1) {
-                    Toast.makeText(fr.getContext(),
-                            "Kernel size must be an odd number larger than 1", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
                 switch (spinner.getSelectedItemPosition()) {
                     case MEDIAN_FILTER:
+                        int kernelSize = getKernelSize();
+                        if (kernelSize == -1) {
+                            return;
+                        }
+
                         Toast.makeText(getContext(), "Median Filter", Toast.LENGTH_SHORT).show();
                         new MedianFilterTask(fr, kernelSize).execute(originalBitmap);
                         break;
@@ -123,8 +149,9 @@ public class PreprocessOperatorFragment extends Fragment {
                         Toast.makeText(getContext(), "Difference", Toast.LENGTH_SHORT).show();
                         new DifferenceOperatorTask(fr).execute(originalBitmap);
                         break;
-                    case DIFFERENCE_HOMOGEN_OPERATOR:
-                        Toast.makeText(getContext(), "Difference Homogen", Toast.LENGTH_SHORT).show();
+                    case GRADIENT_OPERATOR:
+                        Toast.makeText(getContext(), "Gradient", Toast.LENGTH_SHORT).show();
+                        new GradientOperatorTask(fr, kernelSpinner.getSelectedItemPosition()).execute(originalBitmap);
                         break;
                 }
             }
@@ -164,6 +191,24 @@ public class PreprocessOperatorFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    public int getKernelSize() {
+        int kernelSize;
+        try {
+            kernelSize = Integer.parseInt(kernelSizeEditText.getText().toString());
+        } catch (NumberFormatException e) {
+            Toast.makeText(getContext(),
+                    "Invalid weight input", Toast.LENGTH_SHORT).show();
+            return -1;
+        }
+
+        if (kernelSize % 2 == 0 || kernelSize <= 1) {
+            Toast.makeText(getContext(),
+                    "Kernel size must be an odd number larger than 1", Toast.LENGTH_SHORT).show();
+            return -1;
+        }
+        return kernelSize;
     }
 
     public void setResultImageView(Bitmap bitmap) {

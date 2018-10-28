@@ -37,10 +37,13 @@
     <string-array name="preprocess_operator_method">
         <item>Median Filter</item>
         <item>Difference Operator</item>
-        <item>Difference Homogen Operator</item>
+        <item>Gradient Operator</item>
     </string-array>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string-array name="gradient_operator_kernel">
+        <item>Sobel-Feldman</item>
+        <item>Scharr</item>
+    </string-array>
+
     <string name="kernel_size">Kernel Size</string>
 </resources>
