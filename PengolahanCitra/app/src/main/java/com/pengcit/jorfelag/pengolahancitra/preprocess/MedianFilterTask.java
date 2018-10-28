@@ -5,8 +5,6 @@ import android.graphics.Bitmap;
 import com.pengcit.jorfelag.pengolahancitra.util.LoopBody;
 import com.pengcit.jorfelag.pengolahancitra.util.Parallel;
 
-import java.util.Arrays;
-
 public class MedianFilterTask extends BaseFilterTask {
 
     private int kernelSize;
@@ -77,32 +75,57 @@ public class MedianFilterTask extends BaseFilterTask {
 
                 // Placeholder
                 final int[] resultPixels = new int[width];
+
+                // Init histogram
                 final int[] red = new int[256];
                 final int[] green = new int[256];
                 final int[] blue = new int[256];
 
+                int pixel;
+                for (int i = 0; i < kernelSize; ++i) {
+                    for (int j = 0; j < kernelSize; ++j) {
+                        pixel = processedPixels[i * paddedWidth + j];
+                        red[(pixel & 0x00FF0000) >> 16]++;
+                        green[(pixel & 0x0000FF00) >> 8]++;
+                        blue[(pixel & 0x000000FF)]++;
+                    }
+                }
+
+                int[][] cache = new int[kernelSize][];
+                for (int i = 0; i < kernelSize; ++i) {
+                    cache[i] = new int[kernelSize];
+                    for (int j = 0; j < kernelSize; j++) {
+                        cache[i][j] = processedPixels[j * paddedWidth + i];
+                    }
+                }
+
                 // Traverse width
                 for (int x = 0; x < width; ++x) {
-                    // Separate channels
-                    Arrays.fill(red, 0);
-                    Arrays.fill(green, 0);
-                    Arrays.fill(blue, 0);
-
-                    for (int i = 0; i < kernelSize; ++i) {
-                        for (int j = 0; j < kernelSize; ++j) {
-                            int pixel = processedPixels[i * paddedWidth + x + j];
-
-                            red[(pixel & 0x00FF0000) >> 16]++;
-                            green[(pixel & 0x0000FF00) >> 8]++;
-                            blue[(pixel & 0x000000FF)]++;
-                        }
-                    }
-
                     // Put median in result
                     resultPixels[x] = (0xFF << 24)
                             | (medianOfHistogram(red) << 16)
                             | (medianOfHistogram(green) << 8)
                             | medianOfHistogram(blue);
+
+                    // Slide histogram
+                    if (x == width - 1) {
+                        break;
+                    }
+
+                    // Slide histogram
+                    for (int i = 0; i < kernelSize; ++i) {
+                        pixel = cache[x % kernelSize][i];
+                        red[(pixel & 0x00FF0000) >> 16]--;
+                        green[(pixel & 0x0000FF00) >> 8]--;
+                        blue[(pixel & 0x000000FF)]--;
+                    }
+                    for (int i = 0; i < kernelSize; ++i) {
+                        pixel = processedPixels[i * paddedWidth + x + kernelSize];
+                        red[(pixel & 0x00FF0000) >> 16]++;
+                        green[(pixel & 0x0000FF00) >> 8]++;
+                        blue[(pixel & 0x000000FF)]++;
+                        cache[x % kernelSize][i] = pixel;
+                    }
                 }
 
                 processedBitmap.setPixels(resultPixels, 0, width, 0, y, width, 1);
