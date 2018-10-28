@@ -7,13 +7,14 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -33,6 +34,7 @@ public class PreprocessOperatorFragment extends Fragment {
     private ImageView originalImageView;
     private ImageView resultImageView;
     private TextView loadTextView;
+    private EditText kernelSizeEditText;
     private Button processButton;
     private Button commitButton;
     private Spinner spinner;
@@ -57,6 +59,7 @@ public class PreprocessOperatorFragment extends Fragment {
         originalImageView = view.findViewById(R.id.preprocess_operator_fr_iv_orig);
         resultImageView = view.findViewById(R.id.preprocess_operator_fr_iv_result);
         loadTextView = view.findViewById(R.id.preprocess_operator_fr_tv_load_first);
+        kernelSizeEditText = view.findViewById(R.id.preprocess_operator_fr_tv_kernel_size);
         processButton = view.findViewById(R.id.preprocess_operator_fr_btn_process);
         commitButton = view.findViewById(R.id.preprocess_operator_fr_btn_commit);
         spinner = view.findViewById(R.id.preprocess_operator_spinner);
@@ -90,22 +93,39 @@ public class PreprocessOperatorFragment extends Fragment {
         processButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (originalBitmap != null) {
-                    switch (spinner.getSelectedItemPosition()) {
-                        case MEDIAN_FILTER:
-                            Toast.makeText(getContext(), "Median Filter", Toast.LENGTH_SHORT).show();
-                            break;
-                        case DIFFERENCE_OPERATOR:
-                            Toast.makeText(getContext(), "Difference", Toast.LENGTH_SHORT).show();
-                            new DifferenceOperatorTask(fr).execute(originalBitmap);
-                            break;
-                        case DIFFERENCE_HOMOGEN_OPERATOR:
-                            Toast.makeText(getContext(), "Difference Homogen", Toast.LENGTH_SHORT).show();
-                            break;
-                    }
-                } else {
+                if (originalBitmap == null) {
                     Toast.makeText(fr.getContext(),
                             R.string.ask_to_select_or_capture_an_image, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                int kernelSize;
+                try {
+                    kernelSize = Integer.parseInt(kernelSizeEditText.getText().toString());
+                } catch (NumberFormatException e) {
+                    Toast.makeText(fr.getContext(),
+                            "Invalid weight input", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (kernelSize % 2 == 0 || kernelSize <= 1) {
+                    Toast.makeText(fr.getContext(),
+                            "Kernel size must be an odd number larger than 1", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                switch (spinner.getSelectedItemPosition()) {
+                    case MEDIAN_FILTER:
+                        Toast.makeText(getContext(), "Median Filter", Toast.LENGTH_SHORT).show();
+                        new MedianFilterTask(fr, kernelSize).execute(originalBitmap);
+                        break;
+                    case DIFFERENCE_OPERATOR:
+                        Toast.makeText(getContext(), "Difference", Toast.LENGTH_SHORT).show();
+                        new DifferenceOperatorTask(fr).execute(originalBitmap);
+                        break;
+                    case DIFFERENCE_HOMOGEN_OPERATOR:
+                        Toast.makeText(getContext(), "Difference Homogen", Toast.LENGTH_SHORT).show();
+                        break;
                 }
             }
         });
