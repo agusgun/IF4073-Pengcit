@@ -3,8 +3,9 @@ package com.pengcit.jorfelag.pengolahancitra.preprocess;
 import android.graphics.Bitmap;
 
 import com.pengcit.jorfelag.pengolahancitra.util.LoopBody;
-import com.pengcit.jorfelag.pengolahancitra.util.Median;
 import com.pengcit.jorfelag.pengolahancitra.util.Parallel;
+
+import java.util.Arrays;
 
 public class MedianFilterTask extends BaseFilterTask {
 
@@ -36,66 +37,72 @@ public class MedianFilterTask extends BaseFilterTask {
         Parallel.For(0, height, new LoopBody<Integer>() {
             @Override
             public void run(Integer y) {
-                int[][] processedPixels = new int[kernelSize][];
+                final int paddedWidth = width + 2 * offset;
+                final int[] processedPixels = new int[kernelSize * paddedWidth];
+
+                final int yUpper = Math.max(0, y - offset);
+                final int yLower = Math.min(height - 1, y + offset);
+
+                final int startOffset = offset + Math.max(0, offset - y) * paddedWidth;
+
+                originalBitmap.getPixels(processedPixels, startOffset, width + 2 * offset,
+                        0, yUpper, width, yLower - yUpper + 1);
+
+                // Left and right padding
                 for (int i = 0; i < kernelSize; ++i) {
-                    processedPixels[i] = new int[width + 2 * offset];
-                }
-
-                // Get anchor pixels
-                originalBitmap.getPixels(processedPixels[offset], offset, width, 0, y, width, 1);
-                for (int i = offset - 1; i >= 0; --i) {
-                    processedPixels[offset][i] = processedPixels[offset][offset];
-                }
-                for (int i = width + offset; i < width + 2 * offset; ++i) {
-                    processedPixels[offset][i] = processedPixels[offset][width + offset - 1];
-                }
-
-                // Get neighbor pixels
-                for (int i = offset - 1; i >= 0; --i) {
-                    int yOffset = offset - i;
-                    try {
-                        originalBitmap.getPixels(processedPixels[i], offset, width, 0, y - yOffset, width, 1);
-                    } catch (IllegalArgumentException ignored) {
-                        // At border, duplicate border pixels
-                        System.arraycopy(processedPixels[i + 1], 0, processedPixels[i], 0, width + 2 * offset);
+                    int j;
+                    for (j = 0; j < offset; ++j) {
+                        processedPixels[i * paddedWidth + j] = processedPixels[i * paddedWidth + offset];
                     }
-                }
-                for (int i = offset + 1; i < kernelSize; ++i) {
-                    int yOffset = i - offset;
-                    try {
-                        originalBitmap.getPixels(processedPixels[i], offset, width, 0, y - yOffset, width, 1);
-                    } catch (IllegalArgumentException ignored) {
-                        // At border, duplicate border pixels
-                        System.arraycopy(processedPixels[i + 1], 0, processedPixels[i], 0, width + 2 * offset);
+                    for (j = width + offset; j < paddedWidth; ++j) {
+                        processedPixels[i * paddedWidth + j] = processedPixels[i * paddedWidth + width + offset - 1];
                     }
                 }
 
-                // Placeholders
-                int[] resultPixels = new int[width];
+                // Top and bottom padding
+                if (yUpper > y - offset) {
+                    int yRef = offset - (y - yUpper);
+                    for (int i = 0; i < yRef; ++i) {
+                        System.arraycopy(processedPixels, yRef * paddedWidth,
+                                processedPixels, i * paddedWidth, paddedWidth);
+                    }
+                }
+                if (yLower < y + offset) {
+                    int yRef = offset + (yLower - y);
+                    for (int i = yRef + 1; i < kernelSize; ++i) {
+                        System.arraycopy(processedPixels, yRef * paddedWidth,
+                                processedPixels, i * paddedWidth, paddedWidth);
+                    }
+                }
+
+                // Placeholder
+                final int[] resultPixels = new int[width];
+                final int[] red = new int[256];
+                final int[] green = new int[256];
+                final int[] blue = new int[256];
 
                 // Traverse width
                 for (int x = 0; x < width; ++x) {
                     // Separate channels
-                    int[] red = new int[kernelSizeSq];
-                    int[] green = new int[kernelSizeSq];
-                    int[] blue = new int[kernelSizeSq];
+                    Arrays.fill(red, 0);
+                    Arrays.fill(green, 0);
+                    Arrays.fill(blue, 0);
 
                     for (int i = 0; i < kernelSize; ++i) {
                         for (int j = 0; j < kernelSize; ++j) {
-                            int pixel = processedPixels[i][x + j];
-                            int k = i * kernelSize + j;
+                            int pixel = processedPixels[i * paddedWidth + x + j];
 
-                            red[k] = (pixel & 0x00FF0000) >> 16;
-                            green[k] = (pixel & 0x0000FF00) >> 8;
-                            blue[k] = (pixel & 0x000000FF);
+                            red[(pixel & 0x00FF0000) >> 16]++;
+                            green[(pixel & 0x0000FF00) >> 8]++;
+                            blue[(pixel & 0x000000FF)]++;
                         }
                     }
 
                     // Put median in result
                     resultPixels[x] = (0xFF << 24)
-                            | (Median.findMedian(red) << 16)
-                            | (Median.findMedian(green) << 8)
-                            | Median.findMedian(blue);
+                            | (medianOfHistogram(red) << 16)
+                            | (medianOfHistogram(green) << 8)
+                            | medianOfHistogram(blue);
                 }
 
                 processedBitmap.setPixels(resultPixels, 0, width, 0, y, width, 1);
@@ -103,5 +110,17 @@ public class MedianFilterTask extends BaseFilterTask {
         });
 
         return processedBitmap;
+    }
+
+    private int medianOfHistogram(int[] histogram) {
+        int cumulative = 0;
+        int i;
+        for (i = 0; i < 256; ++i) {
+            cumulative += histogram[i];
+            if (cumulative >= kernelSizeSq / 2) {
+                break;
+            }
+        }
+        return i;
     }
 }
