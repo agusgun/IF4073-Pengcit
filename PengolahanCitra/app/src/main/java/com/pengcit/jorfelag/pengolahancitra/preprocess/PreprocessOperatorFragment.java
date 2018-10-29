@@ -31,7 +31,8 @@ public class PreprocessOperatorFragment extends Fragment {
 
     private final static int MEDIAN_FILTER = 0;
     private final static int DIFFERENCE_OPERATOR = 1;
-    private final static int GRADIENT_OPERATOR = 2;
+    private final static int DIFFERENCE_HOMOGEN_OPERATOR = 2;
+    private final static int GRADIENT_OPERATOR = 3;
 
     private final static int SOBEL = 0;
     private final static int SCHARR = 1;
@@ -148,6 +149,10 @@ public class PreprocessOperatorFragment extends Fragment {
                     case DIFFERENCE_OPERATOR:
                         Toast.makeText(getContext(), "Difference", Toast.LENGTH_SHORT).show();
                         new DifferenceOperatorTask(fr).execute(originalBitmap);
+                        break;
+                    case DIFFERENCE_HOMOGEN_OPERATOR:
+                        Toast.makeText(getContext(), "Difference Homogen", Toast.LENGTH_SHORT).show();
+                        new DifferenceHomogenOperatorTask(fr).execute(originalBitmap);
                         break;
                     case GRADIENT_OPERATOR:
                         Toast.makeText(getContext(), "Gradient", Toast.LENGTH_SHORT).show();

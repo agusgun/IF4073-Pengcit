@@ -37,6 +37,7 @@
     <string-array name="preprocess_operator_method">
         <item>Median Filter</item>
         <item>Difference Operator</item>
+        <item>Difference Homogen Operator</item>
         <item>Gradient Operator</item>
     </string-array>
 
