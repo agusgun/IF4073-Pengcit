@@ -8,6 +8,9 @@ import java.lang.ref.WeakReference;
 
 public abstract class BaseFilterTask extends AsyncTask<Bitmap, Void, Bitmap> {
 
+    public static int MAX_WIDTH = 1080;
+    public static int MAX_HEIGHT = 1080;
+
     private WeakReference<PreprocessOperatorFragment> fragmentRef;
     private ProgressDialog dialog;
 
@@ -35,5 +38,21 @@ public abstract class BaseFilterTask extends AsyncTask<Bitmap, Void, Bitmap> {
         }
 
         fr.setResultImageView(result);
+    }
+
+    protected Bitmap resizeBitmap(Bitmap bitmap) {
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        int resizedWidth, resizedHeight;
+
+        if (width >= height) {   // Landscape
+            resizedWidth = Math.min(width, MAX_WIDTH);
+            resizedHeight = resizedWidth * height / width;
+        } else {    // Portrait
+            resizedHeight = Math.min(height, MAX_HEIGHT);
+            resizedWidth = resizedHeight *  width / height;
+        }
+
+        return Bitmap.createScaledBitmap(bitmap, resizedWidth, resizedHeight, true);
     }
 }

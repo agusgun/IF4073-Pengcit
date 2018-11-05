@@ -39,6 +39,7 @@
         <item>Difference Operator</item>
         <item>Difference Homogen Operator</item>
         <item>Gradient Operator</item>
+        <item>Custom Kernel</item>
     </string-array>
 
     <string-array name="gradient_operator_kernel">

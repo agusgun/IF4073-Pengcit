@@ -19,6 +19,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,12 +34,14 @@ public class PreprocessOperatorFragment extends Fragment {
     private final static int DIFFERENCE_OPERATOR = 1;
     private final static int DIFFERENCE_HOMOGEN_OPERATOR = 2;
     private final static int GRADIENT_OPERATOR = 3;
+    private final static int CUSTOM_KERNEL = 4;
 
     private ImageView originalImageView;
     private ImageView resultImageView;
     private TextView loadTextView;
     private EditText kernelSizeEditText;
     private LinearLayout kernelLinearLayout;
+    private TableLayout kernelTableLayout;
     private Button processButton;
     private Button commitButton;
     private Spinner spinner;
@@ -46,6 +49,8 @@ public class PreprocessOperatorFragment extends Fragment {
     private SharedViewModel model;
     private Bitmap originalBitmap;
     private Bitmap resultBitmap;
+
+    private EditText[][] customKernelTextView;
 
     public PreprocessOperatorFragment() {
         // Required empty public constructor
@@ -66,10 +71,29 @@ public class PreprocessOperatorFragment extends Fragment {
         loadTextView = view.findViewById(R.id.preprocess_operator_fr_tv_load_first);
         kernelSizeEditText = view.findViewById(R.id.preprocess_operator_fr_tv_kernel_size);
         kernelLinearLayout = view.findViewById(R.id.preprocess_operator_layout_kernel);
+        kernelTableLayout = view.findViewById(R.id.preprocess_operator_layout_custom_kernel_table);
         processButton = view.findViewById(R.id.preprocess_operator_fr_btn_process);
         commitButton = view.findViewById(R.id.preprocess_operator_fr_btn_commit);
         spinner = view.findViewById(R.id.preprocess_operator_spinner);
         kernelSpinner = view.findViewById(R.id.preprocess_operator_spinner_kernel);
+
+        customKernelTextView = new EditText[][] {
+                {
+                        view.findViewById(R.id.preprocess_operator_kernel_m00),
+                        view.findViewById(R.id.preprocess_operator_kernel_m01),
+                        view.findViewById(R.id.preprocess_operator_kernel_m02),
+                },
+                {
+                        view.findViewById(R.id.preprocess_operator_kernel_m10),
+                        view.findViewById(R.id.preprocess_operator_kernel_m11),
+                        view.findViewById(R.id.preprocess_operator_kernel_m12),
+                },
+                {
+                        view.findViewById(R.id.preprocess_operator_kernel_m20),
+                        view.findViewById(R.id.preprocess_operator_kernel_m21),
+                        view.findViewById(R.id.preprocess_operator_kernel_m22),
+                },
+        };
 
         model = ViewModelProviders.of(getActivity()).get(SharedViewModel.class);
         model.getBitmapLiveData().observe(this, new Observer<Bitmap>() {
@@ -100,13 +124,19 @@ public class PreprocessOperatorFragment extends Fragment {
                 if (position == MEDIAN_FILTER) {
                     kernelSizeEditText.setVisibility(View.VISIBLE);
                 } else {
-                    kernelSizeEditText.setVisibility(View.INVISIBLE);
+                    kernelSizeEditText.setVisibility(View.GONE);
                 }
 
                 if (position == GRADIENT_OPERATOR) {
                     kernelLinearLayout.setVisibility(View.VISIBLE);
                 } else {
-                    kernelLinearLayout.setVisibility(View.INVISIBLE);
+                    kernelLinearLayout.setVisibility(View.GONE);
+                }
+
+                if (position == CUSTOM_KERNEL) {
+                    kernelTableLayout.setVisibility(View.VISIBLE);
+                } else {
+                    kernelTableLayout.setVisibility(View.GONE);
                 }
             }
 
@@ -155,6 +185,11 @@ public class PreprocessOperatorFragment extends Fragment {
                         Toast.makeText(getContext(), "Gradient", Toast.LENGTH_SHORT).show();
                         new GradientOperatorTask(fr, kernelSpinner.getSelectedItemPosition()).execute(originalBitmap);
                         break;
+                    case CUSTOM_KERNEL:
+                        try {
+                            new CustomKernelTask(fr, getCustomKernel()).execute(originalBitmap);
+                            break;
+                        } catch (NumberFormatException ignored) {}
                 }
             }
         });
@@ -211,6 +246,24 @@ public class PreprocessOperatorFragment extends Fragment {
             return -1;
         }
         return kernelSize;
+    }
+
+    public double[][] getCustomKernel() {
+        double[][] customKernel = new double[3][];
+        try {
+            for (int i = 0; i < 3; ++i) {
+                customKernel[i] = new double[3];
+                for (int j = 0; j < 3; ++j) {
+                    customKernel[i][j] =
+                            Double.parseDouble(customKernelTextView[i][j].getText().toString());
+                }
+            }
+        } catch (NumberFormatException e) {
+            Toast.makeText(getContext(),
+                    "Invalid kernel input", Toast.LENGTH_SHORT).show();
+            throw(e);
+        }
+        return customKernel;
     }
 
     public void setResultImageView(Bitmap bitmap) {

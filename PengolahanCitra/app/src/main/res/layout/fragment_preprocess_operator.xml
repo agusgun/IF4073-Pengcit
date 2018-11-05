@@ -47,48 +47,98 @@
                     android:layout_centerHorizontal="true"
                     android:text="@string/load_image_fr_tv_text" />
 
-
-                <EditText
-                    android:id="@+id/preprocess_operator_fr_tv_kernel_size"
-                    android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:layout_below="@id/preprocess_operator_fr_iv_orig"
-                    android:hint="@string/kernel_size"
-                    android:inputType="number"
-                    android:padding="10dp"
-                    android:visibility="visible" />
-
-                <LinearLayout
-                    android:id="@+id/preprocess_operator_layout_kernel"
-                    android:layout_width="match_parent"
+                <RelativeLayout
+                    android:id="@+id/preprocess_operator_fr_options_wrapper"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/preprocess_operator_fr_iv_orig"
-                    android:layout_centerHorizontal="true"
-                    android:paddingTop="5dp"
-                    android:paddingBottom="5dp"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="10dp"
-                    android:orientation="horizontal"
-                    android:visibility="invisible">
+                    android:layout_below="@id/preprocess_operator_fr_iv_orig">
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <EditText
+                        android:id="@+id/preprocess_operator_fr_tv_kernel_size"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:hint="@string/kernel_size"
+                        android:inputType="number"
+                        android:padding="10dp"
+                        android:visibility="visible" />
+
+                    <LinearLayout
+                        android:id="@+id/preprocess_operator_layout_kernel"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Kernel"/>
+                        android:layout_centerHorizontal="true"
+                        android:paddingTop="5dp"
+                        android:paddingBottom="5dp"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:orientation="horizontal"
+                        android:visibility="gone" >
 
-                    <Spinner
-                        android:id="@+id/preprocess_operator_spinner_kernel"
-                        android:layout_width="0dp"
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Kernel"/>
+
+                        <Spinner
+                            android:id="@+id/preprocess_operator_spinner_kernel"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"/>
+
+                    </LinearLayout>
+
+                    <TableLayout
+                        android:id="@+id/preprocess_operator_layout_custom_kernel_table"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="2"/>
+                        android:paddingStart="100dp"
+                        android:paddingEnd="100dp"
+                        android:stretchColumns="*"
+                        android:visibility="gone" >
 
-                </LinearLayout>
+                        <TableRow>
+                            <TextView
+                                android:layout_span="3"
+                                android:gravity="center"
+                                android:text="Custom kernel"
+                                android:textSize="15sp"/>
+                        </TableRow>
+                        <TableRow>
+                            <EditText
+                                android:id="@+id/preprocess_operator_kernel_m00"/>
+                            <EditText
+                                android:id="@+id/preprocess_operator_kernel_m01"/>
+                            <EditText
+                                android:id="@+id/preprocess_operator_kernel_m02"/>
+                        </TableRow>
+
+                        <TableRow>
+                            <EditText
+                                android:id="@+id/preprocess_operator_kernel_m10"/>
+                            <EditText
+                                android:id="@+id/preprocess_operator_kernel_m11"/>
+                            <EditText
+                                android:id="@+id/preprocess_operator_kernel_m12"/>
+                        </TableRow>
+
+                        <TableRow>
+                            <EditText
+                                android:id="@+id/preprocess_operator_kernel_m20"/>
+                            <EditText
+                                android:id="@+id/preprocess_operator_kernel_m21"/>
+                            <EditText
+                                android:id="@+id/preprocess_operator_kernel_m22"/>
+                        </TableRow>
+
+                    </TableLayout>
+
+                </RelativeLayout>
 
                 <Button
                     android:id="@+id/preprocess_operator_fr_btn_process"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/preprocess_operator_layout_kernel"
+                    android:layout_below="@id/preprocess_operator_fr_options_wrapper"
                     android:layout_centerHorizontal="true"
                     android:layout_marginBottom="10dp"
                     android:layout_marginEnd="50dp"
