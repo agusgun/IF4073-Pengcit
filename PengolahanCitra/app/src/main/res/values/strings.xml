@@ -44,6 +44,9 @@
     <string-array name="gradient_operator_kernel">
         <item>Sobel-Feldman</item>
         <item>Scharr</item>
+        <item>Prewitt</item>
+        <item>Roberts Cross</item>
+        <item>Frei-Chen</item>
     </string-array>
 
     <string name="kernel_size">Kernel Size</string>

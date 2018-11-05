@@ -34,9 +34,6 @@ public class PreprocessOperatorFragment extends Fragment {
     private final static int DIFFERENCE_HOMOGEN_OPERATOR = 2;
     private final static int GRADIENT_OPERATOR = 3;
 
-    private final static int SOBEL = 0;
-    private final static int SCHARR = 1;
-
     private ImageView originalImageView;
     private ImageView resultImageView;
     private TextView loadTextView;

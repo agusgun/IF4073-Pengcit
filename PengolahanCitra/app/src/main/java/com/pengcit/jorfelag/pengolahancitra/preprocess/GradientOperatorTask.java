@@ -12,26 +12,105 @@ public class GradientOperatorTask extends BaseFilterTask {
     private final static int SOBEL = 0;
     private final static int SCHARR = 1;
 
-    private final static int[][] SOBEL_X = {
-            {1, 0, -1},
-            {2, 0, -2},
-            {1, 0, -1}
-    };
-    private final static int[][] SOBEL_Y = {
-            { 1,  2,  1},
-            { 0,  0,  0},
-            {-1, -2, -1}
-    };
+    private final static double SQRT_2 = Math.sqrt(2);
 
-    private final static int[][] SCHARR_X = {
-            {3,  0,  -3},
-            {10, 0, -10},
-            {3,  0,  -3}
-    };
-    private final static int[][] SCHARR_Y = {
-            { 3,  10,  3},
-            { 0,   0,  0},
-            {-3, -10, -3}
+    private final static double[][][][] KERNEL = {
+            {   // SOBEL
+                    {   // X
+                            {1, 0, -1},
+                            {2, 0, -2},
+                            {1, 0, -1}
+                    },
+                    {   // Y
+                            { 1,  2,  1},
+                            { 0,  0,  0},
+                            {-1, -2, -1}
+                    }
+            },
+            {   // SCHARR
+                    {   // X
+                            {3,  0,  -3},
+                            {10, 0, -10},
+                            {3,  0,  -3}
+                    },
+                    {   // Y
+                            { 3,  10,  3},
+                            { 0,   0,  0},
+                            {-3, -10, -3}
+                    }
+            },
+            {   // PREWITT
+                    {   // X
+                            {1, 0, -1},
+                            {1, 0, -1},
+                            {1, 0, -1}
+                    },
+                    {   // Y
+                            { 1,  1,  1},
+                            { 0,  0,  0},
+                            {-1, -1, -1}
+                    }
+            },
+            {   // ROBERTS (Padded)
+                    {   // X
+                            {1,  0, 0},
+                            {0, -1, 0},
+                            {0,  0, 0}
+                    },
+                    {   // Y
+                            { 0, 1, 0},
+                            {-1, 0, 0},
+                            { 0, 0, 0}
+                    }
+            },
+            {   // FREI-CHEN
+                    {   // G1
+                            { 1,  SQRT_2,  1},
+                            { 0,       0,  0},
+                            {-1, -SQRT_2, -1}
+                    },
+                    {   // G2
+                            {     1, 0,      -1},
+                            {SQRT_2, 0, -SQRT_2},
+                            {     1, 0,      -1}
+                    },
+                    {   // G3
+                            {      0, -1, SQRT_2},
+                            {      1,  0,     -1},
+                            {-SQRT_2,  1,      0}
+                    },
+                    {   // G4
+                            {SQRT_2, -1,       0},
+                            {    -1,  0,       1},
+                            {     0,  1, -SQRT_2}
+                    },
+                    {   // G5
+                            { 0,   1/6,  0},
+                            {-1/6, 0,   -1/6},
+                            { 0,   1/6,  0}
+                    },
+                    {   // G6
+                            {-1/6, 0,  1/6},
+                            {   0, 0,    0},
+                            { 1/6, 0, -1/6}
+                    },
+                    {   // G7
+                            { 1/6, -2/6,  1/6},
+                            {-2/6,  4/6, -2/6},
+                            { 1/6, -2/6,  1/6}
+                    },
+                    {   // G8
+                            {-2, 1, -2},
+                            { 1, 4,  1},
+                            {-2, 1, -2}
+                    },
+                    {   // G9
+                            {1/9, 1/9, 1/9},
+                            {1/9, 1/9, 1/9},
+                            {1/9, 1/9, 1/9}
+                    }
+
+            }
     };
 
     private final static int RED = 2;
@@ -40,6 +119,7 @@ public class GradientOperatorTask extends BaseFilterTask {
 
     private int kernel;
     private int kernelSize;
+    private int numOfKernels;
     private int offset;
 
     public GradientOperatorTask(PreprocessOperatorFragment fr, int kernel) {
@@ -47,6 +127,7 @@ public class GradientOperatorTask extends BaseFilterTask {
 
         this.kernel = kernel;
         this.kernelSize = 3;
+        this.numOfKernels = KERNEL[kernel].length;
         this.offset = (kernelSize - 1) / 2;
     }
 
@@ -103,15 +184,18 @@ public class GradientOperatorTask extends BaseFilterTask {
                 // Placeholder
                 final int[] resultPixels = new int[width];
                 int[] pixel = new int[3];
-                int[] sx = new int[3];
-                int[] sy = new int[3];
+                double[][] gDir = new double[numOfKernels][];
+                for (int k = 0; k < numOfKernels; ++k) {
+                    gDir[k] = new double[3];
+                }
                 int[] s = new int[3];
 
                 // Traverse width
                 for (int x = 0; x < width; ++x) {
                     // Convolve
-                    Arrays.fill(sx, 0);
-                    Arrays.fill(sy, 0);
+                    for (int k = 0; k < numOfKernels; ++k) {
+                        Arrays.fill(gDir[k], 0);
+                    }
 
                     for (int i = 0; i < kernelSize; ++i) {
                         for (int j = 0; j < kernelSize; ++j) {
@@ -120,22 +204,19 @@ public class GradientOperatorTask extends BaseFilterTask {
                             pixel[BLUE] = (processedPixels[i * paddedWidth + x + j] & 0x000000FF);
 
                             for (int c = 0; c < 3; ++c) {
-                                switch (kernel) {
-                                    case SCHARR:
-                                        sx[c] += SCHARR_X[i][j] * pixel[c];
-                                        sy[c] += SCHARR_Y[i][j] * pixel[c];
-                                        break;
-                                    default:    // SOBEL
-                                        sx[c] += SOBEL_X[i][j] * pixel[c];
-                                        sy[c] += SOBEL_Y[i][j] * pixel[c];
-                                        break;
+                                for (int k = 0; k < numOfKernels; ++k) {
+                                    gDir[k][c] += KERNEL[kernel][k][i][j] * pixel[c];
                                 }
                             }
                         }
                     }
 
                     for (int c = 0; c < 3; ++c) {
-                        s[c] = Math.min(255, (int) Math.sqrt(sx[c] * sx[c] + sy[c] * sy[c]));
+                        double gSum = 0;
+                        for (int k = 0; k < numOfKernels; ++k) {
+                            gSum += gDir[k][c] * gDir[k][c];
+                        }
+                        s[c] = Math.min(255, (int) Math.sqrt(gSum));
                     }
 
                     // Put magnitude in result
