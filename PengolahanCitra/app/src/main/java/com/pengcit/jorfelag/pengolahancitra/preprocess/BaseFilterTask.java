@@ -14,6 +14,9 @@ public abstract class BaseFilterTask extends AsyncTask<Bitmap, Void, Bitmap> {
     private WeakReference<PreprocessOperatorFragment> fragmentRef;
     private ProgressDialog dialog;
 
+    protected int kernelSize;
+    protected int offset;
+
     public BaseFilterTask(PreprocessOperatorFragment fr) {
         fragmentRef = new WeakReference<>(fr);
         dialog = new ProgressDialog(fr.getContext());
@@ -54,5 +57,39 @@ public abstract class BaseFilterTask extends AsyncTask<Bitmap, Void, Bitmap> {
         }
 
         return Bitmap.createScaledBitmap(bitmap, resizedWidth, resizedHeight, true);
+    }
+
+    protected int[] getProcessedPixels(Bitmap originalBitmap) {
+        final int height = originalBitmap.getHeight();
+        final int width = originalBitmap.getWidth();
+        final int paddedWidth = width + 2 * offset;
+        final int paddedHeight = height + 2 * offset;
+        final int startOffset = offset + offset * paddedWidth;
+
+        final int[] processedPixels = new int[paddedHeight * paddedWidth];
+        originalBitmap.getPixels(processedPixels, startOffset, paddedWidth,
+                0, 0, width, height);
+
+        // Left and right padding
+        for (int i = 0; i < paddedHeight; ++i) {
+            for (int j = 0; j < offset; ++j) {
+                processedPixels[i * paddedWidth + j] = processedPixels[i * paddedWidth + offset];
+            }
+            for (int j = width + offset; j < paddedWidth; ++j) {
+                processedPixels[i * paddedWidth + j] = processedPixels[i * paddedWidth + width + offset - 1];
+            }
+        }
+
+        // Top and bottom padding
+        for (int i = 0; i < offset; ++i) {
+            System.arraycopy(processedPixels, offset * paddedWidth,
+                    processedPixels, i * paddedWidth, paddedWidth);
+        }
+        for (int i = height + offset; i < paddedHeight; ++i) {
+            System.arraycopy(processedPixels, (height + offset - 1) * paddedWidth,
+                    processedPixels, i * paddedWidth, paddedWidth);
+        }
+
+        return processedPixels;
     }
 }

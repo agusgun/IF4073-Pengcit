@@ -7,9 +7,7 @@ import com.pengcit.jorfelag.pengolahancitra.util.Parallel;
 
 public class MedianFilterTask extends BaseFilterTask {
 
-    private int kernelSize;
     private int kernelSizeSq;
-    private int offset;
 
     public MedianFilterTask(PreprocessOperatorFragment fr, int kernelSize) {
         super(fr);
@@ -25,54 +23,18 @@ public class MedianFilterTask extends BaseFilterTask {
 
     @Override
     protected Bitmap doInBackground(Bitmap... bitmaps) {
-        final Bitmap originalBitmap = bitmaps[0].copy(Bitmap.Config.ARGB_8888, false);
+        final Bitmap originalBitmap = resizeBitmap(bitmaps[0]);
+        final Bitmap processedBitmap = originalBitmap.copy(Bitmap.Config.ARGB_8888, true);
 
         final int height = originalBitmap.getHeight();
         final int width = originalBitmap.getWidth();
+        final int paddedWidth = width + 2 * offset;
 
-        final Bitmap processedBitmap = bitmaps[0].copy(Bitmap.Config.ARGB_8888, true);
+        final int[] processedPixels = getProcessedPixels(originalBitmap);
 
         Parallel.For(0, height, new LoopBody<Integer>() {
             @Override
             public void run(Integer y) {
-                final int paddedWidth = width + 2 * offset;
-                final int[] processedPixels = new int[kernelSize * paddedWidth];
-
-                final int yUpper = Math.max(0, y - offset);
-                final int yLower = Math.min(height - 1, y + offset);
-
-                final int startOffset = offset + Math.max(0, offset - y) * paddedWidth;
-
-                originalBitmap.getPixels(processedPixels, startOffset, width + 2 * offset,
-                        0, yUpper, width, yLower - yUpper + 1);
-
-                // Left and right padding
-                for (int i = 0; i < kernelSize; ++i) {
-                    int j;
-                    for (j = 0; j < offset; ++j) {
-                        processedPixels[i * paddedWidth + j] = processedPixels[i * paddedWidth + offset];
-                    }
-                    for (j = width + offset; j < paddedWidth; ++j) {
-                        processedPixels[i * paddedWidth + j] = processedPixels[i * paddedWidth + width + offset - 1];
-                    }
-                }
-
-                // Top and bottom padding
-                if (yUpper > y - offset) {
-                    int yRef = offset - (y - yUpper);
-                    for (int i = 0; i < yRef; ++i) {
-                        System.arraycopy(processedPixels, yRef * paddedWidth,
-                                processedPixels, i * paddedWidth, paddedWidth);
-                    }
-                }
-                if (yLower < y + offset) {
-                    int yRef = offset + (yLower - y);
-                    for (int i = yRef + 1; i < kernelSize; ++i) {
-                        System.arraycopy(processedPixels, yRef * paddedWidth,
-                                processedPixels, i * paddedWidth, paddedWidth);
-                    }
-                }
-
                 // Placeholder
                 final int[] resultPixels = new int[width];
 
@@ -84,7 +46,7 @@ public class MedianFilterTask extends BaseFilterTask {
                 int pixel;
                 for (int i = 0; i < kernelSize; ++i) {
                     for (int j = 0; j < kernelSize; ++j) {
-                        pixel = processedPixels[i * paddedWidth + j];
+                        pixel = processedPixels[(y + i) * paddedWidth + j];
                         red[(pixel & 0x00FF0000) >> 16]++;
                         green[(pixel & 0x0000FF00) >> 8]++;
                         blue[(pixel & 0x000000FF)]++;
@@ -95,7 +57,7 @@ public class MedianFilterTask extends BaseFilterTask {
                 for (int i = 0; i < kernelSize; ++i) {
                     cache[i] = new int[kernelSize];
                     for (int j = 0; j < kernelSize; j++) {
-                        cache[i][j] = processedPixels[j * paddedWidth + i];
+                        cache[i][j] = processedPixels[(y + j) * paddedWidth + i];
                     }
                 }
 
@@ -120,7 +82,7 @@ public class MedianFilterTask extends BaseFilterTask {
                         blue[(pixel & 0x000000FF)]--;
                     }
                     for (int i = 0; i < kernelSize; ++i) {
-                        pixel = processedPixels[i * paddedWidth + x + kernelSize];
+                        pixel = processedPixels[(y + i) * paddedWidth + x + kernelSize];
                         red[(pixel & 0x00FF0000) >> 16]++;
                         green[(pixel & 0x0000FF00) >> 8]++;
                         blue[(pixel & 0x000000FF)]++;

@@ -34,23 +34,31 @@ public class PreprocessOperatorFragment extends Fragment {
     private final static int DIFFERENCE_OPERATOR = 1;
     private final static int DIFFERENCE_HOMOGEN_OPERATOR = 2;
     private final static int GRADIENT_OPERATOR = 3;
-    private final static int CUSTOM_KERNEL = 4;
+    private final static int BLUR = 4;
+    private final static int CUSTOM_KERNEL = 5;
 
     private ImageView originalImageView;
     private ImageView resultImageView;
     private TextView loadTextView;
     private EditText kernelSizeEditText;
-    private LinearLayout kernelLinearLayout;
-    private TableLayout kernelTableLayout;
+
+    private LinearLayout edgeKernelLayout;
+    private Spinner edgeKernelSpinner;
+
+    private LinearLayout blurKernelLayout;
+    private Spinner blurKernelSpinner;
+
+    private TableLayout customKernelLayout;
+    private EditText[][] customKernelEditText;
+
     private Button processButton;
     private Button commitButton;
-    private Spinner spinner;
-    private Spinner kernelSpinner;
+    private Spinner filterSpinner;
+
     private SharedViewModel model;
     private Bitmap originalBitmap;
     private Bitmap resultBitmap;
 
-    private EditText[][] customKernelTextView;
 
     public PreprocessOperatorFragment() {
         // Required empty public constructor
@@ -69,15 +77,21 @@ public class PreprocessOperatorFragment extends Fragment {
         originalImageView = view.findViewById(R.id.preprocess_operator_fr_iv_orig);
         resultImageView = view.findViewById(R.id.preprocess_operator_fr_iv_result);
         loadTextView = view.findViewById(R.id.preprocess_operator_fr_tv_load_first);
+
         kernelSizeEditText = view.findViewById(R.id.preprocess_operator_fr_tv_kernel_size);
-        kernelLinearLayout = view.findViewById(R.id.preprocess_operator_layout_kernel);
-        kernelTableLayout = view.findViewById(R.id.preprocess_operator_layout_custom_kernel_table);
+
+        edgeKernelLayout = view.findViewById(R.id.preprocess_operator_layout_edge_kernel);
+        edgeKernelSpinner = view.findViewById(R.id.preprocess_operator_spinner_edge_kernel);
+
+        blurKernelLayout = view.findViewById(R.id.preprocess_operator_layout_blur_kernel);
+        blurKernelSpinner = view.findViewById(R.id.preprocess_operator_spinner_blur_kernel);
+
         processButton = view.findViewById(R.id.preprocess_operator_fr_btn_process);
         commitButton = view.findViewById(R.id.preprocess_operator_fr_btn_commit);
-        spinner = view.findViewById(R.id.preprocess_operator_spinner);
-        kernelSpinner = view.findViewById(R.id.preprocess_operator_spinner_kernel);
+        filterSpinner = view.findViewById(R.id.preprocess_operator_spinner);
 
-        customKernelTextView = new EditText[][] {
+        customKernelLayout = view.findViewById(R.id.preprocess_operator_layout_custom_kernel_table);
+        customKernelEditText = new EditText[][] {
                 {
                         view.findViewById(R.id.preprocess_operator_kernel_m00),
                         view.findViewById(R.id.preprocess_operator_kernel_m01),
@@ -117,26 +131,32 @@ public class PreprocessOperatorFragment extends Fragment {
                 R.layout.support_simple_spinner_dropdown_item
         );
         methodListAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
-        spinner.setAdapter(methodListAdapter);
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        filterSpinner.setAdapter(methodListAdapter);
+        filterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position == MEDIAN_FILTER) {
+                if (position == MEDIAN_FILTER || position == BLUR) {
                     kernelSizeEditText.setVisibility(View.VISIBLE);
                 } else {
                     kernelSizeEditText.setVisibility(View.GONE);
                 }
 
                 if (position == GRADIENT_OPERATOR) {
-                    kernelLinearLayout.setVisibility(View.VISIBLE);
+                    edgeKernelLayout.setVisibility(View.VISIBLE);
                 } else {
-                    kernelLinearLayout.setVisibility(View.GONE);
+                    edgeKernelLayout.setVisibility(View.GONE);
+                }
+
+                if (position == BLUR) {
+                    blurKernelLayout.setVisibility(View.VISIBLE);
+                } else {
+                    blurKernelLayout.setVisibility(View.GONE);
                 }
 
                 if (position == CUSTOM_KERNEL) {
-                    kernelTableLayout.setVisibility(View.VISIBLE);
+                    customKernelLayout.setVisibility(View.VISIBLE);
                 } else {
-                    kernelTableLayout.setVisibility(View.GONE);
+                    customKernelLayout.setVisibility(View.GONE);
                 }
             }
 
@@ -144,13 +164,21 @@ public class PreprocessOperatorFragment extends Fragment {
             public void onNothingSelected(AdapterView<?> parent) { }
         });
 
-        ArrayAdapter<CharSequence> kernelListAdapter = ArrayAdapter.createFromResource(
+        ArrayAdapter<CharSequence> edgeKernelListAdapter = ArrayAdapter.createFromResource(
                 view.getContext(),
                 R.array.gradient_operator_kernel,
                 R.layout.support_simple_spinner_dropdown_item
         );
-        kernelListAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
-        kernelSpinner.setAdapter(kernelListAdapter);
+        edgeKernelListAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
+        edgeKernelSpinner.setAdapter(edgeKernelListAdapter);
+
+        ArrayAdapter<CharSequence> blurKernelListAdapter = ArrayAdapter.createFromResource(
+                view.getContext(),
+                R.array.blur_kernel,
+                R.layout.support_simple_spinner_dropdown_item
+        );
+        blurKernelListAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
+        blurKernelSpinner.setAdapter(blurKernelListAdapter);
 
         // Process button listener
         final PreprocessOperatorFragment fr = this;
@@ -163,7 +191,7 @@ public class PreprocessOperatorFragment extends Fragment {
                     return;
                 }
 
-                switch (spinner.getSelectedItemPosition()) {
+                switch (filterSpinner.getSelectedItemPosition()) {
                     case MEDIAN_FILTER:
                         int kernelSize = getKernelSize();
                         if (kernelSize == -1) {
@@ -183,11 +211,22 @@ public class PreprocessOperatorFragment extends Fragment {
                         break;
                     case GRADIENT_OPERATOR:
                         Toast.makeText(getContext(), "Gradient", Toast.LENGTH_SHORT).show();
-                        new GradientOperatorTask(fr, kernelSpinner.getSelectedItemPosition()).execute(originalBitmap);
+                        new GradientOperatorTask(fr, edgeKernelSpinner.getSelectedItemPosition()).execute(originalBitmap);
+                        break;
+                    case BLUR:
+                        kernelSize = getKernelSize();
+                        if (kernelSize == -1) {
+                            return;
+                        }
+
+                        Toast.makeText(getContext(), "Blur", Toast.LENGTH_SHORT).show();
+                        new BlurTask(fr, blurKernelSpinner.getSelectedItemPosition(), kernelSize).execute(originalBitmap);
                         break;
                     case CUSTOM_KERNEL:
                         try {
-                            new CustomKernelTask(fr, getCustomKernel()).execute(originalBitmap);
+                            double[][] kernel = getCustomKernel();
+                            Toast.makeText(getContext(), "Custom kernel", Toast.LENGTH_SHORT).show();
+                            new SingleKernelTask(fr, kernel).execute(originalBitmap);
                             break;
                         } catch (NumberFormatException ignored) {}
                 }
@@ -255,7 +294,7 @@ public class PreprocessOperatorFragment extends Fragment {
                 customKernel[i] = new double[3];
                 for (int j = 0; j < 3; ++j) {
                     customKernel[i][j] =
-                            Double.parseDouble(customKernelTextView[i][j].getText().toString());
+                            Double.parseDouble(customKernelEditText[i][j].getText().toString());
                 }
             }
         } catch (NumberFormatException e) {
