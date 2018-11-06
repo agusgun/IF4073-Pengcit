@@ -51,13 +51,15 @@ public class MultipleKernelTask extends BaseFilterTask {
                 // Traverse width
                 for (int x = 0; x < width; ++x) {
                     // Convolve
-                    Arrays.fill(s, 0);
+                    for (int k = 0; k < numOfKernels; ++k) {
+                        Arrays.fill(gDir[k], 0);
+                    }
 
                     for (int i = 0; i < kernelSize; ++i) {
                         for (int j = 0; j < kernelSize; ++j) {
-                            pixel[RED] = (processedPixels[(y + i) * width + x + j] & 0x00FF0000) >> 16;
-                            pixel[GREEN] = (processedPixels[(y + i) * width + x + j] & 0x0000FF00) >> 8;
-                            pixel[BLUE] = (processedPixels[(y + i) * width + x + j] & 0x000000FF);
+                            pixel[RED] = (processedPixels[(y + i) * paddedWidth + x + j] & 0x00FF0000) >> 16;
+                            pixel[GREEN] = (processedPixels[(y + i) * paddedWidth + x + j] & 0x0000FF00) >> 8;
+                            pixel[BLUE] = (processedPixels[(y + i) * paddedWidth + x + j] & 0x000000FF);
 
                             for (int c = 0; c < 3; ++c) {
                                 for (int k = 0; k < numOfKernels; ++k) {
