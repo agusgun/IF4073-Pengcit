@@ -15,6 +15,7 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.pengcit.jorfelag.pengolahancitra.contrast_enhancement.ContrastEnhancementFragment;
 import com.pengcit.jorfelag.pengolahancitra.contrast_enhancement.HistogramSpecificationFragment;
+import com.pengcit.jorfelag.pengolahancitra.face_detection.FaceDetectionFragment;
 import com.pengcit.jorfelag.pengolahancitra.histogram.ShowHistogramFragment;
 import com.pengcit.jorfelag.pengolahancitra.ocr.OCRFragment;
 import com.pengcit.jorfelag.pengolahancitra.preprocess.PreprocessOperatorFragment;
@@ -27,7 +28,8 @@ public class MainActivity extends AppCompatActivity implements
         ContrastEnhancementFragment.OnFragmentInteractionListener,
         HistogramSpecificationFragment.OnFragmentInteractionListener,
         OCRFragment.OnFragmentInteractionListener,
-        PreprocessOperatorFragment.OnFragmentInteractionListener {
+        PreprocessOperatorFragment.OnFragmentInteractionListener,
+        FaceDetectionFragment.OnFragmentInteractionListener {
 
     private TextToSpeech textToSpeech;
 
@@ -73,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements
         tabLayout.addTab(tabLayout.newTab().setText("Histogram Specification"));
         tabLayout.addTab(tabLayout.newTab().setText("OCR"));
         tabLayout.addTab(tabLayout.newTab().setText("Preprocess Operator"));
+        tabLayout.addTab(tabLayout.newTab().setText("Face Detection"));
 
         final ViewPager viewPager = findViewById(R.id.main_act_pager);
         final PagerAdapter adapter = new TabPagerAdapter(

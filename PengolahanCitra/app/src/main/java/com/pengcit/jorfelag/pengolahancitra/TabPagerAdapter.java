@@ -6,6 +6,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 
 import com.pengcit.jorfelag.pengolahancitra.contrast_enhancement.ContrastEnhancementFragment;
 import com.pengcit.jorfelag.pengolahancitra.contrast_enhancement.HistogramSpecificationFragment;
+import com.pengcit.jorfelag.pengolahancitra.face_detection.FaceDetectionFragment;
 import com.pengcit.jorfelag.pengolahancitra.histogram.ShowHistogramFragment;
 import com.pengcit.jorfelag.pengolahancitra.ocr.OCRFragment;
 import com.pengcit.jorfelag.pengolahancitra.preprocess.PreprocessOperatorFragment;
@@ -35,6 +36,8 @@ public class TabPagerAdapter extends FragmentPagerAdapter {
                 return new OCRFragment();
             case 5:
                 return new PreprocessOperatorFragment();
+            case 6:
+                return new FaceDetectionFragment();
             default:
                 return null;
         }
