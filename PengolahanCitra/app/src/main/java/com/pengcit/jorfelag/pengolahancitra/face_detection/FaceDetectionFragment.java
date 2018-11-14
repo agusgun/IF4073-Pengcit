@@ -20,6 +20,8 @@ import android.widget.Toast;
 import com.pengcit.jorfelag.pengolahancitra.R;
 import com.pengcit.jorfelag.pengolahancitra.SharedViewModel;
 
+import java.util.concurrent.TimeoutException;
+
 public class FaceDetectionFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
 
@@ -33,6 +35,13 @@ public class FaceDetectionFragment extends Fragment {
     private SharedViewModel model;
     private Bitmap originalBitmap;
     private Bitmap resultBitmap;
+
+    private TextView alisKiriTextView;
+    private TextView alisKananTextView;
+    private TextView mataKiriTextView;
+    private TextView mataKananTextView;
+    private TextView hidungTextView;
+    private TextView mulutTextView;
 
     public FaceDetectionFragment() {
         // Required empty public constructor

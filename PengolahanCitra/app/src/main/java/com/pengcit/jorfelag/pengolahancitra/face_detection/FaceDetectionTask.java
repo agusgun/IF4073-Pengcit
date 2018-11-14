@@ -91,6 +91,14 @@ public class FaceDetectionTask extends AsyncTask<Bitmap, Void, Bitmap> {
         setBoundingBox(resizedFace, Color.YELLOW, leftEyelashPosition[0], leftEyelashPosition[1], leftEyelashPosition[2], leftEyelashPosition[3]);
         setBoundingBox(resizedFace, Color.YELLOW, rightEyelashPosition[0], rightEyelashPosition[1], rightEyelashPosition[2], rightEyelashPosition[3]);
 
+        int mouthRating = mouthPosition[4];
+        int noseRating = nosePosition[4];
+        int leftEyeRating = leftEyePosition[4];
+        int rightEyeRating = rightEyePosition[4];
+        int leftEyelashRating = leftEyelashPosition[4];
+        int rightEyelashRating = rightEyelashPosition[4];
+        Log.d("Rating", Integer.toString(mouthRating) + " " + Integer.toString(noseRating) + " " + Integer.toString(leftEyeRating) + " " + Integer.toString(rightEyeRating) + " " + Integer.toString(leftEyelashRating) + " " + Integer.toString(rightEyelashRating));
+
         return resizedFace;
     }
 
@@ -126,7 +134,7 @@ public class FaceDetectionTask extends AsyncTask<Bitmap, Void, Bitmap> {
         int rightEyelashHeight = 5;
 
         int maks = 0;
-        int rightEyelashPosition[] = new int[4];
+        int rightEyelashPosition[] = new int[5];
 
         int bitmapWidth = faceBitmap.getWidth();
         int bitmapHeight = faceBitmap.getHeight();
@@ -147,8 +155,8 @@ public class FaceDetectionTask extends AsyncTask<Bitmap, Void, Bitmap> {
             }
             if (i + rightEyelashHeight >= bitmapHeight) break;
         }
+        rightEyelashPosition[4] = (int) ((float) (maks) / (rightEyelashWidth * rightEyelashHeight) * 5);
         return rightEyelashPosition;
-
     }
 
     //find leftEyeLash
@@ -157,7 +165,7 @@ public class FaceDetectionTask extends AsyncTask<Bitmap, Void, Bitmap> {
         int leftEyelashHeight = 5;
 
         int maks = 0;
-        int leftEyelashPosition[] = new int[4];
+        int leftEyelashPosition[] = new int[5];
 
         int bitmapWidth = faceBitmap.getWidth();
         int bitmapHeight = faceBitmap.getHeight();
@@ -178,6 +186,7 @@ public class FaceDetectionTask extends AsyncTask<Bitmap, Void, Bitmap> {
             }
             if (i + leftEyelashHeight >= bitmapHeight) break;
         }
+        leftEyelashPosition[4] = (int) ((float) (maks) / (leftEyelashWidth * leftEyelashHeight) * 5);
         return leftEyelashPosition;
     }
 
@@ -187,7 +196,7 @@ public class FaceDetectionTask extends AsyncTask<Bitmap, Void, Bitmap> {
         int rightEyeHeight = 12;
 
         int maks = 0;
-        int rightEyePosition[] = new int[4];
+        int rightEyePosition[] = new int[5];
 
         int bitmapWidth = faceBitmap.getWidth();
         int bitmapHeight = faceBitmap.getHeight();
@@ -208,8 +217,8 @@ public class FaceDetectionTask extends AsyncTask<Bitmap, Void, Bitmap> {
             }
             if (i + rightEyeHeight >= bitmapHeight) break;
         }
+        rightEyePosition[4] = (int) ((float) (maks) / (rightEyeWidth * rightEyeHeight) * 5);
         return rightEyePosition;
-
     }
 
     //find left eye
@@ -218,7 +227,7 @@ public class FaceDetectionTask extends AsyncTask<Bitmap, Void, Bitmap> {
         int leftEyeHeight = 12;
 
         int maks = 0;
-        int leftEyePosition[] = new int[4];
+        int leftEyePosition[] = new int[5];
 
         int bitmapWidth = faceBitmap.getWidth();
         int bitmapHeight = faceBitmap.getHeight();
@@ -239,6 +248,7 @@ public class FaceDetectionTask extends AsyncTask<Bitmap, Void, Bitmap> {
             }
             if (i + leftEyeHeight >= bitmapHeight) break;
         }
+        leftEyePosition[4] = (int) ((float) (maks) / (leftEyeWidth * leftEyeHeight) * 5);
         return leftEyePosition;
     }
 
@@ -248,7 +258,7 @@ public class FaceDetectionTask extends AsyncTask<Bitmap, Void, Bitmap> {
         int noseHeight = 20;
 
         int maks = 0;
-        int nosePosition[] = new int[4];
+        int nosePosition[] = new int[5];
 
         int bitmapWidth = faceBitmap.getWidth();
         int bitmapHeight = faceBitmap.getHeight();
@@ -270,6 +280,7 @@ public class FaceDetectionTask extends AsyncTask<Bitmap, Void, Bitmap> {
             }
             if (i + noseHeight >= bitmapHeight) break;
         }
+        nosePosition[4] = (int) ((float) (maks) / (noseWidth * noseHeight) * 5);
         return nosePosition;
     }
 
@@ -279,7 +290,7 @@ public class FaceDetectionTask extends AsyncTask<Bitmap, Void, Bitmap> {
         int mouthHeight = 12;
 
         int maks = 0;
-        int mouthPosition[] = new int[4];
+        int mouthPosition[] = new int[5];
 
         int bitmapWidth = faceBitmap.getWidth();
         int bitmapHeight = faceBitmap.getHeight();
@@ -299,6 +310,7 @@ public class FaceDetectionTask extends AsyncTask<Bitmap, Void, Bitmap> {
             }
             if (i + mouthHeight >= bitmapHeight) break;
         }
+        mouthPosition[4] = (int) ((float) (maks) / (mouthWidth * mouthHeight) * 5);
         return mouthPosition;
     }
 
