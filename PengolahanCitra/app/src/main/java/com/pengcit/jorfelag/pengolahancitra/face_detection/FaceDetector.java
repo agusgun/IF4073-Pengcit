@@ -14,6 +14,7 @@ import com.pengcit.jorfelag.pengolahancitra.util.Parallel;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Queue;
 
 public class FaceDetector {
@@ -26,8 +27,8 @@ public class FaceDetector {
     private final static int[] X_TRANSLATION = {0, 1, 1, 1, 0, -1, -1, -1};
     private final static int[] Y_TRANSLATION = {-1, -1, 0, 1, 1, 1, 0, -1};
 
-    private final static float[] SOBEL_X = {1, 0, -1, 2, 0, -2, 1, 0, -1};
-    private final static float[] SOBEL_Y = {1, 2, 1, 0, 0, 0, -1, -2, -1};
+    private final static float[] SOBEL_X = {-1, 0, 1, -2, 0, 2, -1, 0, 1};
+    private final static float[] SOBEL_Y = {-1, -2, -1, 0, 0, 0, 1, 2, 1};
 
     private Bitmap originalBitmap;
     private Bitmap processedBitmap;
@@ -54,7 +55,7 @@ public class FaceDetector {
         });
 
         processedBitmap = Bitmap.createBitmap(bitmap, width, height, originalBitmap.getConfig());
-        Bitmap sobelBitmap = new Sobel(processedBitmap).process();
+        Bitmap sobelBitmap = new Sobel(originalBitmap).process();
 
         Canvas canvas = new Canvas(originalBitmap);
         Paint framePaint = new Paint();
@@ -65,16 +66,18 @@ public class FaceDetector {
         pointsPaint.setStyle(Paint.Style.STROKE);
 
         ArrayList<Point[]> faceCandidateBounds =
-                new MultipleFaceDetector(bitmap, width, height).process();
+                new CandidateFaceDetector(bitmap, width, height).process();
 
         for (Point[] bound: faceCandidateBounds) {
-            Rect r = new Rect(bound[0].x, bound[0].y, bound[1].x, bound[1].y);
-            canvas.drawRect(r, framePaint);
-
             FaceCandidate fc = new FaceCandidate(processedBitmap, sobelBitmap, bound);
             fc.process();
-
-            Point[][] controlPoints = fc.getControlPoints();
+            for (Point[] featureBoundary :fc.getFeaturesBoundary()) {
+                Rect r = new Rect(featureBoundary[0].x, featureBoundary[0].y, featureBoundary[1].x, featureBoundary[1].y);
+                canvas.drawRect(r, framePaint);
+            }
+        }
+//
+//            Point[][] controlPoints = fc.getControlPoints();
 
 //            ArrayList<Float> f = new ArrayList<>();
 //            for (Point[] component: controlPoints) {
@@ -89,11 +92,11 @@ public class FaceDetector {
 //            }
 //            canvas.drawPoints(f2, pointsPaint);
 
-            for (Point[] component: controlPoints) {
-                r = new Rect(component[0].x, component[0].y, component[1].x, component[1].y);
-                canvas.drawRect(r, pointsPaint);
-            }
-        }
+//            for (Point[] component: controlPoints) {
+//                r = new Rect(component[0].x, component[0].y, component[1].x, component[1].y);
+//                canvas.drawRect(r, pointsPaint);
+//            }
+//        }
     }
 
     public Bitmap getBitmap() {
@@ -142,73 +145,6 @@ public class FaceDetector {
                 YCbCr[2] > 135 && YCbCr[2] < 180);
     }
 
-    private class MultipleFaceDetector {
-        private int[] processedPixels;
-        private int width, height;
-
-        private ArrayList<Point[]> candidateFaces;
-
-        MultipleFaceDetector(int[] pixels, int width, int height) {
-            this.processedPixels = Arrays.copyOf(pixels, pixels.length);
-            this.width = width;
-            this.height = height;
-            this.candidateFaces = new ArrayList<>();
-        }
-
-        ArrayList<Point[]> process() {
-            for (int i = 0; i < processedPixels.length; ++i) {
-                if (processedPixels[i] == Color.WHITE) {
-                    int y = i / width;
-                    int x = i % width;
-                    Point p = new Point(x, y);
-
-                    Point[] bounds = floodFill(p);
-                    int currWidth = bounds[1].x - bounds[0].x;
-                    int currHeight = bounds[1].y - bounds[0].y;
-
-                    if (currWidth < 100 || currHeight < 100) {
-                        continue;
-                    }
-
-                    candidateFaces.add(bounds);
-                }
-            }
-
-            return candidateFaces;
-        }
-
-        private Point[] floodFill(Point start) {
-            Queue<Point> queue = new ArrayDeque<>();
-            queue.add(start);
-
-            Point min = new Point(Integer.MAX_VALUE, Integer.MAX_VALUE);
-            Point max = new Point(Integer.MIN_VALUE, Integer.MIN_VALUE);
-
-            while (!queue.isEmpty()) {
-                Point curr = queue.remove();
-
-                if (curr.x < 0 || curr.x >= width || curr.y < 0 || curr.y >= height) {
-                    continue;
-                }
-                int i = curr.y * width + curr.x;
-
-                if (processedPixels[i] == Color.WHITE) {
-                    min.x = Math.min(min.x, curr.x);
-                    min.y = Math.min(min.y, curr.y);
-                    max.x = Math.max(max.x, curr.x);
-                    max.y = Math.max(max.y, curr.y);
-
-                    processedPixels[i] = Color.BLACK;
-                    for (int j = 0; j < 8; ++j) {
-                        queue.add(new Point(curr.x + X_TRANSLATION[j], curr.y + Y_TRANSLATION[j]));
-                    }
-                }
-            }
-
-            return new Point[] {min, max};
-        }
-    }
-
     private class FaceCandidate {
 
         private Point[] bounds;
@@ -217,18 +153,29 @@ public class FaceDetector {
         private Bitmap bitmap;
         private int[] pixels;
         private int[] sobelPixels;
+        private List<Point[]> featuresBoundary;
         private Point[][] controlPoints;
 
         FaceCandidate(Bitmap processedBitmap, Bitmap sobelBitmap, Point[] bounds) {
             this.bounds = bounds;
 
-            width = bounds[1].x - bounds[0].x;
-            height = bounds[1].y - bounds[0].y;
+            width = bounds[1].x - bounds[0].x + 1;
+            height = bounds[1].y - bounds[0].y + 1;
 
             Log.d("BOUNDS", String.format("%d %d | %d %d -> %d %d", bounds[0].x, bounds[0].y, bounds[1].x, bounds[1].y, width, height));
 
+//            bitmap = Bitmap.createBitmap(
+//                    processedBitmap,
+//                    bounds[0].x,
+//                    bounds[0].y,
+//                    width,
+//                    height
+//            );
+//            pixels = new int[height * width];
+//            bitmap.getPixels(pixels, 0, width, 0, 0, width, height);
+
             bitmap = Bitmap.createBitmap(
-                    processedBitmap,
+                    sobelBitmap,
                     bounds[0].x,
                     bounds[0].y,
                     width,
@@ -236,56 +183,38 @@ public class FaceDetector {
             );
             pixels = new int[height * width];
             bitmap.getPixels(pixels, 0, width, 0, 0, width, height);
-
-            sobelBitmap = Bitmap.createBitmap(
-                    sobelBitmap,
-                    bounds[0].x,
-                    bounds[0].y,
-                    width,
-                    height
-            );
-            sobelPixels = new int[height * width];
-            sobelBitmap.getPixels(sobelPixels, 0, width, 0, 0, width, height);
-            for (int i = 0; i < sobelPixels.length; ++i) {
-                sobelPixels[i] &= 0x000000FF;
-            }
+            featuresBoundary = new ArrayList<>();
         }
 
         void process() {
-            dilate();
             clean();
+            dilate();
+            erode();
 
+            double minArea = height * width * 0.0002;
             int[] processedPixels = Arrays.copyOf(pixels, pixels.length);
             for (int i = 0; i < pixels.length; i++) {
-                if (processedPixels[i] == Color.BLACK) {
+                if (processedPixels[i] == Color.WHITE) {
                     Point start = new Point(i % width, i / width);
                     int area = floodFillCountArea(processedPixels, start);
-                    if (area < MIN_AREA) {
+//                    Log.d("AREA", "area " + area + " " + minArea);
+                    if (area < minArea) {
                         floodFillClean(start);
                     }
                 }
             }
 
-            Point[] eyelashCenter = findEyeCenter(0);
-            Point[] eyeCenter = findEyeCenter(eyelashCenter[0].y + height / 20);
-            Point mouthCenter = findMouth();
+            extractFeaturesBoundary();
 
-            bitmap.getPixels(processedPixels, 0, width, 0, 0, width, height);
-            Point[][] boundaries = new Point[][] {
-                    floodFill(processedPixels, eyelashCenter[0]),
-                    floodFill(processedPixels, eyelashCenter[1]),
-                    floodFill(processedPixels, eyeCenter[0]),
-                    floodFill(processedPixels, eyeCenter[1]),
-                    floodFill(processedPixels, mouthCenter)
-            };
+//
+//            controlPoints = boundaries;
+//            for (int i = 0; i < controlPoints.length; ++i) {
+//                for (int j = 0; j < controlPoints[i].length; ++j) {
+//                    controlPoints[i][j].x += bounds[0].x;
+//                    controlPoints[i][j].y += bounds[0].y;
+//                }
+//            }
 
-            controlPoints = boundaries;
-            for (int i = 0; i < controlPoints.length; ++i) {
-                for (int j = 0; j < controlPoints[i].length; ++j) {
-                    controlPoints[i][j].x += bounds[0].x;
-                    controlPoints[i][j].y += bounds[0].y;
-                }
-            }
 
 //            controlPoints = new Point[5][];
 //            for (int i = 0; i < boundaries.length; ++i) {
@@ -309,10 +238,6 @@ public class FaceDetector {
 //            }
         }
 
-        Point[][] getControlPoints() {
-            return controlPoints;
-        }
-
         private void dilate() {
             int[] dilated = new int[pixels.length];
             for (int i = 0; i < pixels.length; ++i) {
@@ -320,8 +245,8 @@ public class FaceDetector {
                 int x = i % width;
 
                 int roi = Integer.MIN_VALUE;
-                for (int j = Math.max(0, y - 2); j < Math.min(height, y + 3); ++j) {
-                    for (int k = Math.max(0, x - 2); k < Math.min(width, x + 3); ++k) {
+                for (int j = Math.max(0, y - 4); j < Math.min(height, y + 5); ++j) {
+                    for (int k = Math.max(0, x - 4); k < Math.min(width, x + 5); ++k) {
                         int pixel = pixels[j * width + k];
                         if (pixel > roi) {
                             roi = pixel;
@@ -333,42 +258,56 @@ public class FaceDetector {
             pixels = dilated;
         }
 
-        private void clean() {
-            for (int i = 0; i < height; ++i) {
-                floodFillClean(new Point(i, 0));
-                floodFillClean(new Point(i, width - 1));
-            }
-        }
+        private void erode() {
+            int[] eroded = new int[pixels.length];
+            for (int i = 0; i < pixels.length; ++i) {
+                int y = i / width;
+                int x = i % width;
 
-        private Point[] floodFill(int[] processedPixels, Point start) {
-            Queue<Point> queue = new ArrayDeque<>();
-            queue.add(start);
-
-            Point min = new Point(Integer.MAX_VALUE, Integer.MAX_VALUE);
-            Point max = new Point(Integer.MIN_VALUE, Integer.MIN_VALUE);
-
-            while (!queue.isEmpty()) {
-                Point curr = queue.remove();
-
-                if (curr.x < 0 || curr.x >= width || curr.y < 0 || curr.y >= height) {
-                    continue;
-                }
-                int i = curr.y * width + curr.x;
-
-                if (processedPixels[i] == Color.BLACK) {
-                    min.x = Math.min(min.x, curr.x);
-                    min.y = Math.min(min.y, curr.y);
-                    max.x = Math.max(max.x, curr.x);
-                    max.y = Math.max(max.y, curr.y);
-
-                    processedPixels[i] = Color.WHITE;
-                    for (int j = 0; j < 8; ++j) {
-                        queue.add(new Point(curr.x + X_TRANSLATION[j], curr.y + Y_TRANSLATION[j]));
+                int roi = Integer.MAX_VALUE;
+                for (int j = Math.max(0, y - 3); j < Math.min(height, y + 5); ++j) {
+                    for (int k = Math.max(0, x - 3); k < Math.min(width, x + 5); ++k) {
+                        int pixel = pixels[j * width + k];
+                        if (pixel < roi) {
+                            roi = pixel;
+                        }
                     }
                 }
+                eroded[i] = roi;
             }
+            pixels = eroded;
+        }
 
-            return new Point[] {min, max};
+        private void clean() {
+            for (int i = 0; i < height; ++i) {
+                for (int j = 0; j < 0.1 * width; ++j) {
+                    floodFillClean(new Point(j, i));
+                    floodFillClean(new Point(width - j - 1, i));
+                }
+            }
+            for (int i = 0; i < width; ++i) {
+                for (int j = 0; j < 0.1 * width; ++j) {
+                    floodFillClean(new Point(i, j));
+                    floodFillClean(new Point(i, height - j - 1));
+                }
+            }
+//            for (int i = 0; i < pixels.length; ++i) {
+//                if (pixels[i] == Color.WHITE) {
+//                    int y = i / width;
+//                    int x = i % width;
+//                    Point p = new Point(x, y);
+//
+//                    Point[] bounds = floodFill(p);
+//                    int currWidth = bounds[1].x - bounds[0].x + 1;
+//                    int currHeight = bounds[1].y - bounds[0].y + 1;
+//
+//                    if (currWidth < 100 || currHeight < 100) {
+//                        continue;
+//                    }
+//
+//                    candidateFaces.add(bounds);
+//                }
+//            }
         }
 
         private void floodFillClean(Point start) {
@@ -383,13 +322,44 @@ public class FaceDetector {
                 }
                 int i = curr.y * width + curr.x;
 
-                if (pixels[i] == Color.BLACK) {
-                    pixels[i] = Color.WHITE;
+                if (pixels[i] == Color.WHITE) {
+                    pixels[i] = Color.BLACK;
                     for (int j = 0; j < 8; ++j) {
                         queue.add(new Point(curr.x + X_TRANSLATION[j], curr.y + Y_TRANSLATION[j]));
                     }
                 }
             }
+        }
+
+        private Point[] floodFill(Point start) {
+            Queue<Point> queue = new ArrayDeque<>();
+            queue.add(start);
+
+            Point min = new Point(Integer.MAX_VALUE, Integer.MAX_VALUE);
+            Point max = new Point(Integer.MIN_VALUE, Integer.MIN_VALUE);
+
+            while (!queue.isEmpty()) {
+                Point curr = queue.remove();
+
+                if (curr.x < 0 || curr.x >= width || curr.y < 0 || curr.y >= height) {
+                    continue;
+                }
+                int i = curr.y * width + curr.x;
+
+                if (pixels[i] == Color.WHITE) {
+                    min.x = Math.min(min.x, curr.x);
+                    min.y = Math.min(min.y, curr.y);
+                    max.x = Math.max(max.x, curr.x);
+                    max.y = Math.max(max.y, curr.y);
+
+                    pixels[i] = Color.BLACK;
+                    for (int j = 0; j < 8; ++j) {
+                        queue.add(new Point(curr.x + X_TRANSLATION[j], curr.y + Y_TRANSLATION[j]));
+                    }
+                }
+            }
+
+            return new Point[] {min, max};
         }
 
         private int floodFillCountArea(int[] processedPixels, Point start) {
@@ -406,9 +376,9 @@ public class FaceDetector {
                 }
                 int i = curr.y * width + curr.x;
 
-                if (processedPixels[i] == Color.BLACK) {
+                if (processedPixels[i] == Color.WHITE) {
                     area++;
-                    processedPixels[i] = Color.WHITE;
+                    processedPixels[i] = Color.BLACK;
                     for (int j = 0; j < 8; ++j) {
                         queue.add(new Point(curr.x + X_TRANSLATION[j], curr.y + Y_TRANSLATION[j]));
                     }
@@ -416,6 +386,183 @@ public class FaceDetector {
             }
 
             return area;
+        }
+
+        private void extractFeaturesBoundary() {
+            int y = 0;
+            int x;
+            boolean found = false;
+
+            // find eyes / eyebrows
+            do {
+                x = 0;
+                do {
+                    int i = y * width + x;
+                    if (pixels[i] == Color.WHITE) {
+                        Point[] leftBounds = floodFill(new Point(x, y));
+                        int y2 = leftBounds[0].y;
+                        do {
+                            int x2 = width / 2;
+                            do {
+                                i = y2 * width + x2;
+                                if (pixels[i] == Color.WHITE) {
+                                    Point[] rightBounds = floodFill(new Point(x2, y2));
+
+                                    leftBounds[0].x += bounds[0].x;
+                                    leftBounds[0].y += bounds[0].y;
+                                    leftBounds[1].x += bounds[0].x;
+                                    leftBounds[1].y += bounds[0].y;
+
+                                    rightBounds[0].x += bounds[0].x;
+                                    rightBounds[0].y += bounds[0].y;
+                                    rightBounds[1].x += bounds[0].x;
+                                    rightBounds[1].y += bounds[0].y;
+
+                                    featuresBoundary.add(leftBounds);
+                                    featuresBoundary.add(rightBounds);
+                                    found = true;
+                                } else {
+                                    x2++;
+                                }
+                            } while (!found && x2 < width);
+                            y2++;
+                        } while (!found && y2 < leftBounds[1].y);
+
+                    } else {
+                        x++;
+                    }
+                } while (!found && x < width / 2);
+                y++;
+            } while (!found && y < height);
+
+
+            // find eyes / nose
+            found = false;
+            while (!found && y < height) {
+                x = 0;
+                do {
+                    int i = y * width + x;
+                    if (pixels[i] == Color.WHITE) {
+                        Point[] leftBounds = floodFill(new Point(x, y));
+                        int y2 = leftBounds[0].y;
+                        do {
+                            int x2 = width / 2;
+                            do {
+                                i = y2 * width + x2;
+                                if (pixels[i] == Color.WHITE) {
+                                    Point[] rightBounds = floodFill(new Point(x2, y2));
+
+                                    leftBounds[0].x += bounds[0].x;
+                                    leftBounds[0].y += bounds[0].y;
+                                    leftBounds[1].x += bounds[0].x;
+                                    leftBounds[1].y += bounds[0].y;
+
+                                    rightBounds[0].x += bounds[0].x;
+                                    rightBounds[0].y += bounds[0].y;
+                                    rightBounds[1].x += bounds[0].x;
+                                    rightBounds[1].y += bounds[0].y;
+
+                                    featuresBoundary.add(leftBounds);
+                                    featuresBoundary.add(rightBounds);
+                                    found = true;
+                                } else {
+                                    x2++;
+                                }
+                            } while (!found && x2 < width);
+                            y2++;
+                        } while (!found && y2 < leftBounds[1].y);
+                        if (!found) {
+                            leftBounds[0].x += bounds[0].x;
+                            leftBounds[0].y += bounds[0].y;
+                            leftBounds[1].x += bounds[0].x;
+                            leftBounds[1].y += bounds[0].y;
+                            featuresBoundary.add(leftBounds);
+                        }
+                    } else {
+                        x++;
+                    }
+                } while (!found && x < width / 2);
+                y++;
+            }
+
+            // find nose / mouth
+            found = false;
+            while (!found && y < height) {
+                x = 0;
+                do {
+                    int i = y * width + x;
+                    if (pixels[i] == Color.WHITE) {
+                        Point[] leftBounds = floodFill(new Point(x, y));
+                        int y2 = leftBounds[0].y;
+                        do {
+                            int x2 = width / 2;
+                            do {
+                                i = y2 * width + x2;
+                                if (pixels[i] == Color.WHITE) {
+                                    Point[] rightBounds = floodFill(new Point(x2, y2));
+
+                                    leftBounds[0].x += bounds[0].x;
+                                    leftBounds[0].y += bounds[0].y;
+                                    leftBounds[1].x += bounds[0].x;
+                                    leftBounds[1].y += bounds[0].y;
+
+                                    rightBounds[0].x += bounds[0].x;
+                                    rightBounds[0].y += bounds[0].y;
+                                    rightBounds[1].x += bounds[0].x;
+                                    rightBounds[1].y += bounds[0].y;
+
+                                    featuresBoundary.add(leftBounds);
+                                    featuresBoundary.add(rightBounds);
+                                    found = true;
+                                } else {
+                                    x2++;
+                                }
+                            } while (!found && x2 < width);
+                            y2++;
+                        } while (!found && y2 < leftBounds[1].y);
+                        if (!found) {
+                            leftBounds[0].x += bounds[0].x;
+                            leftBounds[0].y += bounds[0].y;
+                            leftBounds[1].x += bounds[0].x;
+                            leftBounds[1].y += bounds[0].y;
+                            featuresBoundary.add(leftBounds);
+                        }
+                    } else {
+                        x++;
+                    }
+                } while (!found && x < width / 2);
+                y++;
+            }
+
+            // find mouth
+            found = false;
+            while (!found && y < height) {
+                x = 0;
+                do {
+                    int i = y * width + x;
+                    if (pixels[i] == Color.WHITE) {
+                        Point[] mouthBounds = floodFill(new Point(x, y));
+                        mouthBounds[0].x += bounds[0].x;
+                        mouthBounds[0].y += bounds[0].y;
+                        mouthBounds[1].x += bounds[0].x;
+                        mouthBounds[1].y += bounds[0].y;
+
+                        featuresBoundary.add(mouthBounds);
+                        found = true;
+                    } else {
+                        x++;
+                    }
+                } while (!found && x < width / 2);
+                y++;
+            }
+        }
+
+        Point[][] getControlPoints() {
+            return controlPoints;
+        }
+
+        public List<Point[]> getFeaturesBoundary() {
+            return featuresBoundary;
         }
 
         private Point[] findEyeCenter(int startY) {
@@ -454,24 +601,24 @@ public class FaceDetector {
             return null;
         }
 
-        private Point findMouth() {
-            int[] processedPixels = Arrays.copyOf(pixels, pixels.length);
-            for (int i = pixels.length / 2; i < pixels.length; ++i) {
-                int x = i % width;
-                if (x < width / 3 || x > width * 2 / 3) {
-                    continue;
-                }
-
-                if (pixels[i] != Color.WHITE) {
-                    Point p = new Point(i % width, i / width);
-                    Point[] bounds = floodFill(processedPixels, p);
-                    if (bounds[0].x < width / 2 && bounds[1].x > width / 2) {
-                        return p;
-                    }
-                }
-            }
-            return null;
-        }
+//        private Point findMouth() {
+//            int[] processedPixels = Arrays.copyOf(pixels, pixels.length);
+//            for (int i = pixels.length / 2; i < pixels.length; ++i) {
+//                int x = i % width;
+//                if (x < width / 3 || x > width * 2 / 3) {
+//                    continue;
+//                }
+//
+//                if (pixels[i] != Color.WHITE) {
+//                    Point p = new Point(i % width, i / width);
+//                    Point[] bounds = floodFill(processedPixels, p);
+//                    if (bounds[0].x < width / 2 && bounds[1].x > width / 2) {
+//                        return p;
+//                    }
+//                }
+//            }
+//            return null;
+//        }
 
         private ArrayList<Point> findPoints(Point min, Point max, int threshold) {
             ArrayList<Point> result = new ArrayList<>();
@@ -557,6 +704,7 @@ public class FaceDetector {
         Bitmap process() {
             int[] resultPixels = new int[pixels.length];
             Arrays.fill(resultPixels, Color.WHITE);
+            int maxGradient = -1;
 
             for (int top = 0, middle = width, bottom = width * 2; bottom < pixels.length; top++, middle++, bottom++) {
                 if (top % width == 0 || top % width == (width - 1)) {
@@ -571,21 +719,24 @@ public class FaceDetector {
                         middle - 1, middle, middle + 1,
                         bottom - 1, bottom, bottom + 1
                 };
+
                 for (int j = 0; j < idx.length; ++j) {
                     int r = (pixels[idx[j]] & 0x00FF0000) >> 16;
                     int g = (pixels[idx[j]] & 0x0000FF00) >> 8;
                     int b = (pixels[idx[j]] & 0x000000FF);
-                    int intensity = r + g + b;
+                    int gray = (int)(0.2126 * r + 0.7152 * g + 0.0722 * b);
 
-                    gX += SOBEL_X[j] * intensity;
-                    gY += SOBEL_Y[j] * intensity;
+                    gX += SOBEL_X[j] * gray;
+                    gY += SOBEL_Y[j] * gray;
+
                 }
 
-                int length = (int) (Math.sqrt(gX * gX + gY * gY) * 255 / 4328);
-                resultPixels[middle] = (0xFF << 24)
-                        | (length << 16)
-                        | (length << 8)
-                        | length;
+                int gradient = (int) (Math.sqrt(gX * gX + gY * gY)) > 70 ? 255 : 0;
+
+              resultPixels[middle] = (0xFF << 24)
+                        | (gradient << 16)
+                        | (gradient << 8)
+                        | gradient;
             }
 
             return Bitmap.createBitmap(resultPixels, width, height, originalBitmap.getConfig());
