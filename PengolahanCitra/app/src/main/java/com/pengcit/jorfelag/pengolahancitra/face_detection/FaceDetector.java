@@ -56,32 +56,33 @@ public class FaceDetector {
         for (Point[] bound: faceCandidateBounds) {
             FaceCandidateProcessor fc = new FaceCandidateProcessor(sobelBitmap, bound);
             fc.process();
-            for (Point[] featureBoundary :fc.getFeaturesBoundary()) {
-                Rect r = new Rect(featureBoundary[0].x, featureBoundary[0].y, featureBoundary[1].x, featureBoundary[1].y);
-                canvas.drawRect(r, framePaint);
+            if (fc.isFace()) {
+                for (Point[] featureBoundary :fc.getFeaturesBoundary()) {
+                    if (featureBoundary != null) {
+                        Rect r = new Rect(featureBoundary[0].x, featureBoundary[0].y, featureBoundary[1].x, featureBoundary[1].y);
+                        canvas.drawRect(r, framePaint);
+                    }
+                }
+
+                Point[][] controlPoints = fc.getControlPoints();
+                ArrayList<Float> f = new ArrayList<>();
+                for (Point[] component: controlPoints) {
+                    if (component != null) {
+                        for (Point controlPoint: component) {
+                            f.add((float) controlPoint.x);
+                            f.add((float) controlPoint.y);
+                        }
+                    }
+                }
+
+                float[] f2 = new float[f.size()];
+                for (int i = 0; i < f2.length; ++i) {
+                    f2[i] = f.get(i);
+                }
+
+                canvas.drawPoints(f2, pointsPaint);
             }
         }
-//
-//            Point[][] controlPoints = fc.getControlPoints();
-
-//            ArrayList<Float> f = new ArrayList<>();
-//            for (Point[] component: controlPoints) {
-//                for (Point controlPoint: component) {
-//                    f.add((float) controlPoint.x);
-//                    f.add((float) controlPoint.y);
-//                }
-//            }
-//            float[] f2 = new float[f.size()];
-//            for (int i = 0; i < f2.length; ++i) {
-//                f2[i] = f.get(i);
-//            }
-//            canvas.drawPoints(f2, pointsPaint);
-
-//            for (Point[] component: controlPoints) {
-//                r = new Rect(component[0].x, component[0].y, component[1].x, component[1].y);
-//                canvas.drawRect(r, pointsPaint);
-//            }
-//        }
     }
 
     public Bitmap getBitmap() {

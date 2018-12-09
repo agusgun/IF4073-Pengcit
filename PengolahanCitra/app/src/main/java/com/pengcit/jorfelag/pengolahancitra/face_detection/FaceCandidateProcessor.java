@@ -8,6 +8,7 @@ import android.util.Log;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
 
@@ -21,8 +22,9 @@ public class FaceCandidateProcessor {
     private int height;
     private Bitmap bitmap;
     private int[] pixels;
-    private List<Point[]> featuresBoundary;
+    private Point[][] featuresBoundary;
     private Point[][] controlPoints;
+    private boolean isFace;
 
     FaceCandidateProcessor(Bitmap sobelBitmap, Point[] bounds) {
         this.bounds = bounds;
@@ -41,7 +43,21 @@ public class FaceCandidateProcessor {
         );
         pixels = new int[height * width];
         bitmap.getPixels(pixels, 0, width, 0, 0, width, height);
-        featuresBoundary = new ArrayList<>();
+        featuresBoundary = new Point[7][];
+        controlPoints = null;
+        isFace = false;
+    }
+
+    public boolean isFace() {
+        return isFace;
+    }
+
+    Point[][] getControlPoints() {
+        return controlPoints;
+    }
+
+    public Point[][] getFeaturesBoundary() {
+        return featuresBoundary;
     }
 
     void process() {
@@ -61,37 +77,32 @@ public class FaceCandidateProcessor {
             }
         }
         extractFeaturesBoundary();
+        if (isFace) {
+            controlPoints = new Point[7][];
+            for (int i = 0; i < featuresBoundary.length; ++i) {
+                if (featuresBoundary[i] != null) {
+                    Point min = new Point(featuresBoundary[i][0].x, featuresBoundary[i][0].y);
+                    Point max = new Point(featuresBoundary[i][1].x, featuresBoundary[i][1].y);
 
-//
-//            controlPoints = boundaries;
-//            for (int i = 0; i < controlPoints.length; ++i) {
-//                for (int j = 0; j < controlPoints[i].length; ++j) {
-//                    controlPoints[i][j].x += bounds[0].x;
-//                    controlPoints[i][j].y += bounds[0].y;
-//                }
-//            }
+                    min.x -= bounds[0].x;
+                    max.x -= bounds[0].x;
+                    min.y -= bounds[0].y;
+                    max.y -= bounds[0].y;
 
-
-//            controlPoints = new Point[5][];
-//            for (int i = 0; i < boundaries.length; ++i) {
-//                Point min = boundaries[i][0];
-//                Point max = boundaries[i][1];
-//
-//                if (min.x == Integer.MAX_VALUE || min.y == Integer.MAX_VALUE
-//                        || max.x == Integer.MIN_VALUE || max.y == Integer.MIN_VALUE) {
-//                    continue;
-//                }
-//
-//                ArrayList<Point> cp = findControlPoints(findPoints(min, max, 10), 20);
-//                controlPoints[i] = new Point[cp.size()];
-//                for (int j = 0; j < controlPoints[i].length; ++j) {
-//                    controlPoints[i][j] = new Point(
-//                            cp.get(j).x + bounds[0].x,
-//                            cp.get(j).y + bounds[0].y
-//                    );
-//                    Log.d("CP", String.format("%d %d", controlPoints[i][j].x, controlPoints[i][j].y));
-//                }
-//            }
+                    List<Point> cp = findControlPoints(min, max, 6);
+                    controlPoints[i] = new Point[cp.size()];
+                    for (int j = 0; j < controlPoints[i].length; ++j) {
+                        controlPoints[i][j] = new Point(
+                                cp.get(j).x + bounds[0].x,
+                                cp.get(j).y + bounds[0].y
+                        );
+                        Log.d("CP", String.format("%d %d %d %d", i, j, controlPoints[i][j].x, controlPoints[i][j].y));
+                    }
+                } else {
+                    controlPoints[i] = null;
+                }
+            }
+        }
     }
 
     private void dilate() {
@@ -243,25 +254,43 @@ public class FaceCandidateProcessor {
             }
 
             List<Point[]> eyeBrowsBoundary = findEyesBoundary(0, miny, minx, maxx);
-            if (eyeBrowsBoundary != null) {
-                for (Point[] eyeBrowBoundary : eyeBrowsBoundary) {
-                    featuresBoundary.add(translateBoundary(eyeBrowBoundary));
-                }
-            }
 
             Point[] mouthBoundary = findMouthBoundary(starty);
             if (mouthBoundary != null && (minx < mouthBoundary[0].x && mouthBoundary[1].x < maxx)) {
                 List<Point[]> nosesBoundary = findNoseBoundary(starty,
                         (int) (mouthBoundary[0].y - (0.05 * height)),
                         mouthBoundary[0].x, mouthBoundary[1].x);
+
                 if (nosesBoundary != null) {
-                    for (Point[] noseBoundary : nosesBoundary) {
-                        featuresBoundary.add(translateBoundary(noseBoundary));
+                    for (int i = 0; i < 7; i++) {
+                        featuresBoundary[i] = new Point[2];
                     }
-                    featuresBoundary.add(translateBoundary(mouthBoundary));
+                    int counter = 0;
+                    if (eyeBrowsBoundary != null) {
+                        for (Point[] eyeBrowBoundary : eyeBrowsBoundary) {
+                            featuresBoundary[counter++] = translateBoundary(eyeBrowBoundary);
+                        }
+                    } else {
+                        for (int i = 0; i < 2; i++) {
+                            featuresBoundary[counter++] = null;
+                        }
+                    }
+
                     for (Point[] eyeBoundary : eyesBoundary) {
-                        featuresBoundary.add(translateBoundary(eyeBoundary));
+                        featuresBoundary[counter++] = translateBoundary(eyeBoundary);
                     }
+
+                    for (Point[] noseBoundary : nosesBoundary) {
+                        featuresBoundary[counter++] = translateBoundary(noseBoundary);
+                    }
+                    if (counter == 5) {
+                        for (Point[] noseBoundary : nosesBoundary) {
+                            featuresBoundary[counter++] = translateBoundary(noseBoundary);
+                        }
+                    }
+
+                    featuresBoundary[counter] = translateBoundary(mouthBoundary);
+                    isFace = true;
                 }
             }
         }
@@ -429,76 +458,69 @@ public class FaceCandidateProcessor {
         return nosesBoundary;
     }
 
-    Point[][] getControlPoints() {
-        return controlPoints;
-    }
+    private List<Point> findControlPoints(Point min, Point max, int num) {
+        List<Point> result = new ArrayList<>();
 
-    public List<Point[]> getFeaturesBoundary() {
-        return featuresBoundary;
-    }
+        int mid_num = (num - 2) / 2;
+        Point left = new Point();
 
-//    private ArrayList<Point> findPoints(Point min, Point max, int threshold) {
-//        ArrayList<Point> result = new ArrayList<>();
-//
-//        topLeft:
-//        for (int y = min.y; y < max.y; ++y) {
-//            for (int x = min.x; x < max.x; ++x) {
-//                int i = y * width + x;
-//                if (sobelPixels[i] >= threshold) {
-//                    result.add(new Point(x, y));
-//                    break topLeft;
-//                }
-//            }
-//        }
-//
-//        topRight:
-//        for (int y = min.y; y < max.y; ++y) {
-//            for (int x = max.x - 1; x >= min.x; --x) {
-//                int i = y * width + x;
-//                if (sobelPixels[i] >= threshold) {
-//                    result.add(new Point(x, y));
-//                    break topRight;
-//                }
-//            }
-//        }
-//
-//        bottomLeft:
-//        for (int y = max.y - 1; y >= min.y; --y) {
-//            for (int x = min.x; x < max.x; ++x) {
-//                int i = y * width + x;
-//                if (sobelPixels[i] >= threshold) {
-//                    result.add(new Point(x, y));
-//                    break bottomLeft;
-//                }
-//            }
-//        }
-//
-//        bottomRight:
-//        for (int y = max.y - 1; y >= min.y; --y) {
-//            for (int x = max.x - 1; x >= min.x; --x) {
-//                int i = y * width + x;
-//                if (sobelPixels[i] >= threshold) {
-//                    result.add(new Point(x, y));
-//                    break bottomRight;
-//                }
-//            }
-//        }
-//
-//        return result;
-//    }
-
-    private ArrayList<Point> findControlPoints(ArrayList<Point> points, int num) {
-        ArrayList<Point> result = new ArrayList<>();
-
-        int size = points.size();
-        if (size == 0) {
-            return result;
+        for (int y = min.y; y <= max.y; y++) {
+            int i = y * width + min.x;
+            if (pixels[i] == Color.WHITE) {
+                left = new Point(min.x, y);
+                break;
+            }
         }
 
-        int increment = size / num;
-        for (int i = 0; i < num; i += increment) {
-            result.add(points.get(i));
+        result.add(left);
+
+        List<Point> tops = new ArrayList<>();
+        List<Point> bottoms = new ArrayList<>();
+        int x = min.x;
+        int deltaX = (max.x - min.x + 1) / (mid_num + 1);
+
+        for (int mid = 1; mid <= mid_num; mid++) {
+            x += deltaX;
+
+            Point top = new Point();
+            for (int y = min.y; y <= max.y; y++) {
+                int i = y * width + x;
+                if (pixels[i] == Color.WHITE) {
+                    top = new Point(x, y);
+                    break;
+                }
+            }
+
+            Point bottom = new Point();
+            for (int y = max.y; y >= min.y; y--) {
+                int i = y * width + x;
+                if (pixels[i] == Color.WHITE) {
+                    bottom = new Point(x, y);
+                    break;
+                }
+            }
+
+            tops.add(top);
+            bottoms.add(bottom);
         }
+
+        result.addAll(tops);
+
+        Point right = new Point();
+
+        for (int y = min.y; y <= max.y; y++) {
+            int i = y * width + max.x;
+            if (pixels[i] == Color.WHITE) {
+                right = new Point(max.x, y);
+                break;
+            }
+        }
+
+        result.add(right);
+
+        Collections.reverse(bottoms);
+        result.addAll(bottoms);
+
         return result;
     }
 }
