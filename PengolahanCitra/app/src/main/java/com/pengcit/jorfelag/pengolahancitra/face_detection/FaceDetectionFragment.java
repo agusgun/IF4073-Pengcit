@@ -42,6 +42,7 @@ public class FaceDetectionFragment extends Fragment {
     private TextView mataKananTextView;
     private TextView hidungTextView;
     private TextView mulutTextView;
+    private TextView resultTextView;
 
     public FaceDetectionFragment() {
         // Required empty public constructor
@@ -64,6 +65,8 @@ public class FaceDetectionFragment extends Fragment {
 
         processButton = view.findViewById(R.id.face_detection_fr_btn_process);
         commitButton = view.findViewById(R.id.face_detection_fr_btn_commit);
+
+        resultTextView = view.findViewById(R.id.face_detection_fr_tv_result);
 
         model = ViewModelProviders.of(getActivity()).get(SharedViewModel.class);
         model.getBitmapLiveData().observe(this, new Observer<Bitmap>() {
@@ -138,5 +141,9 @@ public class FaceDetectionFragment extends Fragment {
         resultBitmap = bitmap;
         resultImageView.setImageBitmap(bitmap);
         commitButton.setVisibility(View.VISIBLE);
+    }
+
+    public void setRecognitionResultTextView(String text) {
+        resultTextView.setText(text);
     }
 }

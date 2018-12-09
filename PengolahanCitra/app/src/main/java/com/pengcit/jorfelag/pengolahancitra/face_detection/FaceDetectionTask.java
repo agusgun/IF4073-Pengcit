@@ -5,8 +5,9 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 
 import java.lang.ref.WeakReference;
+import java.util.List;
 
-public class FaceDetectionTask extends AsyncTask<Bitmap, Void, Bitmap> {
+public class FaceDetectionTask extends AsyncTask<Bitmap, Void, FaceDetector> {
 
     private WeakReference<FaceDetectionFragment> fragmentRef;
     private ProgressDialog dialog;
@@ -26,12 +27,12 @@ public class FaceDetectionTask extends AsyncTask<Bitmap, Void, Bitmap> {
     }
 
     @Override
-    protected Bitmap doInBackground(Bitmap... bitmaps) {
-        return new FaceDetector(bitmaps[0]).getBitmap();
+    protected FaceDetector doInBackground(Bitmap... bitmaps) {
+        return new FaceDetector(bitmaps[0]);
     }
 
     @Override
-    protected void onPostExecute(Bitmap result) {
+    protected void onPostExecute(FaceDetector result) {
         FaceDetectionFragment fr = fragmentRef.get();
         if (fr == null
                 || fr.getActivity() == null
@@ -40,7 +41,33 @@ public class FaceDetectionTask extends AsyncTask<Bitmap, Void, Bitmap> {
         if (dialog.isShowing()) {
             dialog.dismiss();
         }
+        StringBuilder sb = new StringBuilder();
+        List<String> recognitionResult = result.getLabels();
+        List<Double> deltas = result.getDeltas();
 
-        fr.setResultImageView(result);
+        if (recognitionResult.size() > 1) {
+            for (int i = 0; i < recognitionResult.size(); i++) {
+                sb.append(i + 1);
+                sb.append(". ");
+                sb.append(recognitionResult.get(i));
+
+                // DEBUG
+                sb.append(", error: ");
+                sb.append(String.format("%.2f", deltas.get(i)));
+
+                if (i != (recognitionResult.size() - 1)) {
+                    sb.append("\n");
+                }
+            }
+        } else if (recognitionResult.size() == 1) {
+            sb.append(recognitionResult.get(0));
+            // DEBUG
+            sb.append(", error: ");
+            sb.append(String.format("%.2f", deltas.get(0)));
+        } else {
+            sb.append("No face detected");
+        }
+        fr.setResultImageView(result.getBitmap());
+        fr.setRecognitionResultTextView(sb.toString());
     }
 }
