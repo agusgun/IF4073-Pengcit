@@ -12,6 +12,7 @@ import com.pengcit.jorfelag.pengolahancitra.util.LoopBody;
 import com.pengcit.jorfelag.pengolahancitra.util.Parallel;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class FaceDetector {
 
@@ -19,8 +20,12 @@ public class FaceDetector {
     private Bitmap processedBitmap;
     private int[] bitmap;
     private int width, height;
+    private List<String> labels;
+    private List<Double> deltas;
 
     public FaceDetector(Bitmap inputBitmap) {
+        labels = new ArrayList<>();
+        deltas = new ArrayList<>();
         originalBitmap = inputBitmap.copy(inputBitmap.getConfig(), true);
 
         height = originalBitmap.getHeight();
@@ -53,9 +58,15 @@ public class FaceDetector {
         ArrayList<Point[]> faceCandidateBounds =
                 new CandidateFaceDetector(bitmap, width, height).process();
 
+        Log.d("Candidates", "num: " + faceCandidateBounds.size());
+
         for (Point[] bound: faceCandidateBounds) {
             FaceCandidateProcessor fc = new FaceCandidateProcessor(sobelBitmap, bound);
             fc.process();
+
+            //DEBUG
+//            originalBitmap = fc.getBitmap();
+
             if (fc.isFace()) {
                 for (Point[] featureBoundary :fc.getFeaturesBoundary()) {
                     if (featureBoundary != null) {
@@ -81,12 +92,21 @@ public class FaceDetector {
                 }
 
                 canvas.drawPoints(f2, pointsPaint);
+                labels.add(recognize(controlPoints));
             }
         }
     }
 
     public Bitmap getBitmap() {
         return originalBitmap;
+    }
+
+    public List<String> getLabels() {
+        return labels;
+    }
+
+    public List<Double> getDeltas() {
+        return deltas;
     }
 
     private int[] getRGB(int pixel) {
@@ -113,5 +133,42 @@ public class FaceDetector {
         int[] YCbCr = getYCbCr(pixel);
         return (YCbCr[0] > 80 && YCbCr[1] > 85 && YCbCr[1] < 135 &&
                 YCbCr[2] > 135 && YCbCr[2] < 180);
+    }
+
+    private double gradient(Point p1, Point p2) {
+        if (p1.x == p2.x) {
+            return Double.MAX_VALUE;
+        }
+        return (double)(p2.y - p1.y)/(double)(p2.x - p1.x);
+    }
+
+    private double compare(Point[][] p1, Point[][] p2) {
+        double delta = 0;
+
+        for (int i = 0; i < p1.length; i++) {
+            if (p1[i] != null && p2[i] != null) {
+                for (int j = 0; j < p1[i].length - 1; j++) {
+                    delta += Math.abs(gradient(p1[i][j], p1[i][j + 1]) - gradient(p2[i][j], p2[i][j + 1]));
+                }
+                delta += Math.abs(gradient(p1[i][p1[i].length - 1], p1[i][0]) - gradient(p2[i][p2[i].length - 1], p2[i][0]));
+            }
+        }
+
+        return delta;
+    }
+
+    private String recognize(Point[][] controlPoints) {
+        int index = 0;
+        double delta = Double.MAX_VALUE;
+        double newDelta;
+        for (int i = 0; i < FaceDataset.LABELS.length; i++) {
+            newDelta = compare(controlPoints, FaceDataset.CONTROL_POINTS[i]);
+            if (newDelta < delta) {
+                index = i;
+                delta = newDelta;
+            }
+        }
+        deltas.add(delta);
+        return FaceDataset.LABELS[index];
     }
 }
