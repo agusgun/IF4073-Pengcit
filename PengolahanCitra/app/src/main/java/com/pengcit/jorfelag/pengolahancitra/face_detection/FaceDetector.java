@@ -11,6 +11,7 @@ import android.util.Log;
 import com.pengcit.jorfelag.pengolahancitra.util.LoopBody;
 import com.pengcit.jorfelag.pengolahancitra.util.Parallel;
 
+import java.lang.reflect.Array;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -69,12 +70,14 @@ public class FaceDetector {
                 new CandidateFaceDetector(bitmap, width, height).process();
 
         for (Point[] bound: faceCandidateBounds) {
+//            bound = faceCandidateBounds.get(0);
             FaceCandidate fc = new FaceCandidate(processedBitmap, sobelBitmap, bound);
             fc.process();
             for (Point[] featureBoundary :fc.getFeaturesBoundary()) {
                 Rect r = new Rect(featureBoundary[0].x, featureBoundary[0].y, featureBoundary[1].x, featureBoundary[1].y);
                 canvas.drawRect(r, framePaint);
             }
+//            originalBitmap = fc.bitmap;
         }
 //
 //            Point[][] controlPoints = fc.getControlPoints();
@@ -101,22 +104,6 @@ public class FaceDetector {
 
     public Bitmap getBitmap() {
         return originalBitmap;
-    }
-
-    private Bitmap resizeBitmap(Bitmap bitmap, int maxWidth, int maxHeight) {
-        int width = bitmap.getWidth();
-        int height = bitmap.getHeight();
-        int resizedWidth, resizedHeight;
-
-        if (width >= height) {   // Landscape
-            resizedWidth = Math.min(width, maxWidth);
-            resizedHeight = resizedWidth * height / width;
-        } else {    // Portrait
-            resizedHeight = Math.min(height, maxHeight);
-            resizedWidth = resizedHeight *  width / height;
-        }
-
-        return Bitmap.createScaledBitmap(bitmap, resizedWidth, resizedHeight, true);
     }
 
     private int[] getRGB(int pixel) {
@@ -203,7 +190,7 @@ public class FaceDetector {
                     }
                 }
             }
-
+//            bitmap = Bitmap.createBitmap(pixels, width, height, bitmap.getConfig());
             extractFeaturesBoundary();
 
 //
@@ -245,8 +232,8 @@ public class FaceDetector {
                 int x = i % width;
 
                 int roi = Integer.MIN_VALUE;
-                for (int j = Math.max(0, y - 4); j < Math.min(height, y + 5); ++j) {
-                    for (int k = Math.max(0, x - 4); k < Math.min(width, x + 5); ++k) {
+                for (int j = Math.max(0, y - 2); j < Math.min(height, y + 3); ++j) {
+                    for (int k = Math.max(0, x - 2); k < Math.min(width, x + 3); ++k) {
                         int pixel = pixels[j * width + k];
                         if (pixel > roi) {
                             roi = pixel;
@@ -265,8 +252,8 @@ public class FaceDetector {
                 int x = i % width;
 
                 int roi = Integer.MAX_VALUE;
-                for (int j = Math.max(0, y - 3); j < Math.min(height, y + 5); ++j) {
-                    for (int k = Math.max(0, x - 3); k < Math.min(width, x + 5); ++k) {
+                for (int j = Math.max(0, y - 2); j < Math.min(height, y + 3); ++j) {
+                    for (int k = Math.max(0, x - 2); k < Math.min(width, x + 3); ++k) {
                         int pixel = pixels[j * width + k];
                         if (pixel < roi) {
                             roi = pixel;
@@ -291,23 +278,6 @@ public class FaceDetector {
                     floodFillClean(new Point(i, height - j - 1));
                 }
             }
-//            for (int i = 0; i < pixels.length; ++i) {
-//                if (pixels[i] == Color.WHITE) {
-//                    int y = i / width;
-//                    int x = i % width;
-//                    Point p = new Point(x, y);
-//
-//                    Point[] bounds = floodFill(p);
-//                    int currWidth = bounds[1].x - bounds[0].x + 1;
-//                    int currHeight = bounds[1].y - bounds[0].y + 1;
-//
-//                    if (currWidth < 100 || currHeight < 100) {
-//                        continue;
-//                    }
-//
-//                    candidateFaces.add(bounds);
-//                }
-//            }
         }
 
         private void floodFillClean(Point start) {
@@ -331,9 +301,10 @@ public class FaceDetector {
             }
         }
 
-        private Point[] floodFill(Point start) {
+        private int[] floodFill(int[] processedPixels, Point start) {
             Queue<Point> queue = new ArrayDeque<>();
             queue.add(start);
+            int area = 0;
 
             Point min = new Point(Integer.MAX_VALUE, Integer.MAX_VALUE);
             Point max = new Point(Integer.MIN_VALUE, Integer.MIN_VALUE);
@@ -346,20 +317,20 @@ public class FaceDetector {
                 }
                 int i = curr.y * width + curr.x;
 
-                if (pixels[i] == Color.WHITE) {
+                if (processedPixels[i] == Color.WHITE) {
                     min.x = Math.min(min.x, curr.x);
                     min.y = Math.min(min.y, curr.y);
                     max.x = Math.max(max.x, curr.x);
                     max.y = Math.max(max.y, curr.y);
-
-                    pixels[i] = Color.BLACK;
+                    area++;
+                    processedPixels[i] = Color.BLACK;
                     for (int j = 0; j < 8; ++j) {
                         queue.add(new Point(curr.x + X_TRANSLATION[j], curr.y + Y_TRANSLATION[j]));
                     }
                 }
             }
 
-            return new Point[] {min, max};
+            return new int[] {min.x, min.y, max.x, max.y, area};
         }
 
         private int floodFillCountArea(int[] processedPixels, Point start) {
@@ -389,172 +360,204 @@ public class FaceDetector {
         }
 
         private void extractFeaturesBoundary() {
-            int y = 0;
-            int x;
-            boolean found = false;
+           List<Point[]> eyesBoundary = findEyesBoundary(0, height / 2, 0, width);
+           if (eyesBoundary != null){
+               int starty = 0;
+               int minx = Integer.MAX_VALUE;
+               int maxx = Integer.MIN_VALUE;
+               int miny = Integer.MAX_VALUE;
+               for (Point[] eyeBoundary : eyesBoundary) {
+                   starty = Math.max(starty, eyeBoundary[1].y + 1);
+                   minx = Math.min(minx, eyeBoundary[0].x);
+                   maxx = Math.max(maxx, eyeBoundary[1].x);
+                   miny = Math.min(miny, eyeBoundary[0].y);
+               }
 
-            // find eyes / eyebrows
-            do {
-                x = 0;
-                do {
+               List<Point[]> eyeBrowsBoundary = findEyesBoundary(0, miny, minx, maxx);
+               if (eyeBrowsBoundary != null) {
+                   for (Point[] eyeBrowBoundary : eyeBrowsBoundary) {
+                       featuresBoundary.add(translateBoundary(eyeBrowBoundary));
+                   }
+               }
+
+               Point[] mouthBoundary = findMouthBoundary(starty);
+               if (mouthBoundary != null && (minx < mouthBoundary[0].x && mouthBoundary[1].x < maxx)) {
+                   List<Point[]> nosesBoundary = findNoseBoundary(starty,
+                           (int) (mouthBoundary[0].y - (0.05 * height)),
+                           mouthBoundary[0].x, mouthBoundary[1].x);
+                   if (nosesBoundary != null) {
+                       for (Point[] noseBoundary : nosesBoundary) {
+                           featuresBoundary.add(translateBoundary(noseBoundary));
+                       }
+                       featuresBoundary.add(translateBoundary(mouthBoundary));
+                       for (Point[] eyeBoundary : eyesBoundary) {
+                           featuresBoundary.add(translateBoundary(eyeBoundary));
+                       }
+                   }
+               }
+           }
+        }
+
+        private Point[] translateBoundary(Point[] boundary) {
+            Point[] newBoundary = Arrays.copyOf(boundary, boundary.length);
+            for (int i = 0; i < boundary.length; i++) {
+                newBoundary[i].x += bounds[0].x;
+                newBoundary[i].y += bounds[0].y;
+            }
+            return newBoundary;
+        }
+
+        private List<Point[]> findEyesBoundary(int starty, int endy, int startx, int endx) {
+            int[] processedPixels = Arrays.copyOf(pixels, pixels.length);
+            int [] leftEye = new int[5];
+            int [] rightEye = new int[5];
+
+            // find left and right eye
+            for (int y = starty; y < endy; y++) {
+                for (int x = startx; x < endx; x++) {
                     int i = y * width + x;
-                    if (pixels[i] == Color.WHITE) {
-                        Point[] leftBounds = floodFill(new Point(x, y));
-                        int y2 = leftBounds[0].y;
-                        do {
-                            int x2 = width / 2;
-                            do {
-                                i = y2 * width + x2;
-                                if (pixels[i] == Color.WHITE) {
-                                    Point[] rightBounds = floodFill(new Point(x2, y2));
-
-                                    leftBounds[0].x += bounds[0].x;
-                                    leftBounds[0].y += bounds[0].y;
-                                    leftBounds[1].x += bounds[0].x;
-                                    leftBounds[1].y += bounds[0].y;
-
-                                    rightBounds[0].x += bounds[0].x;
-                                    rightBounds[0].y += bounds[0].y;
-                                    rightBounds[1].x += bounds[0].x;
-                                    rightBounds[1].y += bounds[0].y;
-
-                                    featuresBoundary.add(leftBounds);
-                                    featuresBoundary.add(rightBounds);
-                                    found = true;
-                                } else {
-                                    x2++;
-                                }
-                            } while (!found && x2 < width);
-                            y2++;
-                        } while (!found && y2 < leftBounds[1].y);
-
-                    } else {
-                        x++;
-                    }
-                } while (!found && x < width / 2);
-                y++;
-            } while (!found && y < height);
-
-
-            // find eyes / nose
-            found = false;
-            while (!found && y < height) {
-                x = 0;
-                do {
-                    int i = y * width + x;
-                    if (pixels[i] == Color.WHITE) {
-                        Point[] leftBounds = floodFill(new Point(x, y));
-                        int y2 = leftBounds[0].y;
-                        do {
-                            int x2 = width / 2;
-                            do {
-                                i = y2 * width + x2;
-                                if (pixels[i] == Color.WHITE) {
-                                    Point[] rightBounds = floodFill(new Point(x2, y2));
-
-                                    leftBounds[0].x += bounds[0].x;
-                                    leftBounds[0].y += bounds[0].y;
-                                    leftBounds[1].x += bounds[0].x;
-                                    leftBounds[1].y += bounds[0].y;
-
-                                    rightBounds[0].x += bounds[0].x;
-                                    rightBounds[0].y += bounds[0].y;
-                                    rightBounds[1].x += bounds[0].x;
-                                    rightBounds[1].y += bounds[0].y;
-
-                                    featuresBoundary.add(leftBounds);
-                                    featuresBoundary.add(rightBounds);
-                                    found = true;
-                                } else {
-                                    x2++;
-                                }
-                            } while (!found && x2 < width);
-                            y2++;
-                        } while (!found && y2 < leftBounds[1].y);
-                        if (!found) {
-                            leftBounds[0].x += bounds[0].x;
-                            leftBounds[0].y += bounds[0].y;
-                            leftBounds[1].x += bounds[0].x;
-                            leftBounds[1].y += bounds[0].y;
-                            featuresBoundary.add(leftBounds);
+                    if (processedPixels[i] == Color.WHITE) {
+                        if (x < width / 2) {
+                            int [] leftEyeCandidate = floodFill(processedPixels, new Point(x, y));
+                            if (leftEyeCandidate[4] > leftEye[4]) {
+                                leftEye = Arrays.copyOf(leftEyeCandidate, 5);
+                            }
+                        } else {
+                            int [] rightEyeCandidate = floodFill(processedPixels, new Point(x, y));
+                            if (rightEyeCandidate[4] > rightEye[4]) {
+                                rightEye = Arrays.copyOf(rightEyeCandidate, 5);
+                            }
                         }
-                    } else {
-                        x++;
                     }
-                } while (!found && x < width / 2);
-                y++;
+                }
             }
 
-            // find nose / mouth
-            found = false;
-            while (!found && y < height) {
-                x = 0;
-                do {
+            //check valid eyes or not
+            boolean valid;
+            double eyeDistance = rightEye[0] - leftEye[2];
+
+            double leftEyeHeight = leftEye[3] - leftEye[1];
+            double leftEyeWidth = leftEye[2] - leftEye[0];
+            double leftEyeRatio = leftEyeHeight / leftEyeWidth;
+
+            double rightEyeHeight = rightEye[3] - rightEye[1];
+            double rightEyeWidth = rightEye[2] - rightEye[0];
+            double rightEyeRatio = rightEyeHeight / rightEyeWidth;
+
+            valid = (eyeDistance > 0) && ((eyeDistance / width) < 0.25) &&
+                    (leftEyeRatio < 0.6) && (rightEyeRatio < 0.6);
+
+            if (valid) {
+                List<Point[]> eyesBoundary = new ArrayList<>();
+
+                Point[] leftEyeBoundary = new Point[2];
+                leftEyeBoundary[0] = new Point(leftEye[0], leftEye[1]);
+                leftEyeBoundary[1] = new Point(leftEye[2], leftEye[3]);
+
+                Point[] rightEyeBoundary = new Point[2];
+                rightEyeBoundary[0] = new Point(rightEye[0], rightEye[1]);
+                rightEyeBoundary[1] = new Point(rightEye[2], rightEye[3]);
+
+                eyesBoundary.add(leftEyeBoundary);
+                eyesBoundary.add(rightEyeBoundary);
+
+                return eyesBoundary;
+            } else {
+                return null;
+            }
+        }
+
+        private Point[] findMouthBoundary(int starty) {
+            int[] processedPixels = Arrays.copyOf(pixels, pixels.length);
+            int [] mouth = new int[5];
+
+            for (int y = starty; y < height; y++) {
+                for (int x = 0; x < width; x++) {
                     int i = y * width + x;
-                    if (pixels[i] == Color.WHITE) {
-                        Point[] leftBounds = floodFill(new Point(x, y));
-                        int y2 = leftBounds[0].y;
-                        do {
-                            int x2 = width / 2;
-                            do {
-                                i = y2 * width + x2;
-                                if (pixels[i] == Color.WHITE) {
-                                    Point[] rightBounds = floodFill(new Point(x2, y2));
-
-                                    leftBounds[0].x += bounds[0].x;
-                                    leftBounds[0].y += bounds[0].y;
-                                    leftBounds[1].x += bounds[0].x;
-                                    leftBounds[1].y += bounds[0].y;
-
-                                    rightBounds[0].x += bounds[0].x;
-                                    rightBounds[0].y += bounds[0].y;
-                                    rightBounds[1].x += bounds[0].x;
-                                    rightBounds[1].y += bounds[0].y;
-
-                                    featuresBoundary.add(leftBounds);
-                                    featuresBoundary.add(rightBounds);
-                                    found = true;
-                                } else {
-                                    x2++;
-                                }
-                            } while (!found && x2 < width);
-                            y2++;
-                        } while (!found && y2 < leftBounds[1].y);
-                        if (!found) {
-                            leftBounds[0].x += bounds[0].x;
-                            leftBounds[0].y += bounds[0].y;
-                            leftBounds[1].x += bounds[0].x;
-                            leftBounds[1].y += bounds[0].y;
-                            featuresBoundary.add(leftBounds);
+                    if (processedPixels[i] == Color.WHITE) {
+                        int [] mouthCandidate = floodFill(processedPixels, new Point(x, y));
+                        if (mouthCandidate[4] > mouth[4]) {
+                            mouth = Arrays.copyOf(mouthCandidate, 5);
                         }
-                    } else {
-                        x++;
                     }
-                } while (!found && x < width / 2);
-                y++;
+                }
             }
 
-            // find mouth
-            found = false;
-            while (!found && y < height) {
-                x = 0;
-                do {
+            double mouthHeight = mouth[3] - mouth[1];
+            double mouthWidth = mouth[2] - mouth[0];
+            double mouthRatio = mouthHeight / mouthWidth;
+
+            if (mouthRatio < 0.4) {
+                Point[] mouthBoundary = new Point[2];
+                mouthBoundary[0] = new Point(mouth[0], mouth[1]);
+                mouthBoundary[1] = new Point(mouth[2], mouth[3]);
+                return mouthBoundary;
+            } else {
+                return null;
+            }
+        }
+
+
+        private List<Point[]> findNoseBoundary(int starty, int endy, int startx, int endx) {
+            int[] processedPixels = Arrays.copyOf(pixels, pixels.length);
+            int [] leftNose = new int[5];
+            int [] rightNose = new int[5];
+
+            // find left and right nose
+            for (int y = starty; y < endy; y++) {
+                for (int x = startx; x < endx; x++) {
                     int i = y * width + x;
-                    if (pixels[i] == Color.WHITE) {
-                        Point[] mouthBounds = floodFill(new Point(x, y));
-                        mouthBounds[0].x += bounds[0].x;
-                        mouthBounds[0].y += bounds[0].y;
-                        mouthBounds[1].x += bounds[0].x;
-                        mouthBounds[1].y += bounds[0].y;
-
-                        featuresBoundary.add(mouthBounds);
-                        found = true;
-                    } else {
-                        x++;
+                    if (processedPixels[i] == Color.WHITE) {
+                        if (x < width / 2) {
+                            int [] leftNoseCandidate = floodFill(processedPixels, new Point(x, y));
+                            if (leftNoseCandidate[4] > leftNose[4]) {
+                                leftNose = Arrays.copyOf(leftNoseCandidate, 5);
+                            }
+                        } else {
+                            int [] rightNoseCandidate = floodFill(processedPixels, new Point(x, y));
+                            if (rightNoseCandidate[4] > rightNose[4]) {
+                                rightNose = Arrays.copyOf(rightNoseCandidate, 5);
+                            }
+                        }
                     }
-                } while (!found && x < width / 2);
-                y++;
+                }
             }
+
+            List<Point[]> nosesBoundary = null;
+
+            if (leftNose[4] == 0 && rightNose[4] == 0) {
+                return null;
+            } else if (leftNose[4] == 0) {
+                nosesBoundary = new ArrayList<>();
+                Point[] noseBoundary = new Point[2];
+                noseBoundary[0] = new Point(rightNose[0], rightNose[1]);
+                noseBoundary[1] = new Point(rightNose[2], rightNose[3]);
+                nosesBoundary.add(noseBoundary);
+            } else if (rightNose[4] == 0) {
+                nosesBoundary = new ArrayList<>();
+                Point[] noseBoundary = new Point[2];
+                noseBoundary[0] = new Point(leftNose[0], leftNose[1]);
+                noseBoundary[1] = new Point(leftNose[2], leftNose[3]);
+                nosesBoundary.add(noseBoundary);
+            } else {
+                //check valid nose or not
+                double noseDistance = rightNose[0] - leftNose[2];
+                if (noseDistance > 0 && (noseDistance / width) < 0.15) {
+                    nosesBoundary = new ArrayList<>();
+                    Point[] leftNoseBoundary = new Point[2];
+                    leftNoseBoundary[0] = new Point(leftNose[0], leftNose[1]);
+                    leftNoseBoundary[1] = new Point(leftNose[2], leftNose[3]);
+
+                    Point[] rightNoseBoundary = new Point[2];
+                    rightNoseBoundary[0] = new Point(rightNose[0], rightNose[1]);
+                    rightNoseBoundary[1] = new Point(rightNose[2], rightNose[3]);
+
+                    nosesBoundary.add(leftNoseBoundary);
+                    nosesBoundary.add(rightNoseBoundary);
+                }
+            }
+
+            return nosesBoundary;
         }
 
         Point[][] getControlPoints() {
@@ -742,6 +745,4 @@ public class FaceDetector {
             return Bitmap.createBitmap(resultPixels, width, height, originalBitmap.getConfig());
         }
     }
-
-
 }
