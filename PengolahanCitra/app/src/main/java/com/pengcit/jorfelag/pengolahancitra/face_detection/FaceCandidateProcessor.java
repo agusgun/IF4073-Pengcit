@@ -89,7 +89,7 @@ public class FaceCandidateProcessor {
                     min.y -= bounds[0].y;
                     max.y -= bounds[0].y;
 
-                    List<Point> cp = findControlPoints(min, max, 6);
+                    List<Point> cp = findControlPoints(min, max, 10);
                     controlPoints[i] = new Point[cp.size()];
                     for (int j = 0; j < controlPoints[i].length; ++j) {
                         controlPoints[i][j] = new Point(
