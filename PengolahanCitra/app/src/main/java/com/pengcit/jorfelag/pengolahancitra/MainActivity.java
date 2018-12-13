@@ -29,7 +29,8 @@ public class MainActivity extends AppCompatActivity implements
         HistogramSpecificationFragment.OnFragmentInteractionListener,
         OCRFragment.OnFragmentInteractionListener,
         PreprocessOperatorFragment.OnFragmentInteractionListener,
-        FaceDetectionFragment.OnFragmentInteractionListener {
+        FaceDetectionFragment.OnFragmentInteractionListener,
+        ImageBeautifierFragment.OnFragmentInteractionListener {
 
     private TextToSpeech textToSpeech;
 
@@ -76,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements
         tabLayout.addTab(tabLayout.newTab().setText("OCR"));
         tabLayout.addTab(tabLayout.newTab().setText("Preprocess Operator"));
         tabLayout.addTab(tabLayout.newTab().setText("Face Detection"));
+        tabLayout.addTab(tabLayout.newTab().setText("Image Beautifier"));
 
         final ViewPager viewPager = findViewById(R.id.main_act_pager);
         final PagerAdapter adapter = new TabPagerAdapter(

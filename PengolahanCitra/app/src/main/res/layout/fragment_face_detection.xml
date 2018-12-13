@@ -84,48 +84,6 @@
                     android:layout_marginBottom="20dp"
                     android:textSize="32sp" />
 
-                <!--<TextView-->
-                    <!--android:id="@+id/aliskanan"-->
-                    <!--android:layout_width="wrap_content"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:layout_below="@id/face_detection_fr_btn_commit"-->
-                    <!--android:text="Alis Kanan" />-->
-
-                <!--<TextView-->
-                    <!--android:id="@+id/aliskiri"-->
-                    <!--android:layout_below="@id/aliskanan"-->
-                    <!--android:layout_width="wrap_content"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:text="Alis Kiri" />-->
-
-                <!--<TextView-->
-                    <!--android:id="@+id/matakanan"-->
-                    <!--android:layout_width="wrap_content"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:layout_below="@id/aliskiri"-->
-                    <!--android:text="Mata Kanan" />-->
-
-                <!--<TextView-->
-                    <!--android:id="@+id/matakiri"-->
-                    <!--android:layout_below="@id/matakanan"-->
-                    <!--android:layout_width="wrap_content"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:text="Mata Kiri" />-->
-
-                <!--<TextView-->
-                    <!--android:id="@+id/hidung"-->
-                    <!--android:layout_width="wrap_content"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:layout_below="@id/matakiri"-->
-                    <!--android:text="Hidung" />-->
-
-                <!--<TextView-->
-                    <!--android:id="@+id/mulut"-->
-                    <!--android:layout_below="@id/hidung"-->
-                    <!--android:layout_width="wrap_content"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:text="Mulut" />-->
-
             </RelativeLayout>
 
         </ScrollView>

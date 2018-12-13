@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ImageBeautifierFragment">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginBottom="48dp"
+            android:focusableInTouchMode="true">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/image_beautifier_fr_iv_orig"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_margin="5dp"
+                    android:adjustViewBounds="true"
+                    android:minHeight="200dp"
+                    android:minWidth="150dp"
+                    android:scaleType="fitCenter" />
+
+                <TextView
+                    android:id="@+id/image_beautifier_fr_tv_load_first"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/image_beautifier_fr_iv_orig"
+                    android:layout_centerHorizontal="true"
+                    android:text="@string/load_image_fr_tv_text" />
+
+                <Button
+                    android:id="@+id/image_beautifier_fr_btn_bradley"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/image_beautifier_fr_iv_orig"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginEnd="50dp"
+                    android:layout_marginStart="50dp"
+                    android:text="Bradley Local Threshold" />
+
+                <Button
+                    android:id="@+id/image_beautifier_fr_btn_sauvola"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/image_beautifier_fr_btn_bradley"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginEnd="50dp"
+                    android:layout_marginStart="50dp"
+                    android:text="Sauvola Threshold" />
+
+                <Button
+                    android:id="@+id/image_beautifier_fr_btn_niblack"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/image_beautifier_fr_btn_sauvola"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginEnd="50dp"
+                    android:layout_marginStart="50dp"
+                    android:text="Niblack Threshold" />
+
+
+                <Button
+                    android:id="@+id/image_beautifier_fr_btn_wolf"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/image_beautifier_fr_btn_niblack"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginEnd="50dp"
+                    android:layout_marginStart="50dp"
+                    android:text="Wolf Jolion Threshold" />
+
+                <EditText
+                    android:id="@+id/threshold_1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:hint="FFT 1"
+                    android:layout_toStartOf="@id/threshold_2"
+                    android:layout_below="@id/image_beautifier_fr_btn_wolf"
+                    />
+
+                <EditText
+                    android:id="@+id/threshold_2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignStart="@+id/image_beautifier_fr_tv_result"
+                    android:layout_alignTop="@+id/threshold_1"
+                    android:hint="FFT 2" />
+
+                <Button
+                    android:id="@+id/image_beautifier_fr_btn_fft"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/threshold_2"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginEnd="50dp"
+                    android:layout_marginStart="50dp"
+                    android:text="FFT" />
+
+
+                <ImageView
+                    android:id="@+id/image_beautifier_fr_iv_result"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/image_beautifier_fr_btn_fft"
+                    android:layout_centerHorizontal="true"
+                    android:layout_margin="5dp"
+                    android:adjustViewBounds="true"
+                    android:minHeight="200dp"
+                    android:minWidth="150dp"
+                    android:scaleType="fitCenter" />
+
+                <Button
+                    android:id="@+id/image_beautifier_fr_btn_commit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/image_beautifier_fr_iv_result"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginEnd="50dp"
+                    android:layout_marginStart="50dp"
+                    android:text="@string/contrast_enhancement_fr_btn_commit_text"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/image_beautifier_fr_tv_result"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/image_beautifier_fr_btn_commit"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginBottom="20dp"
+                    android:textSize="32sp" />
+
+            </RelativeLayout>
+
+        </ScrollView>
+
+    </RelativeLayout>
+
+</FrameLayout>

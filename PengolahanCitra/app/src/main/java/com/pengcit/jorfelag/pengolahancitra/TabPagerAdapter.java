@@ -38,6 +38,8 @@ public class TabPagerAdapter extends FragmentPagerAdapter {
                 return new PreprocessOperatorFragment();
             case 6:
                 return new FaceDetectionFragment();
+            case 7:
+                return new ImageBeautifierFragment();
             default:
                 return null;
         }

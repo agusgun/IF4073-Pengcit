@@ -14,6 +14,12 @@ import com.pengcit.jorfelag.pengolahancitra.util.Parallel;
 import java.util.ArrayList;
 import java.util.List;
 
+import Catalano.Imaging.FastBitmap;
+import Catalano.Imaging.Filters.FourierTransform;
+import Catalano.Imaging.Filters.FrequencyFilter;
+import Catalano.Imaging.Filters.Threshold;
+
+
 public class FaceDetector {
 
     private Bitmap originalBitmap;
@@ -23,9 +29,11 @@ public class FaceDetector {
     private List<String> labels;
     private List<Double> deltas;
 
+
     public FaceDetector(Bitmap inputBitmap) {
         labels = new ArrayList<>();
         deltas = new ArrayList<>();
+
         originalBitmap = inputBitmap.copy(inputBitmap.getConfig(), true);
 
         height = originalBitmap.getHeight();
