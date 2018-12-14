@@ -17,7 +17,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.github.chrisbanes.photoview.PhotoViewAttacher;
 import com.pengcit.jorfelag.pengolahancitra.R;
 import com.pengcit.jorfelag.pengolahancitra.SharedViewModel;
 
@@ -39,8 +38,6 @@ public class FaceDetectionFragment extends Fragment {
 
     private TextView resultTextView;
 
-    private PhotoViewAttacher mAttacher;
-
     public FaceDetectionFragment() {
         // Required empty public constructor
     }
@@ -58,8 +55,6 @@ public class FaceDetectionFragment extends Fragment {
 
         originalImageView = view.findViewById(R.id.face_detection_fr_iv_orig);
         resultImageView = view.findViewById(R.id.face_detection_fr_iv_result);
-        mAttacher = new PhotoViewAttacher(resultImageView);
-        mAttacher.update();
         loadTextView = view.findViewById(R.id.face_detection_fr_tv_load_first);
 
         processButton = view.findViewById(R.id.face_detection_fr_btn_process);
@@ -139,7 +134,6 @@ public class FaceDetectionFragment extends Fragment {
     public void setResultImageView(Bitmap bitmap) {
         resultBitmap = bitmap;
         resultImageView.setImageBitmap(bitmap);
-        mAttacher.update();
         commitButton.setVisibility(View.VISIBLE);
     }
 

@@ -18,8 +18,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.github.chrisbanes.photoview.PhotoViewAttacher;
-
 import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.Filters.FourierTransform;
 
@@ -43,8 +41,6 @@ public class ImageBeautifierFragment extends Fragment {
     private Bitmap originalBitmap;
     private Bitmap resultBitmap;
 
-    private PhotoViewAttacher mAttacher;
-
     private EditText threshold1;
     private EditText threshold2;
 
@@ -66,8 +62,6 @@ public class ImageBeautifierFragment extends Fragment {
 
         originalImageView = view.findViewById(R.id.image_beautifier_fr_iv_orig);
         resultImageView = view.findViewById(R.id.image_beautifier_fr_iv_result);
-        mAttacher = new PhotoViewAttacher(resultImageView);
-        mAttacher.update();
         loadTextView = view.findViewById(R.id.image_beautifier_fr_tv_load_first);
 
         threshold1 = view.findViewById(R.id.threshold_1);
@@ -211,7 +205,6 @@ public class ImageBeautifierFragment extends Fragment {
     public void setResultImageView(Bitmap bitmap) {
         resultBitmap = bitmap;
         resultImageView.setImageBitmap(bitmap);
-        mAttacher.update();
         commitButton.setVisibility(View.VISIBLE);
     }
 

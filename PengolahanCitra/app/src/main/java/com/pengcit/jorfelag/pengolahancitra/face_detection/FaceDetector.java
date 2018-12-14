@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.support.constraint.solver.widgets.Rectangle;
 import android.util.Log;
 
 import com.pengcit.jorfelag.pengolahancitra.util.LoopBody;
@@ -68,6 +69,7 @@ public class FaceDetector {
 
         Log.d("Candidates", "num: " + faceCandidateBounds.size());
 
+        int index = 0;
         for (Point[] bound: faceCandidateBounds) {
             FaceCandidateProcessor fc = new FaceCandidateProcessor(sobelBitmap, bound);
             fc.process();
@@ -76,6 +78,13 @@ public class FaceDetector {
 //            originalBitmap = fc.getBitmap();
 
             if (fc.isFace()) {
+                index += 1;
+                Rect rFace = new Rect(bound[0].x, bound[0].y, bound[1].x, bound[1].y);
+                canvas.drawRect(rFace, framePaint);
+
+                setTextSizeForWidth(pointsPaint, 20, Integer.toString(index));
+
+                canvas.drawText(Integer.toString(index), bound[0].x + 5, bound[0].y + 5, pointsPaint);
                 for (Point[] featureBoundary :fc.getFeaturesBoundary()) {
                     if (featureBoundary != null) {
                         Rect r = new Rect(featureBoundary[0].x, featureBoundary[0].y, featureBoundary[1].x, featureBoundary[1].y);
@@ -103,6 +112,27 @@ public class FaceDetector {
                 labels.add(recognize(controlPoints));
             }
         }
+    }
+
+    private static void setTextSizeForWidth(Paint paint, float desiredWidth,
+                                            String text) {
+
+        // Pick a reasonably large value for the test. Larger values produce
+        // more accurate results, but may cause problems with hardware
+        // acceleration. But there are workarounds for that, too; refer to
+        // http://stackoverflow.com/questions/6253528/font-size-too-large-to-fit-in-cache
+        final float testTextSize = 48f;
+
+        // Get the bounds of the text, using our testTextSize.
+        paint.setTextSize(testTextSize);
+        Rect bounds = new Rect();
+        paint.getTextBounds(text, 0, text.length(), bounds);
+
+        // Calculate the desired size as a proportion of our testTextSize.
+        float desiredTextSize = testTextSize * desiredWidth / bounds.width();
+
+        // Set the paint for that size.
+        paint.setTextSize(desiredTextSize);
     }
 
     public Bitmap getBitmap() {
